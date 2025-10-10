@@ -104,7 +104,7 @@ export default function ControlPanel({
           )}
 
           <Button
-            variant="secondary"
+            variant={selectedCells.length > 0 ? "default" : "secondary"}
             size="sm"
             className="w-full gap-2"
             onClick={onSelectAll}

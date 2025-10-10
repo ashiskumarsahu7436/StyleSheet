@@ -224,14 +224,18 @@ export default function Home() {
   };
 
   const handleSelectAll = () => {
-    const allCells: string[] = [];
-    for (let row = 0; row < 100; row++) {
-      for (let col = 0; col < 52; col++) {
-        const colLabel = getColumnLabel(col);
-        allCells.push(`${colLabel}${row + 1}`);
+    if (selectedCells.length > 0) {
+      setSelectedCells([]);
+    } else {
+      const allCells: string[] = [];
+      for (let row = 0; row < 100; row++) {
+        for (let col = 0; col < 52; col++) {
+          const colLabel = getColumnLabel(col);
+          allCells.push(`${colLabel}${row + 1}`);
+        }
       }
+      setSelectedCells(allCells);
     }
-    setSelectedCells(allCells);
   };
 
   const handleUndo = () => {
