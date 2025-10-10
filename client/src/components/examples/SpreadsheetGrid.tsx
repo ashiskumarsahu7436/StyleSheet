@@ -29,6 +29,8 @@ export default function SpreadsheetGridExample() {
         cols={10}
         selectedCells={selectedCells}
         onCellSelect={handleCellSelect}
+        onRowSelect={(row) => console.log("Row selected:", row)}
+        onColumnSelect={(col) => console.log("Column selected:", col)}
         cellData={cellData}
         onCellChange={handleCellChange}
       />

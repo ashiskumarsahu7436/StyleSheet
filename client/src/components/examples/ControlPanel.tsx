@@ -10,7 +10,7 @@ export default function ControlPanelExample() {
     <div className="h-screen">
       <ControlPanel
         selectedCells={selectedCells}
-        onColorSelect={(color) => console.log("Color selected:", color)}
+        onColorApply={(color) => console.log("Color applied:", color)}
         onFontSizeChange={(size) => console.log("Font size:", size)}
         onFontWeightChange={(weight) => console.log("Font weight:", weight)}
         onFormulaApply={(formula) => console.log("Formula applied:", formula)}

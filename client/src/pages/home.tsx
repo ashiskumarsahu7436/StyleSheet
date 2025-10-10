@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import ControlPanel from "@/components/ControlPanel";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -13,9 +13,24 @@ interface CellData {
 
 export default function Home() {
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
+  const [temporarySelectedCells, setTemporarySelectedCells] = useState<string[]>([]);
   const [cellData, setCellData] = useState<Map<string, CellData>>(new Map());
   const [inputValue, setInputValue] = useState("");
   const [outputValue, setOutputValue] = useState("");
+  const [columnWidths, setColumnWidths] = useState<Map<number, number>>(new Map());
+  const [rowHeights, setRowHeights] = useState<Map<number, number>>(new Map());
+  const [customFormulas, setCustomFormulas] = useState<Array<{ name: string; logic: string }>>([]);
+  const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const getColumnLabel = (index: number): string => {
+    let label = "";
+    let num = index;
+    while (num >= 0) {
+      label = String.fromCharCode(65 + (num % 26)) + label;
+      num = Math.floor(num / 26) - 1;
+    }
+    return label;
+  };
 
   const handleCellSelect = (address: string) => {
     setSelectedCells((prev) => {
@@ -24,6 +39,46 @@ export default function Home() {
       }
       return [...prev, address];
     });
+  };
+
+  const handleRowSelect = (rowIndex: number) => {
+    const rowCells: string[] = [];
+    for (let col = 0; col < 10; col++) {
+      const colLabel = getColumnLabel(col);
+      rowCells.push(`${colLabel}${rowIndex + 1}`);
+    }
+    setSelectedCells(rowCells);
+  };
+
+  const handleColumnSelect = (colIndex: number) => {
+    const colCells: string[] = [];
+    const colLabel = getColumnLabel(colIndex);
+    for (let row = 0; row < 20; row++) {
+      colCells.push(`${colLabel}${row + 1}`);
+    }
+    setSelectedCells(colCells);
+  };
+
+  const handleDragSelection = (addresses: string[]) => {
+    setTemporarySelectedCells(addresses);
+    
+    if (tempSelectionTimerRef.current) {
+      clearTimeout(tempSelectionTimerRef.current);
+    }
+    
+    tempSelectionTimerRef.current = setTimeout(() => {
+      setTemporarySelectedCells([]);
+    }, 5000);
+  };
+
+  const handleMakePermanent = () => {
+    if (temporarySelectedCells.length > 0) {
+      setSelectedCells(temporarySelectedCells);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
+    }
   };
 
   const handleCellChange = (address: string, value: string) => {
@@ -35,7 +90,23 @@ export default function Home() {
     });
   };
 
-  const handleColorSelect = (color: string) => {
+  const handleAddressChange = (oldAddress: string, newAddress: string) => {
+    setCellData((prev) => {
+      const newData = new Map(prev);
+      const existing = newData.get(oldAddress);
+      if (existing) {
+        newData.delete(oldAddress);
+        newData.set(newAddress, { ...existing, address: newAddress });
+      }
+      return newData;
+    });
+    
+    setSelectedCells((prev) =>
+      prev.map((addr) => (addr === oldAddress ? newAddress : addr))
+    );
+  };
+
+  const handleColorApply = (color: string) => {
     if (selectedCells.length === 0) return;
     
     setCellData((prev) => {
@@ -49,6 +120,8 @@ export default function Home() {
       });
       return newData;
     });
+    
+    setSelectedCells([]);
   };
 
   const handleFontSizeChange = (size: number) => {
@@ -78,8 +151,8 @@ export default function Home() {
   };
 
   const handleShowInput = () => {
-    const cellList = selectedCells.join(", ");
-    setInputValue(cellList);
+    const values = selectedCells.map((addr) => cellData.get(addr)?.value || "").join(", ");
+    setInputValue(values);
   };
 
   const handleShowOutput = () => {
@@ -94,29 +167,45 @@ export default function Home() {
       .map((addr) => parseFloat(cellData.get(addr)?.value || "0"))
       .filter((v) => !isNaN(v));
 
-    let result = 0;
-    switch (formula) {
-      case "SUM":
-        result = values.reduce((a, b) => a + b, 0);
-        break;
-      case "AVERAGE":
-        result = values.reduce((a, b) => a + b, 0) / values.length;
-        break;
-      case "COUNT":
-        result = values.length;
-        break;
-      case "MIN":
-        result = Math.min(...values);
-        break;
-      case "MAX":
-        result = Math.max(...values);
-        break;
-      case "MULTIPLY":
-        result = values.reduce((a, b) => a * b, 1);
-        break;
+    let result: any = 0;
+    
+    const customFormula = customFormulas.find((f) => f.name === formula);
+    if (customFormula) {
+      try {
+        const formulaFunction = new Function("values", `return ${customFormula.logic}`);
+        result = formulaFunction(values);
+      } catch (error) {
+        setOutputValue(`Error in ${formula}: Invalid formula`);
+        return;
+      }
+    } else {
+      switch (formula) {
+        case "SUM":
+          result = values.reduce((a, b) => a + b, 0);
+          break;
+        case "AVERAGE":
+          result = values.reduce((a, b) => a + b, 0) / values.length;
+          break;
+        case "COUNT":
+          result = values.length;
+          break;
+        case "MIN":
+          result = Math.min(...values);
+          break;
+        case "MAX":
+          result = Math.max(...values);
+          break;
+        case "MULTIPLY":
+          result = values.reduce((a, b) => a * b, 1);
+          break;
+      }
     }
 
     setOutputValue(`${formula}: ${result}`);
+  };
+
+  const handleAddCustomFormula = (name: string, logic: string) => {
+    setCustomFormulas((prev) => [...prev, { name, logic }]);
   };
 
   const handleBulkAdd = (values: string[], separator: string) => {
@@ -138,7 +227,7 @@ export default function Home() {
     const allCells: string[] = [];
     for (let row = 0; row < 20; row++) {
       for (let col = 0; col < 10; col++) {
-        const colLabel = String.fromCharCode(65 + col);
+        const colLabel = getColumnLabel(col);
         allCells.push(`${colLabel}${row + 1}`);
       }
     }
@@ -153,9 +242,17 @@ export default function Home() {
     console.log("Redo action");
   };
 
+  useEffect(() => {
+    return () => {
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="flex h-screen bg-background">
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col" style={{ width: "66.666%" }}>
         <header className="h-14 border-b border-border flex items-center justify-between px-6 bg-card">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold" data-testid="text-app-title">
@@ -170,29 +267,48 @@ export default function Home() {
             rows={20}
             cols={10}
             selectedCells={selectedCells}
+            temporarySelectedCells={temporarySelectedCells}
             onCellSelect={handleCellSelect}
+            onRowSelect={handleRowSelect}
+            onColumnSelect={handleColumnSelect}
             cellData={cellData}
             onCellChange={handleCellChange}
+            onAddressChange={handleAddressChange}
+            columnWidths={columnWidths}
+            rowHeights={rowHeights}
+            onColumnResize={(col, width) => {
+              setColumnWidths((prev) => new Map(prev).set(col, width));
+            }}
+            onRowResize={(row, height) => {
+              setRowHeights((prev) => new Map(prev).set(row, height));
+            }}
+            onDragSelection={handleDragSelection}
           />
         </div>
       </div>
-      <ControlPanel
-        selectedCells={selectedCells}
-        onColorSelect={handleColorSelect}
-        onFontSizeChange={handleFontSizeChange}
-        onFontWeightChange={handleFontWeightChange}
-        onFormulaApply={handleFormulaApply}
-        onBulkAdd={handleBulkAdd}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        onSelectAll={handleSelectAll}
-        inputValue={inputValue}
-        outputValue={outputValue}
-        onInputChange={setInputValue}
-        onOutputChange={setOutputValue}
-        onShowInput={handleShowInput}
-        onShowOutput={handleShowOutput}
-      />
+      <div style={{ width: "33.333%" }}>
+        <ControlPanel
+          selectedCells={selectedCells}
+          temporarySelectedCells={temporarySelectedCells}
+          onMakePermanent={handleMakePermanent}
+          onColorApply={handleColorApply}
+          onFontSizeChange={handleFontSizeChange}
+          onFontWeightChange={handleFontWeightChange}
+          onFormulaApply={handleFormulaApply}
+          customFormulas={customFormulas}
+          onAddCustomFormula={handleAddCustomFormula}
+          onBulkAdd={handleBulkAdd}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          onSelectAll={handleSelectAll}
+          inputValue={inputValue}
+          outputValue={outputValue}
+          onInputChange={setInputValue}
+          onOutputChange={setOutputValue}
+          onShowInput={handleShowInput}
+          onShowOutput={handleShowOutput}
+        />
+      </div>
     </div>
   );
 }

@@ -6,14 +6,18 @@ import FontControls from "./FontControls";
 import InputOutputSection from "./InputOutputSection";
 import FormulaSection from "./FormulaSection";
 import BulkValueSection from "./BulkValueSection";
-import { Undo2, Redo2, MousePointer2 } from "lucide-react";
+import { Undo2, Redo2, MousePointer2, Check } from "lucide-react";
 
 interface ControlPanelProps {
   selectedCells: string[];
-  onColorSelect: (color: string) => void;
+  temporarySelectedCells?: string[];
+  onMakePermanent?: () => void;
+  onColorApply: (color: string) => void;
   onFontSizeChange: (size: number) => void;
   onFontWeightChange: (weight: string) => void;
   onFormulaApply: (formula: string) => void;
+  customFormulas?: Array<{ name: string; logic: string }>;
+  onAddCustomFormula?: (name: string, logic: string) => void;
   onBulkAdd: (values: string[], separator: string) => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -28,10 +32,14 @@ interface ControlPanelProps {
 
 export default function ControlPanel({
   selectedCells,
-  onColorSelect,
+  temporarySelectedCells = [],
+  onMakePermanent,
+  onColorApply,
   onFontSizeChange,
   onFontWeightChange,
   onFormulaApply,
+  customFormulas,
+  onAddCustomFormula,
   onBulkAdd,
   onUndo,
   onRedo,
@@ -44,12 +52,17 @@ export default function ControlPanel({
   onShowOutput,
 }: ControlPanelProps) {
   return (
-    <div className="w-96 h-full border-l border-border bg-card flex flex-col">
+    <div className="w-full h-full border-l border-border bg-card flex flex-col">
       <div className="p-4 border-b border-border">
         <h2 className="font-semibold text-lg">Controls</h2>
         <p className="text-sm text-muted-foreground mt-1">
           {selectedCells.length} cell{selectedCells.length !== 1 ? "s" : ""} selected
         </p>
+        {temporarySelectedCells.length > 0 && (
+          <p className="text-sm text-chart-2 mt-1">
+            {temporarySelectedCells.length} temporary (5s)
+          </p>
+        )}
       </div>
 
       <ScrollArea className="flex-1">
@@ -77,6 +90,19 @@ export default function ControlPanel({
             </Button>
           </div>
 
+          {temporarySelectedCells.length > 0 && onMakePermanent && (
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full gap-2"
+              onClick={onMakePermanent}
+              data-testid="button-make-permanent"
+            >
+              <Check className="w-4 h-4" />
+              Select (Make Permanent)
+            </Button>
+          )}
+
           <Button
             variant="secondary"
             size="sm"
@@ -90,7 +116,7 @@ export default function ControlPanel({
 
           <Separator />
 
-          <ColorPicker onColorSelect={onColorSelect} />
+          <ColorPicker onColorApply={onColorApply} />
 
           <Separator />
 
@@ -112,7 +138,11 @@ export default function ControlPanel({
 
           <Separator />
 
-          <FormulaSection onFormulaApply={onFormulaApply} />
+          <FormulaSection 
+            onFormulaApply={onFormulaApply}
+            customFormulas={customFormulas}
+            onAddCustomFormula={onAddCustomFormula}
+          />
 
           <Separator />
 

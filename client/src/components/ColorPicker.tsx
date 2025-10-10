@@ -1,9 +1,9 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 interface ColorPickerProps {
-  onColorSelect: (color: string) => void;
-  selectedColor?: string;
+  onColorApply: (color: string) => void;
 }
 
 const COLORS = [
@@ -18,7 +18,16 @@ const COLORS = [
   { name: "Gray", value: "#F3F4F6" },
 ];
 
-export default function ColorPicker({ onColorSelect, selectedColor }: ColorPickerProps) {
+export default function ColorPicker({ onColorApply }: ColorPickerProps) {
+  const [selectedColor, setSelectedColor] = useState<string>("");
+
+  const handleApplyColor = () => {
+    if (selectedColor) {
+      onColorApply(selectedColor);
+      setSelectedColor("");
+    }
+  };
+
   return (
     <div className="space-y-3">
       <Label className="text-sm font-medium">Cell Color</Label>
@@ -26,10 +35,10 @@ export default function ColorPicker({ onColorSelect, selectedColor }: ColorPicke
         {COLORS.map((color) => (
           <Button
             key={color.value}
-            variant="outline"
+            variant={selectedColor === color.value ? "default" : "outline"}
             size="sm"
             className="h-auto p-2 flex flex-col items-center gap-1"
-            onClick={() => onColorSelect(color.value)}
+            onClick={() => setSelectedColor(color.value)}
             data-testid={`color-${color.name.toLowerCase()}`}
           >
             <div
@@ -40,15 +49,30 @@ export default function ColorPicker({ onColorSelect, selectedColor }: ColorPicke
           </Button>
         ))}
       </div>
-      <Button
-        variant="secondary"
-        size="sm"
-        className="w-full"
-        onClick={() => onColorSelect("transparent")}
-        data-testid="button-remove-color"
-      >
-        Remove Color
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          variant="default"
+          size="sm"
+          className="flex-1"
+          onClick={handleApplyColor}
+          disabled={!selectedColor}
+          data-testid="button-add-color"
+        >
+          Add Color
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="flex-1"
+          onClick={() => {
+            onColorApply("transparent");
+            setSelectedColor("");
+          }}
+          data-testid="button-remove-color"
+        >
+          Remove Color
+        </Button>
+      </div>
     </div>
   );
 }
