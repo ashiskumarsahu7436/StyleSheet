@@ -21,7 +21,16 @@ export default function Home() {
   const [rowHeights, setRowHeights] = useState<Map<number, number>>(new Map());
   const [customFormulas, setCustomFormulas] = useState<Array<{ name: string; logic: string }>>([]);
   const [retainSelection, setRetainSelection] = useState(false);
+  const [history, setHistory] = useState<Map<string, CellData>[]>([new Map()]);
+  const [historyIndex, setHistoryIndex] = useState(0);
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const saveToHistory = (newCellData: Map<string, CellData>) => {
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(new Map(newCellData));
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
 
   const getColumnLabel = (index: number): string => {
     let label = "";
@@ -119,6 +128,7 @@ export default function Home() {
           backgroundColor: color === "transparent" ? undefined : color,
         });
       });
+      saveToHistory(newData);
       return newData;
     });
     
@@ -136,6 +146,7 @@ export default function Home() {
         const existing = newData.get(address) || { address, value: "" };
         newData.set(address, { ...existing, fontSize: size });
       });
+      saveToHistory(newData);
       return newData;
     });
     
@@ -153,6 +164,7 @@ export default function Home() {
         const existing = newData.get(address) || { address, value: "" };
         newData.set(address, { ...existing, fontWeight: weight });
       });
+      saveToHistory(newData);
       return newData;
     });
     
@@ -250,11 +262,17 @@ export default function Home() {
   };
 
   const handleUndo = () => {
-    console.log("Undo action");
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+      setCellData(new Map(history[historyIndex - 1]));
+    }
   };
 
   const handleRedo = () => {
-    console.log("Redo action");
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+      setCellData(new Map(history[historyIndex + 1]));
+    }
   };
 
   const handleMergeCells = () => {
