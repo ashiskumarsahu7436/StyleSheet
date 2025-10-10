@@ -249,7 +249,7 @@ export default function Home() {
   const handleMergeCells = () => {
     if (selectedCells.length < 2) return;
 
-    const firstCell = selectedCells[0];
+    const mergedAddress = selectedCells.join("");
     const values = selectedCells
       .map((addr) => cellData.get(addr)?.value || "")
       .filter((val) => val !== "")
@@ -258,18 +258,18 @@ export default function Home() {
     setCellData((prev) => {
       const newData = new Map(prev);
       selectedCells.forEach((addr) => {
-        if (addr !== firstCell) {
-          newData.delete(addr);
-        }
+        newData.delete(addr);
       });
       
-      const firstCellData = newData.get(firstCell) || { address: firstCell, value: "" };
-      newData.set(firstCell, { ...firstCellData, value: values });
+      newData.set(mergedAddress, { 
+        address: mergedAddress, 
+        value: values 
+      });
       
       return newData;
     });
 
-    setSelectedCells([firstCell]);
+    setSelectedCells([mergedAddress]);
   };
 
   useEffect(() => {

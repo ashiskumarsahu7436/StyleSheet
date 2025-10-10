@@ -116,16 +116,17 @@ export default function ControlPanel({
             Select All
           </Button>
 
-          {selectedCells.length > 1 && onMergeCells && (
+          {onMergeCells && (
             <Button
               variant="default"
               size="sm"
               className="w-full gap-2"
               onClick={onMergeCells}
-              data-testid="button-add-merge"
+              disabled={selectedCells.length < 2}
+              data-testid="button-merge-shells"
             >
               <Check className="w-4 h-4" />
-              Add (Merge Cells)
+              Merge Shells
             </Button>
           )}
 

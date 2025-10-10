@@ -194,15 +194,23 @@ export default function SpreadsheetGrid({
                 </div>
                 {Array.from({ length: cols }).map((_, colIndex) => {
                   const address = getCellAddress(rowIndex, colIndex);
-                  const cell = cellData.get(address) || {
-                    address,
-                    value: "",
-                    backgroundColor: "transparent",
-                    fontSize: 14,
-                    fontWeight: "normal",
-                  };
+                  
+                  let cell = cellData.get(address);
+                  if (!cell) {
+                    const mergedCell = Array.from(cellData.values()).find(c => 
+                      c.address.includes(address) && c.address.length > address.length
+                    );
+                    cell = mergedCell || {
+                      address,
+                      value: "",
+                      backgroundColor: "transparent",
+                      fontSize: 14,
+                      fontWeight: "normal",
+                    };
+                  }
+                  
                   const width = columnWidths.get(colIndex) || 80;
-                  const isSelected = selectedCells.includes(address);
+                  const isSelected = selectedCells.includes(address) || selectedCells.includes(cell.address);
                   const isTemporary = temporarySelectedCells.includes(address);
                   
                   return (
