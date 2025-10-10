@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import SpreadsheetCell from "./SpreadsheetCell";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CellData {
   address: string;
@@ -148,7 +147,7 @@ export default function SpreadsheetGrid({
   };
 
   return (
-    <ScrollArea className="h-full w-full">
+    <div className="h-full w-full overflow-auto">
       <div
         className="p-4"
         onMouseMove={handleMouseMove}
@@ -235,6 +234,6 @@ export default function SpreadsheetGrid({
           })}
         </div>
       </div>
-    </ScrollArea>
+    </div>
   );
 }
