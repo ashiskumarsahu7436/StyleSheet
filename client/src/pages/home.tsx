@@ -11,6 +11,13 @@ interface CellData {
   fontWeight?: string;
 }
 
+interface MergedCell {
+  startAddress: string;
+  endAddress: string;
+  colspan: number;
+  rowspan: number;
+}
+
 export default function Home() {
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
   const [temporarySelectedCells, setTemporarySelectedCells] = useState<string[]>([]);
@@ -23,6 +30,7 @@ export default function Home() {
   const [retainSelection, setRetainSelection] = useState(false);
   const [history, setHistory] = useState<Map<string, CellData>[]>([new Map()]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [mergedCells, setMergedCells] = useState<MergedCell[]>([]);
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveToHistory = (newCellData: Map<string, CellData>) => {
@@ -278,7 +286,29 @@ export default function Home() {
   const handleMergeCells = () => {
     if (selectedCells.length < 2) return;
 
-    const firstCell = selectedCells[0];
+    const getCellRowCol = (addr: string) => {
+      const match = addr.match(/^([A-Z]+)(\d+)$/);
+      if (!match) return { row: 0, col: 0 };
+      const colLabel = match[1];
+      const row = parseInt(match[2]) - 1;
+      let col = 0;
+      for (let i = 0; i < colLabel.length; i++) {
+        col = col * 26 + (colLabel.charCodeAt(i) - 65 + 1);
+      }
+      return { row, col: col - 1 };
+    };
+
+    const cells = selectedCells.map(addr => ({ addr, ...getCellRowCol(addr) }));
+    const minRow = Math.min(...cells.map(c => c.row));
+    const maxRow = Math.max(...cells.map(c => c.row));
+    const minCol = Math.min(...cells.map(c => c.col));
+    const maxCol = Math.max(...cells.map(c => c.col));
+
+    const startAddress = `${getColumnLabel(minCol)}${minRow + 1}`;
+    const endAddress = `${getColumnLabel(maxCol)}${maxRow + 1}`;
+    const colspan = maxCol - minCol + 1;
+    const rowspan = maxRow - minRow + 1;
+
     const values = selectedCells
       .map((addr) => cellData.get(addr)?.value || "")
       .filter((val) => val !== "")
@@ -287,12 +317,14 @@ export default function Home() {
     setCellData((prev) => {
       const newData = new Map(prev);
       
-      selectedCells.slice(1).forEach((addr) => {
-        newData.delete(addr);
+      selectedCells.forEach((addr) => {
+        if (addr !== startAddress) {
+          newData.delete(addr);
+        }
       });
       
-      const firstCellData = newData.get(firstCell) || { address: firstCell, value: "" };
-      newData.set(firstCell, { 
+      const firstCellData = newData.get(startAddress) || { address: startAddress, value: "" };
+      newData.set(startAddress, { 
         ...firstCellData,
         value: values 
       });
@@ -301,7 +333,8 @@ export default function Home() {
       return newData;
     });
 
-    setSelectedCells([firstCell]);
+    setMergedCells(prev => [...prev, { startAddress, endAddress, colspan, rowspan }]);
+    setSelectedCells([startAddress]);
   };
 
   useEffect(() => {
@@ -345,6 +378,7 @@ export default function Home() {
               setRowHeights((prev) => new Map(prev).set(row, height));
             }}
             onDragSelection={handleDragSelection}
+            mergedCells={mergedCells}
           />
         </div>
       </div>

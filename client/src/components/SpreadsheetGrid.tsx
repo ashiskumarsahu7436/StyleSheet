@@ -9,6 +9,13 @@ interface CellData {
   fontWeight?: string;
 }
 
+interface MergedCell {
+  startAddress: string;
+  endAddress: string;
+  colspan: number;
+  rowspan: number;
+}
+
 interface SpreadsheetGridProps {
   rows?: number;
   cols?: number;
@@ -25,6 +32,7 @@ interface SpreadsheetGridProps {
   onColumnResize?: (colIndex: number, width: number) => void;
   onRowResize?: (rowIndex: number, height: number) => void;
   onDragSelection?: (addresses: string[]) => void;
+  mergedCells?: MergedCell[];
 }
 
 export default function SpreadsheetGrid({
@@ -43,6 +51,7 @@ export default function SpreadsheetGrid({
   onColumnResize,
   onRowResize,
   onDragSelection,
+  mergedCells = [],
 }: SpreadsheetGridProps) {
   const [resizingCol, setResizingCol] = useState<number | null>(null);
   const [resizingRow, setResizingRow] = useState<number | null>(null);
@@ -146,6 +155,35 @@ export default function SpreadsheetGrid({
     setDragStart(null);
   };
 
+  const getMergedCellInfo = (address: string) => {
+    const merged = mergedCells.find(m => m.startAddress === address);
+    if (merged) return merged;
+    
+    const hiddenIn = mergedCells.find(m => {
+      const getCellRowCol = (addr: string) => {
+        const match = addr.match(/^([A-Z]+)(\d+)$/);
+        if (!match) return { row: 0, col: 0 };
+        const colLabel = match[1];
+        const row = parseInt(match[2]) - 1;
+        let col = 0;
+        for (let i = 0; i < colLabel.length; i++) {
+          col = col * 26 + (colLabel.charCodeAt(i) - 65 + 1);
+        }
+        return { row, col: col - 1 };
+      };
+
+      const start = getCellRowCol(m.startAddress);
+      const current = getCellRowCol(address);
+      
+      return current.row >= start.row && 
+             current.row < start.row + m.rowspan &&
+             current.col >= start.col && 
+             current.col < start.col + m.colspan;
+    });
+    
+    return hiddenIn ? { ...hiddenIn, isHidden: true } : null;
+  };
+
   return (
     <div className="h-full w-full overflow-auto">
       <div
@@ -194,13 +232,15 @@ export default function SpreadsheetGrid({
                 </div>
                 {Array.from({ length: cols }).map((_, colIndex) => {
                   const address = getCellAddress(rowIndex, colIndex);
+                  const mergeInfo = getMergedCellInfo(address);
+                  
+                  if (mergeInfo && (mergeInfo as any).isHidden) {
+                    return null;
+                  }
                   
                   let cell = cellData.get(address);
                   if (!cell) {
-                    const mergedCell = Array.from(cellData.values()).find(c => 
-                      c.address.includes(address) && c.address.length > address.length
-                    );
-                    cell = mergedCell || {
+                    cell = {
                       address,
                       value: "",
                       backgroundColor: "transparent",
@@ -209,14 +249,28 @@ export default function SpreadsheetGrid({
                     };
                   }
                   
-                  const width = columnWidths.get(colIndex) || 80;
+                  const baseWidth = columnWidths.get(colIndex) || 80;
+                  let cellWidth = baseWidth;
+                  let cellHeight = height;
+                  
+                  if (mergeInfo && !((mergeInfo as any).isHidden)) {
+                    cellWidth = 0;
+                    for (let i = 0; i < mergeInfo.colspan; i++) {
+                      cellWidth += columnWidths.get(colIndex + i) || 80;
+                    }
+                    cellHeight = 0;
+                    for (let i = 0; i < mergeInfo.rowspan; i++) {
+                      cellHeight += rowHeights.get(rowIndex + i) || 32;
+                    }
+                  }
+                  
                   const isSelected = selectedCells.includes(address) || selectedCells.includes(cell.address);
                   const isTemporary = temporarySelectedCells.includes(address);
                   
                   return (
                     <div
                       key={address}
-                      style={{ width: `${width}px`, height: `${height}px` }}
+                      style={{ width: `${cellWidth}px`, height: `${cellHeight}px` }}
                       onMouseDown={() => handleCellMouseDown(address)}
                       onMouseEnter={() => handleCellMouseEnter(address)}
                       onMouseUp={handleCellMouseUp}
