@@ -22,6 +22,7 @@ interface ControlPanelProps {
   onUndo: () => void;
   onRedo: () => void;
   onSelectAll: () => void;
+  onMergeCells?: () => void;
   inputValue: string;
   outputValue: string;
   onInputChange: (value: string) => void;
@@ -44,6 +45,7 @@ export default function ControlPanel({
   onUndo,
   onRedo,
   onSelectAll,
+  onMergeCells,
   inputValue,
   outputValue,
   onInputChange,
@@ -113,6 +115,19 @@ export default function ControlPanel({
             <MousePointer2 className="w-4 h-4" />
             Select All
           </Button>
+
+          {selectedCells.length > 1 && onMergeCells && (
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full gap-2"
+              onClick={onMergeCells}
+              data-testid="button-add-merge"
+            >
+              <Check className="w-4 h-4" />
+              Add (Merge Cells)
+            </Button>
+          )}
 
           <Separator />
 

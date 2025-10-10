@@ -246,6 +246,32 @@ export default function Home() {
     console.log("Redo action");
   };
 
+  const handleMergeCells = () => {
+    if (selectedCells.length < 2) return;
+
+    const firstCell = selectedCells[0];
+    const values = selectedCells
+      .map((addr) => cellData.get(addr)?.value || "")
+      .filter((val) => val !== "")
+      .join(" ");
+
+    setCellData((prev) => {
+      const newData = new Map(prev);
+      selectedCells.forEach((addr) => {
+        if (addr !== firstCell) {
+          newData.delete(addr);
+        }
+      });
+      
+      const firstCellData = newData.get(firstCell) || { address: firstCell, value: "" };
+      newData.set(firstCell, { ...firstCellData, value: values });
+      
+      return newData;
+    });
+
+    setSelectedCells([firstCell]);
+  };
+
   useEffect(() => {
     return () => {
       if (tempSelectionTimerRef.current) {
@@ -305,6 +331,7 @@ export default function Home() {
           onUndo={handleUndo}
           onRedo={handleRedo}
           onSelectAll={handleSelectAll}
+          onMergeCells={handleMergeCells}
           inputValue={inputValue}
           outputValue={outputValue}
           onInputChange={setInputValue}

@@ -65,6 +65,14 @@ export default function SpreadsheetGrid({
     return `${getColumnLabel(col)}${row + 1}`;
   };
 
+  const getColumnIndexFromLabel = (label: string): number => {
+    let index = 0;
+    for (let i = 0; i < label.length; i++) {
+      index = index * 26 + (label.charCodeAt(i) - 65 + 1);
+    }
+    return index - 1;
+  };
+
   const handleColumnBorderMouseDown = (e: React.MouseEvent, colIndex: number) => {
     e.preventDefault();
     e.stopPropagation();
@@ -107,10 +115,17 @@ export default function SpreadsheetGrid({
 
   const handleCellMouseEnter = (address: string) => {
     if (isDragging && dragStart && onDragSelection) {
-      const startRow = parseInt(dragStart.match(/\d+/)?.[0] || "1") - 1;
-      const startCol = dragStart.charCodeAt(0) - 65;
-      const endRow = parseInt(address.match(/\d+/)?.[0] || "1") - 1;
-      const endCol = address.charCodeAt(0) - 65;
+      const startRowMatch = dragStart.match(/\d+/)?.[0];
+      const startColMatch = dragStart.match(/^[A-Z]+/)?.[0];
+      const endRowMatch = address.match(/\d+/)?.[0];
+      const endColMatch = address.match(/^[A-Z]+/)?.[0];
+      
+      if (!startRowMatch || !startColMatch || !endRowMatch || !endColMatch) return;
+      
+      const startRow = parseInt(startRowMatch) - 1;
+      const startCol = getColumnIndexFromLabel(startColMatch);
+      const endRow = parseInt(endRowMatch) - 1;
+      const endCol = getColumnIndexFromLabel(endColMatch);
 
       const minRow = Math.min(startRow, endRow);
       const maxRow = Math.max(startRow, endRow);
