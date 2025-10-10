@@ -20,6 +20,7 @@ export default function Home() {
   const [columnWidths, setColumnWidths] = useState<Map<number, number>>(new Map());
   const [rowHeights, setRowHeights] = useState<Map<number, number>>(new Map());
   const [customFormulas, setCustomFormulas] = useState<Array<{ name: string; logic: string }>>([]);
+  const [retainSelection, setRetainSelection] = useState(false);
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const getColumnLabel = (index: number): string => {
@@ -121,7 +122,9 @@ export default function Home() {
       return newData;
     });
     
-    setSelectedCells([]);
+    if (!retainSelection) {
+      setSelectedCells([]);
+    }
   };
 
   const handleFontSizeChange = (size: number) => {
@@ -135,6 +138,10 @@ export default function Home() {
       });
       return newData;
     });
+    
+    if (!retainSelection) {
+      setSelectedCells([]);
+    }
   };
 
   const handleFontWeightChange = (weight: string) => {
@@ -148,6 +155,10 @@ export default function Home() {
       });
       return newData;
     });
+    
+    if (!retainSelection) {
+      setSelectedCells([]);
+    }
   };
 
   const handleShowInput = () => {
@@ -338,6 +349,8 @@ export default function Home() {
           onOutputChange={setOutputValue}
           onShowInput={handleShowInput}
           onShowOutput={handleShowOutput}
+          retainSelection={retainSelection}
+          onToggleRetainSelection={() => setRetainSelection(!retainSelection)}
         />
       </div>
     </div>

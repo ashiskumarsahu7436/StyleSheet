@@ -6,7 +6,7 @@ import FontControls from "./FontControls";
 import InputOutputSection from "./InputOutputSection";
 import FormulaSection from "./FormulaSection";
 import BulkValueSection from "./BulkValueSection";
-import { Undo2, Redo2, MousePointer2, Check } from "lucide-react";
+import { Undo2, Redo2, MousePointer2, Check, Lock } from "lucide-react";
 
 interface ControlPanelProps {
   selectedCells: string[];
@@ -29,6 +29,8 @@ interface ControlPanelProps {
   onOutputChange: (value: string) => void;
   onShowInput: () => void;
   onShowOutput: () => void;
+  retainSelection?: boolean;
+  onToggleRetainSelection?: () => void;
 }
 
 export default function ControlPanel({
@@ -52,6 +54,8 @@ export default function ControlPanel({
   onOutputChange,
   onShowInput,
   onShowOutput,
+  retainSelection = false,
+  onToggleRetainSelection,
 }: ControlPanelProps) {
   return (
     <div className="w-full h-full border-l border-border bg-card flex flex-col">
@@ -115,6 +119,19 @@ export default function ControlPanel({
             <MousePointer2 className="w-4 h-4" />
             Select All
           </Button>
+
+          {onToggleRetainSelection && (
+            <Button
+              variant={retainSelection ? "default" : "outline"}
+              size="sm"
+              className="w-full gap-2"
+              onClick={onToggleRetainSelection}
+              data-testid="button-retain-selection"
+            >
+              <Lock className="w-4 h-4" />
+              Retain Selection {retainSelection ? "(ON)" : "(OFF)"}
+            </Button>
+          )}
 
           {onMergeCells && (
             <Button
