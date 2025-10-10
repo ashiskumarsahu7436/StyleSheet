@@ -43,7 +43,7 @@ export default function Home() {
 
   const handleRowSelect = (rowIndex: number) => {
     const rowCells: string[] = [];
-    for (let col = 0; col < 10; col++) {
+    for (let col = 0; col < 52; col++) {
       const colLabel = getColumnLabel(col);
       rowCells.push(`${colLabel}${rowIndex + 1}`);
     }
@@ -53,7 +53,7 @@ export default function Home() {
   const handleColumnSelect = (colIndex: number) => {
     const colCells: string[] = [];
     const colLabel = getColumnLabel(colIndex);
-    for (let row = 0; row < 20; row++) {
+    for (let row = 0; row < 100; row++) {
       colCells.push(`${colLabel}${row + 1}`);
     }
     setSelectedCells(colCells);
@@ -225,8 +225,8 @@ export default function Home() {
 
   const handleSelectAll = () => {
     const allCells: string[] = [];
-    for (let row = 0; row < 20; row++) {
-      for (let col = 0; col < 10; col++) {
+    for (let row = 0; row < 100; row++) {
+      for (let col = 0; col < 52; col++) {
         const colLabel = getColumnLabel(col);
         allCells.push(`${colLabel}${row + 1}`);
       }
@@ -264,8 +264,8 @@ export default function Home() {
         </header>
         <div className="flex-1 overflow-hidden">
           <SpreadsheetGrid
-            rows={20}
-            cols={10}
+            rows={100}
+            cols={52}
             selectedCells={selectedCells}
             temporarySelectedCells={temporarySelectedCells}
             onCellSelect={handleCellSelect}
