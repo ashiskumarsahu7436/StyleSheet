@@ -134,7 +134,7 @@ export default function Home() {
       colIndex = colIndex - 1;
       
       // Get cell formatting
-      const fontSize = existing.fontSize || 14;
+      const fontSize = existing.fontSize || 11; // Excel default (Calibri 11pt)
       const fontFamily = existing.fontFamily || 'Calibri';
       const fontWeight = existing.fontWeight || 'normal';
       
@@ -685,7 +685,7 @@ export default function Home() {
             
             // Apply font formatting (use same defaults as UI: 14pt Calibri)
             const fontFamily = cellData_item.fontFamily || 'Calibri';
-            const fontSize = cellData_item.fontSize || 14;
+            const fontSize = cellData_item.fontSize || 11; // Excel default
             const fontWeight = cellData_item.fontWeight || 'normal';
             const fontStyle = cellData_item.fontStyle || 'normal';
             const textDecoration = cellData_item.textDecoration || 'none';

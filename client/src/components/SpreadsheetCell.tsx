@@ -24,7 +24,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   isSelected,
   isTemporary = false,
   backgroundColor = "transparent",
-  fontSize = 14,
+  fontSize = 11, // Excel default (Calibri 11pt)
   fontWeight = "normal",
   fontFamily = "Calibri",
   fontStyle = "normal",

@@ -262,7 +262,7 @@ export default function SpreadsheetGrid({
                         address,
                         value: "",
                         backgroundColor: "transparent",
-                        fontSize: 14,
+                        fontSize: 11, // Excel default (Calibri 11pt)
                         fontWeight: "normal",
                       };
                     }
