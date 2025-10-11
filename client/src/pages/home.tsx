@@ -358,7 +358,22 @@ export default function Home() {
   };
 
   const handleSelectAll = () => {
-    setSelectedCells([]);
+    if (selectedCells.length > 0 || temporarySelectedCells.length > 0) {
+      setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
+    } else {
+      const allCells: string[] = [];
+      for (let row = 0; row < 100; row++) {
+        for (let col = 0; col < 52; col++) {
+          const colLabel = getColumnLabel(col);
+          allCells.push(`${colLabel}${row + 1}`);
+        }
+      }
+      setSelectedCells(allCells);
+    }
   };
 
   const handleUndo = () => {
