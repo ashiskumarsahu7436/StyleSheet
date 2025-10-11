@@ -61,7 +61,7 @@ export default function ControlPanel({
   const totalSelected = selectedCells.length + temporarySelectedCells.length;
   return (
     <div className="w-full h-full border-l border-border bg-card flex flex-col">
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border select-none">
         <h2 className="font-semibold text-lg">Controls</h2>
         <p className="text-sm text-muted-foreground mt-1">
           {totalSelected} cell{totalSelected !== 1 ? "s" : ""} selected
@@ -74,7 +74,7 @@ export default function ControlPanel({
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-6 select-none">
           <div className="flex gap-2">
             <Button
               variant="outline"

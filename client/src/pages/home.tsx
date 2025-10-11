@@ -606,7 +606,7 @@ export default function Home() {
           }}
         >
           <div 
-            className="flex items-center justify-between px-4 lg:px-6 py-2 border-b border-border"
+            className="flex items-center justify-between px-4 lg:px-6 py-2 border-b border-border select-none"
             onDoubleClick={(e) => {
               if (e.target === e.currentTarget) {
                 setSelectedCells([]);
@@ -646,7 +646,7 @@ export default function Home() {
           </div>
           
           <div 
-            className="px-4 lg:px-6 py-2"
+            className="px-4 lg:px-6 py-2 select-none"
             onDoubleClick={(e) => {
               if (e.target === e.currentTarget) {
                 setSelectedCells([]);
