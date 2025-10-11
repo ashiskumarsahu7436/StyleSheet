@@ -663,9 +663,10 @@ export default function Home() {
       // Set column widths
       for (let colIndex = 0; colIndex < cols; colIndex++) {
         const width = columnWidths.get(colIndex) || 32;
-        // Excel width is in characters (1 character ≈ 7.5 pixels for default font)
-        // Use more accurate conversion: pixels / 7.5 + 0.71 (Excel adjustment)
-        worksheet.getColumn(colIndex + 1).width = (width / 7.5) + 0.71;
+        // Excel column width is in "character units" (number of '0' chars that fit)
+        // Accurate conversion: (pixels - 5) / 7 for Calibri 11pt
+        // For our 14pt default, adjust: pixels / 6.5
+        worksheet.getColumn(colIndex + 1).width = Math.max(width / 6.5, 8.43);
       }
       
       // Set row heights and cell data
@@ -708,6 +709,14 @@ export default function Home() {
                 fgColor: { argb: 'FF' + color },
               };
             }
+            
+            // Add borders to all cells (so they're visible even with background colors)
+            excelCell.border = {
+              top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+              left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+              bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+              right: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            };
             
             // Enable text wrapping for multi-line content
             excelCell.alignment = {
