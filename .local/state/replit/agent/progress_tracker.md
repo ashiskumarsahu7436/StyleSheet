@@ -67,12 +67,13 @@
   - Text alignment fixed to start from top-left (not centered)
   - Word-wrap enabled with proper formatting
 
-✅ **Compact Cells with Auto-Resize** - Smaller default size with smart resizing
-  - Cells start compact (60px width × 28px height) for better appearance
+✅ **Square Compact Cells with Auto-Resize** - Perfect size matching color palette
+  - Cells are **square-shaped** (32px × 32px) - same size as color palette boxes ✨
   - **Auto-resize enabled** - cells expand as you type (up to 150px max width)
   - **Auto word-wrap** - text wraps to new lines when exceeding max width
   - **Auto-height** - rows expand automatically for multi-line content
   - Manual resizing still available via column/row borders drag
+  - More columns visible on screen due to compact size
 
 ## Session Recovery (Oct 11, 2025)
 ✅ Dependencies reinstalled successfully (tsx was missing)

@@ -101,14 +101,14 @@ export default function SpreadsheetGrid({
   const handleMouseMove = (e: React.MouseEvent) => {
     if (resizingCol !== null && onColumnResize) {
       const deltaX = e.clientX - startPosRef.current.x;
-      const currentWidth = columnWidths.get(resizingCol) || 60;
-      const newWidth = Math.max(50, currentWidth + deltaX);
+      const currentWidth = columnWidths.get(resizingCol) || 32;
+      const newWidth = Math.max(32, currentWidth + deltaX);
       onColumnResize(resizingCol, newWidth);
       startPosRef.current = { x: e.clientX, y: e.clientY };
     } else if (resizingRow !== null && onRowResize) {
       const deltaY = e.clientY - startPosRef.current.y;
-      const currentHeight = rowHeights.get(resizingRow) || 28;
-      const newHeight = Math.max(24, currentHeight + deltaY);
+      const currentHeight = rowHeights.get(resizingRow) || 32;
+      const newHeight = Math.max(32, currentHeight + deltaY);
       onRowResize(resizingRow, newHeight);
       startPosRef.current = { x: e.clientX, y: e.clientY };
     }
@@ -204,7 +204,7 @@ export default function SpreadsheetGrid({
           <colgroup>
             <col style={{ width: '48px' }} />
             {Array.from({ length: cols }).map((_, colIndex) => {
-              const width = columnWidths.get(colIndex) || 60;
+              const width = columnWidths.get(colIndex) || 32;
               return <col key={colIndex} style={{ width: `${width}px` }} />;
             })}
           </colgroup>
@@ -229,7 +229,7 @@ export default function SpreadsheetGrid({
           </thead>
           <tbody>
             {Array.from({ length: rows }).map((_, rowIndex) => {
-              const height = rowHeights.get(rowIndex) || 28;
+              const height = rowHeights.get(rowIndex) || 32;
               return (
                 <tr key={rowIndex} style={{ height: `${height}px` }}>
                   <th
@@ -278,11 +278,11 @@ export default function SpreadsheetGrid({
                     const colspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.colspan : 1;
                     const rowspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.rowspan : 1;
                     
-                    let cellHeight = rowHeights.get(rowIndex) || 28;
+                    let cellHeight = rowHeights.get(rowIndex) || 32;
                     if (rowspan > 1) {
                       cellHeight = 0;
                       for (let i = 0; i < rowspan; i++) {
-                        cellHeight += rowHeights.get(rowIndex + i) || 28;
+                        cellHeight += rowHeights.get(rowIndex + i) || 32;
                       }
                     }
                     

@@ -148,7 +148,7 @@ export default function Home() {
         // Add padding (px-2 = 8px on each side, so 16px total, plus some buffer)
         const requiredWidth = textWidth + 24;
         const maxWidth = 150; // ~4cm max width
-        const minWidth = 60; // smaller default for better appearance
+        const minWidth = 32; // square size like color palette
         const currentWidth = columnWidths.get(colIndex) || minWidth;
         
         // Auto-adjust column width up to max
@@ -179,7 +179,7 @@ export default function Home() {
         // Auto-adjust row height based on lines
         const lineHeight = fontSize * 1.5; // typical line height multiplier
         const requiredHeight = lines * lineHeight + 16; // add padding
-        const minHeight = 28; // smaller default height
+        const minHeight = 32; // square size like color palette
         const currentHeight = rowHeights.get(rowIndex) || minHeight;
         
         if (requiredHeight > currentHeight) {
