@@ -100,7 +100,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full h-full bg-transparent border-none outline-none px-2 pt-3 text-foreground resize-none align-top overflow-hidden"
+        className="w-full h-full bg-transparent border-none outline-none px-1 pt-0.5 text-foreground resize-none align-top overflow-hidden"
         style={{ 
           fontSize: `${fontSize}px`, 
           fontWeight,
