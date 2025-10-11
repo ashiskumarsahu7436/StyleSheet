@@ -172,139 +172,144 @@ export default function GoogleSheetsToolbar({
 
       {/* Toolbar - All Icons */}
       <div className="flex items-center gap-0.5 px-2 py-1 overflow-x-auto select-none bg-muted/30">
-        {/* Search */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Search">
-          <Search className="h-3.5 w-3.5" />
-        </Button>
+        {/* Complex Mode Only - Search, Undo/Redo, Print, Paint, Zoom, Number Formats, Font Controls */}
+        {isComplexMode && (
+          <>
+            {/* Search */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Search">
+              <Search className="h-3.5 w-3.5" />
+            </Button>
 
-        {/* Undo/Redo */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7"
-          onClick={onUndo}
-          disabled={!canUndo}
-          title="Undo (Ctrl+Z)"
-          data-testid="button-undo"
-        >
-          <Undo2 className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7"
-          onClick={onRedo}
-          disabled={!canRedo}
-          title="Redo (Ctrl+Y)"
-          data-testid="button-redo"
-        >
-          <Redo2 className="h-3.5 w-3.5" />
-        </Button>
+            {/* Undo/Redo */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={onUndo}
+              disabled={!canUndo}
+              title="Undo (Ctrl+Z)"
+              data-testid="button-undo"
+            >
+              <Undo2 className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={onRedo}
+              disabled={!canRedo}
+              title="Redo (Ctrl+Y)"
+              data-testid="button-redo"
+            >
+              <Redo2 className="h-3.5 w-3.5" />
+            </Button>
 
-        {/* Print */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7"
-          onClick={() => window.print()}
-          title="Print (Ctrl+P)"
-          data-testid="button-print"
-        >
-          <Printer className="h-3.5 w-3.5" />
-        </Button>
+            {/* Print */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => window.print()}
+              title="Print (Ctrl+P)"
+              data-testid="button-print"
+            >
+              <Printer className="h-3.5 w-3.5" />
+            </Button>
 
-        {/* Paint Format */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Paint format">
-          <Paintbrush className="h-3.5 w-3.5" />
-        </Button>
+            {/* Paint Format */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Paint format">
+              <Paintbrush className="h-3.5 w-3.5" />
+            </Button>
 
-        {/* Zoom */}
-        <Select defaultValue="100">
-          <SelectTrigger className="w-16 h-7 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="50">50%</SelectItem>
-            <SelectItem value="75">75%</SelectItem>
-            <SelectItem value="100">100%</SelectItem>
-            <SelectItem value="125">125%</SelectItem>
-            <SelectItem value="150">150%</SelectItem>
-          </SelectContent>
-        </Select>
+            {/* Zoom */}
+            <Select defaultValue="100">
+              <SelectTrigger className="w-16 h-7 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="50">50%</SelectItem>
+                <SelectItem value="75">75%</SelectItem>
+                <SelectItem value="100">100%</SelectItem>
+                <SelectItem value="125">125%</SelectItem>
+                <SelectItem value="150">150%</SelectItem>
+              </SelectContent>
+            </Select>
 
-        <div className="h-5 w-px bg-border mx-1" />
+            <div className="h-5 w-px bg-border mx-1" />
 
-        {/* Currency, Percent, Number Format */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Format as currency">
-          <DollarSign className="h-3.5 w-3.5" />
-        </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Format as percent">
-          <Percent className="h-3.5 w-3.5" />
-        </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Decrease decimal places">
-          <span className="text-xs font-mono">.0</span>
-        </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Increase decimal places">
-          <span className="text-xs font-mono">0.</span>
-        </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="More formats">
-          <Hash className="h-3.5 w-3.5" />
-        </Button>
+            {/* Currency, Percent, Number Format */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Format as currency">
+              <DollarSign className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Format as percent">
+              <Percent className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Decrease decimal places">
+              <span className="text-xs font-mono">.0</span>
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Increase decimal places">
+              <span className="text-xs font-mono">0.</span>
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="More formats">
+              <Hash className="h-3.5 w-3.5" />
+            </Button>
 
-        <div className="h-5 w-px bg-border mx-1" />
+            <div className="h-5 w-px bg-border mx-1" />
 
-        {/* Font Family */}
-        <Select value={currentFontFamily} onValueChange={onFontFamilyChange}>
-          <SelectTrigger className="w-28 h-7 text-xs" data-testid="select-font-family">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FONT_FAMILIES.map((font) => (
-              <SelectItem key={font} value={font}>
-                {font}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            {/* Font Family */}
+            <Select value={currentFontFamily} onValueChange={onFontFamilyChange}>
+              <SelectTrigger className="w-28 h-7 text-xs" data-testid="select-font-family">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FONT_FAMILIES.map((font) => (
+                  <SelectItem key={font} value={font}>
+                    {font}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-        {/* Font Size with +/- buttons */}
-        <div className="flex items-center gap-0.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-6"
-            onClick={() => onFontSizeChange(Math.max(8, currentFontSize - 1))}
-            title="Decrease font size"
-          >
-            <Minus className="h-3 w-3" />
-          </Button>
-          <Select
-            value={currentFontSize.toString()}
-            onValueChange={(value) => onFontSizeChange(parseInt(value))}
-          >
-            <SelectTrigger className="w-12 h-7 text-xs" data-testid="select-font-size">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FONT_SIZES.map((size) => (
-                <SelectItem key={size} value={size.toString()}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-6"
-            onClick={() => onFontSizeChange(Math.min(72, currentFontSize + 1))}
-            title="Increase font size"
-          >
-            <Plus className="h-3 w-3" />
-          </Button>
-        </div>
+            {/* Font Size with +/- buttons */}
+            <div className="flex items-center gap-0.5">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-6"
+                onClick={() => onFontSizeChange(Math.max(8, currentFontSize - 1))}
+                title="Decrease font size"
+              >
+                <Minus className="h-3 w-3" />
+              </Button>
+              <Select
+                value={currentFontSize.toString()}
+                onValueChange={(value) => onFontSizeChange(parseInt(value))}
+              >
+                <SelectTrigger className="w-12 h-7 text-xs" data-testid="select-font-size">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_SIZES.map((size) => (
+                    <SelectItem key={size} value={size.toString()}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-6"
+                onClick={() => onFontSizeChange(Math.min(72, currentFontSize + 1))}
+                title="Increase font size"
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
 
-        <div className="h-5 w-px bg-border mx-1" />
+            <div className="h-5 w-px bg-border mx-1" />
+          </>
+        )}
 
         {/* Text Formatting: Bold, Italic, Underline */}
         <Button
@@ -364,46 +369,51 @@ export default function GoogleSheetsToolbar({
           </div>
         </div>
 
-        <div className="h-5 w-px bg-border mx-1" />
+        {/* Complex Mode Only - Borders, Merge, Alignment, Wrapping, Rotation, More */}
+        {isComplexMode && (
+          <>
+            <div className="h-5 w-px bg-border mx-1" />
 
-        {/* Borders */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Borders">
-          <Grid3x3 className="h-3.5 w-3.5" />
-        </Button>
+            {/* Borders */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Borders">
+              <Grid3x3 className="h-3.5 w-3.5" />
+            </Button>
 
-        {/* Merge cells - not functional, just visual */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Merge cells">
-          <span className="text-xs font-bold">⊞</span>
-        </Button>
+            {/* Merge cells - not functional, just visual */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Merge cells">
+              <span className="text-xs font-bold">⊞</span>
+            </Button>
 
-        <div className="h-5 w-px bg-border mx-1" />
+            <div className="h-5 w-px bg-border mx-1" />
 
-        {/* Horizontal Alignment */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Horizontal align">
-          <AlignLeft className="h-3.5 w-3.5" />
-        </Button>
+            {/* Horizontal Alignment */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Horizontal align">
+              <AlignLeft className="h-3.5 w-3.5" />
+            </Button>
 
-        {/* Vertical Alignment */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Vertical align">
-          <AlignVerticalJustifyCenter className="h-3.5 w-3.5" />
-        </Button>
+            {/* Vertical Alignment */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Vertical align">
+              <AlignVerticalJustifyCenter className="h-3.5 w-3.5" />
+            </Button>
 
-        {/* Text wrapping */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Text wrapping">
-          <WrapText className="h-3.5 w-3.5" />
-        </Button>
+            {/* Text wrapping */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Text wrapping">
+              <WrapText className="h-3.5 w-3.5" />
+            </Button>
 
-        {/* Text rotation */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Text rotation">
-          <RotateCw className="h-3.5 w-3.5" />
-        </Button>
+            {/* Text rotation */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Text rotation">
+              <RotateCw className="h-3.5 w-3.5" />
+            </Button>
 
-        <div className="h-5 w-px bg-border mx-1" />
+            <div className="h-5 w-px bg-border mx-1" />
 
-        {/* More options */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="More options">
-          <MoreVertical className="h-3.5 w-3.5" />
-        </Button>
+            {/* More options */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="More options">
+              <MoreVertical className="h-3.5 w-3.5" />
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
