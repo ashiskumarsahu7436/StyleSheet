@@ -46,7 +46,7 @@ export default function ExcelFontControls({
     <div className="flex items-center gap-1 bg-muted/30 px-2 py-1 rounded-md border border-border select-none">
       <Select value={currentFontFamily} onValueChange={handleFontFamilyChange}>
         <SelectTrigger className="w-28 h-7 text-xs border-none bg-transparent" data-testid="select-font-family">
-          <SelectValue placeholder={currentFontFamily} />
+          <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {FONT_FAMILIES.map((font) => (
@@ -64,7 +64,7 @@ export default function ExcelFontControls({
         onValueChange={(value) => onFontSizeChange(parseInt(value))}
       >
         <SelectTrigger className="w-14 h-7 text-xs border-none bg-transparent" data-testid="select-font-size">
-          <SelectValue placeholder={currentFontSize.toString()} />
+          <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {FONT_SIZES.map((size) => (

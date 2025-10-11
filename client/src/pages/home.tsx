@@ -175,8 +175,9 @@ export default function Home() {
     saveToHistory(newData);
     setCellData(newData);
     
-    if (!retainSelection) {
-      setSelectedCells([]);
+    // Convert temporary selections to permanent when formatting
+    if (temporarySelectedCells.length > 0) {
+      setSelectedCells(Array.from(new Set([...selectedCells, ...temporarySelectedCells])));
       setTemporarySelectedCells([]);
       if (tempSelectionTimerRef.current) {
         clearTimeout(tempSelectionTimerRef.current);
@@ -197,8 +198,9 @@ export default function Home() {
     saveToHistory(newData);
     setCellData(newData);
     
-    if (!retainSelection) {
-      setSelectedCells([]);
+    // Convert temporary selections to permanent when formatting
+    if (temporarySelectedCells.length > 0) {
+      setSelectedCells(Array.from(new Set([...selectedCells, ...temporarySelectedCells])));
       setTemporarySelectedCells([]);
       if (tempSelectionTimerRef.current) {
         clearTimeout(tempSelectionTimerRef.current);
@@ -219,8 +221,9 @@ export default function Home() {
     saveToHistory(newData);
     setCellData(newData);
     
-    if (!retainSelection) {
-      setSelectedCells([]);
+    // Convert temporary selections to permanent when formatting
+    if (temporarySelectedCells.length > 0) {
+      setSelectedCells(Array.from(new Set([...selectedCells, ...temporarySelectedCells])));
       setTemporarySelectedCells([]);
       if (tempSelectionTimerRef.current) {
         clearTimeout(tempSelectionTimerRef.current);
@@ -245,8 +248,9 @@ export default function Home() {
     saveToHistory(newData);
     setCellData(newData);
     
-    if (!retainSelection) {
-      setSelectedCells([]);
+    // Convert temporary selections to permanent when formatting
+    if (temporarySelectedCells.length > 0) {
+      setSelectedCells(Array.from(new Set([...selectedCells, ...temporarySelectedCells])));
       setTemporarySelectedCells([]);
       if (tempSelectionTimerRef.current) {
         clearTimeout(tempSelectionTimerRef.current);
@@ -271,8 +275,9 @@ export default function Home() {
     saveToHistory(newData);
     setCellData(newData);
     
-    if (!retainSelection) {
-      setSelectedCells([]);
+    // Convert temporary selections to permanent when formatting
+    if (temporarySelectedCells.length > 0) {
+      setSelectedCells(Array.from(new Set([...selectedCells, ...temporarySelectedCells])));
       setTemporarySelectedCells([]);
       if (tempSelectionTimerRef.current) {
         clearTimeout(tempSelectionTimerRef.current);
