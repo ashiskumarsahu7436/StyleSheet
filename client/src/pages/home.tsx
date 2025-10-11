@@ -148,7 +148,7 @@ export default function Home() {
         // Add padding (px-1 = 4px on each side, so 8px total, plus some buffer)
         const requiredWidth = textWidth + 16;
         const maxWidth = 150; // ~4cm max width
-        const minWidth = 32; // square size like color palette
+        const minWidth = 64; // Excel default column width
         const currentWidth = columnWidths.get(colIndex) || minWidth;
         
         // Auto-adjust column width (both increase and decrease)
@@ -166,7 +166,7 @@ export default function Home() {
         }
         
         // Calculate wrapped lines - use actual column width for wrapping
-        const actualColumnWidth = columnWidths.get(colIndex) || minWidth;
+        const actualColumnWidth = columnWidths.get(colIndex) || 64;
         const effectiveWidth = actualColumnWidth - 8; // subtract padding (px-1 = 4px each side)
         
         // Split text by newlines first (for Enter key), then wrap words
@@ -217,8 +217,8 @@ export default function Home() {
         
         // Auto-adjust row height based on lines (both increase and decrease)
         const lineHeight = fontSize * 1.4; // line height multiplier
-        const requiredHeight = Math.max(totalLines * lineHeight + 6, 32); // add small padding, min 32px
-        const minHeight = 32; // square size like color palette
+        const requiredHeight = Math.max(totalLines * lineHeight + 6, 20); // add small padding, min 20px
+        const minHeight = 20; // Excel default row height
         
         // Always update height (can increase or decrease)
         setRowHeights(prev => {
@@ -662,19 +662,17 @@ export default function Home() {
       
       // Set column widths
       for (let colIndex = 0; colIndex < cols; colIndex++) {
-        const width = columnWidths.get(colIndex) || 32;
-        // Excel column width is in "character units" (number of '0' chars that fit)
-        // Accurate conversion: (pixels - 5) / 7 for Calibri 11pt
-        // For our 14pt default, adjust: pixels / 6.5
-        worksheet.getColumn(colIndex + 1).width = Math.max(width / 6.5, 8.43);
+        const width = columnWidths.get(colIndex) || 64; // Excel default: 64px
+        // Excel column width is in "character units" (8.43 chars = 64px in Calibri 11pt)
+        // Direct conversion: pixels / 7.6 (64px / 8.43 chars ≈ 7.6 pixels per char)
+        worksheet.getColumn(colIndex + 1).width = width / 7.6;
       }
       
       // Set row heights and cell data
       for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
         const row = worksheet.getRow(rowIndex + 1);
-        const height = rowHeights.get(rowIndex) || 32;
-        // Excel height is in points (1 point = 1.333 pixels)
-        // Use more accurate conversion
+        const height = rowHeights.get(rowIndex) || 20; // Excel default: 20px (15 points)
+        // Excel height is in points (20px = 15 points, so 1 pixel = 0.75 points)
         row.height = height * 0.75;
         
         for (let colIndex = 0; colIndex < cols; colIndex++) {

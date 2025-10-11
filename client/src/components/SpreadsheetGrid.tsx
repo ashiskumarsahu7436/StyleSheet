@@ -204,7 +204,7 @@ export default function SpreadsheetGrid({
           <colgroup>
             <col style={{ width: '48px' }} />
             {Array.from({ length: cols }).map((_, colIndex) => {
-              const width = columnWidths.get(colIndex) || 32;
+              const width = columnWidths.get(colIndex) || 64; // Excel default
               return <col key={colIndex} style={{ width: `${width}px` }} />;
             })}
           </colgroup>
@@ -229,7 +229,7 @@ export default function SpreadsheetGrid({
           </thead>
           <tbody>
             {Array.from({ length: rows }).map((_, rowIndex) => {
-              const height = rowHeights.get(rowIndex) || 32;
+              const height = rowHeights.get(rowIndex) || 20; // Excel default
               return (
                 <tr key={rowIndex} style={{ height: `${height}px` }}>
                   <th
