@@ -89,3 +89,14 @@
   - Cells match the size of color palette boxes perfectly
   - More compact, professional spreadsheet appearance
   - Minimal padding allows more content visibility in default cell size
+
+## Row Height Auto-Resize Fix (Oct 11, 2025)
+[x] **Fixed row height auto-resize to work properly with cell content**
+  - Fixed padding calculation in auto-resize logic (was using 24px, now correctly using 16px based on px-1)
+  - Row height now automatically increases when typing multi-line text
+  - Row height now automatically decreases when deleting text (not just increase)
+  - Proper handling of Enter key (newline characters) in height calculation
+  - Accurate word-wrap calculation based on actual column width
+  - Text content is now fully visible - no more hidden/cutoff data
+  - Minimum row height remains 32px (square cells by default)
+  - Height calculation uses fontSize * 1.4 for proper line spacing

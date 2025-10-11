@@ -145,8 +145,8 @@ export default function Home() {
         context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
         const textWidth = context.measureText(value).width;
         
-        // Add padding (px-2 = 8px on each side, so 16px total, plus some buffer)
-        const requiredWidth = textWidth + 24;
+        // Add padding (px-1 = 4px on each side, so 8px total, plus some buffer)
+        const requiredWidth = textWidth + 16;
         const maxWidth = 150; // ~4cm max width
         const minWidth = 32; // square size like color palette
         const currentWidth = columnWidths.get(colIndex) || minWidth;
@@ -160,35 +160,51 @@ export default function Home() {
           });
         }
         
-        // Calculate wrapped lines if text exceeds max width
-        const effectiveWidth = Math.min(requiredWidth, maxWidth) - 24; // subtract padding
-        const words = value.split(/\s+/);
-        let lines = 1;
-        let currentLineWidth = 0;
+        // Calculate wrapped lines - use actual column width for wrapping
+        const actualColumnWidth = columnWidths.get(colIndex) || minWidth;
+        const effectiveWidth = actualColumnWidth - 8; // subtract padding (px-1 = 4px each side)
         
-        for (const word of words) {
-          const wordWidth = context.measureText(word + ' ').width;
-          if (currentLineWidth + wordWidth > effectiveWidth && currentLineWidth > 0) {
-            lines++;
-            currentLineWidth = wordWidth;
-          } else {
-            currentLineWidth += wordWidth;
+        // Split text by newlines first (for Enter key), then wrap words
+        const lines = value.split('\n');
+        let totalLines = 0;
+        
+        lines.forEach(line => {
+          if (line.trim() === '') {
+            totalLines += 1;
+            return;
           }
-        }
+          
+          const words = line.split(/\s+/);
+          let currentLineWidth = 0;
+          let wrappedLines = 1;
+          
+          for (const word of words) {
+            const wordWidth = context.measureText(word + ' ').width;
+            if (currentLineWidth + wordWidth > effectiveWidth && currentLineWidth > 0) {
+              wrappedLines++;
+              currentLineWidth = wordWidth;
+            } else {
+              currentLineWidth += wordWidth;
+            }
+          }
+          totalLines += wrappedLines;
+        });
         
-        // Auto-adjust row height based on lines
-        const lineHeight = fontSize * 1.5; // typical line height multiplier
-        const requiredHeight = lines * lineHeight + 16; // add padding
+        // Auto-adjust row height based on lines (both increase and decrease)
+        const lineHeight = fontSize * 1.4; // line height multiplier
+        const requiredHeight = Math.max(totalLines * lineHeight + 6, 32); // add small padding, min 32px
         const minHeight = 32; // square size like color palette
-        const currentHeight = rowHeights.get(rowIndex) || minHeight;
         
-        if (requiredHeight > currentHeight) {
-          setRowHeights(prev => {
-            const newMap = new Map(prev);
+        // Always update height (can increase or decrease)
+        setRowHeights(prev => {
+          const newMap = new Map(prev);
+          if (requiredHeight > minHeight) {
             newMap.set(rowIndex, requiredHeight);
-            return newMap;
-          });
-        }
+          } else {
+            newMap.delete(rowIndex); // Reset to default if not needed
+          }
+          return newMap;
+        });
       }
     }
   };
