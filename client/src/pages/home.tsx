@@ -799,15 +799,12 @@ export default function Home() {
           onSpreadsheetNameChange={setSpreadsheetName}
           onUndo={handleUndo}
           onRedo={handleRedo}
-          onDownload={handleDownload}
           onFontFamilyChange={handleFontFamilyChange}
           onFontSizeChange={handleFontSizeChange}
           onBoldToggle={() => handleFontWeightChange(currentFontWeight === "bold" ? "normal" : "bold")}
           onItalicToggle={handleItalicToggle}
           onUnderlineToggle={handleUnderlineToggle}
           onColorApply={handleColorApply}
-          onMergeCells={handleMergeCells}
-          onUnmergeCells={handleUnmergeCells}
           currentFontFamily={currentFontFamily}
           currentFontSize={currentFontSize}
           currentFontWeight={currentFontWeight}
