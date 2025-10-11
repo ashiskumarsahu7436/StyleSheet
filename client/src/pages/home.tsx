@@ -155,6 +155,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -173,6 +177,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -191,6 +199,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -209,6 +221,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -231,6 +247,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -253,6 +273,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -643,7 +667,18 @@ export default function Home() {
             </div>
           </div>
         </header>
-        <div className="flex-1 overflow-hidden">
+        <div 
+          className="flex-1 overflow-hidden"
+          onDoubleClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelectedCells([]);
+              setTemporarySelectedCells([]);
+              if (tempSelectionTimerRef.current) {
+                clearTimeout(tempSelectionTimerRef.current);
+              }
+            }
+          }}
+        >
           <SpreadsheetGrid
             rows={100}
             cols={52}
