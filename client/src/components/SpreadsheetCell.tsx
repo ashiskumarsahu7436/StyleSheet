@@ -24,7 +24,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   isSelected,
   isTemporary = false,
   backgroundColor = "transparent",
-  fontSize = 13, // Optimized for 32px cells
+  fontSize = 13, // Optimized for default 64x20px cells (32px is minimum)
   fontWeight = "normal",
   fontFamily = "Calibri",
   fontStyle = "normal",

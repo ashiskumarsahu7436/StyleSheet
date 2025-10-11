@@ -262,7 +262,7 @@ export default function SpreadsheetGrid({
                         address,
                         value: "",
                         backgroundColor: "transparent",
-                        fontSize: 13, // Optimized for 32px cells
+                        fontSize: 13, // Optimized for default 64x20px cells
                         fontWeight: "normal",
                       };
                     }

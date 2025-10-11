@@ -220,26 +220,30 @@
   - **Project is ready for development and use!**
 
 ## Default Font Size Optimization (Oct 11, 2025 - 6:10 PM)
-[x] **OPTIMIZED: Default font size adjusted for 32px compact cells**
-  - **Problem**: 11px font size was too small for 32px × 32px cells
-  - **Solution**: Changed default font size from 11px to 13px
+[x] **OPTIMIZED: Default font size adjusted for default cell dimensions**
+  - **Problem 1**: 11px font size was too small for default 64px × 20px cells
+  - **Problem 2**: Font size was not displaying in toolbar
+  - **Solution**: Changed default font size from 11px to 13px across all components
   - **Updated files:**
     - ✅ `client/src/components/SpreadsheetCell.tsx` - Updated default fontSize parameter
     - ✅ `client/src/pages/home.tsx` - Updated all default fontSize references (3 locations)
     - ✅ `client/src/components/SpreadsheetGrid.tsx` - Updated default fontSize for empty cells
-    - ✅ `client/src/components/FontControls.tsx` - Added 13px option to font size selector
+    - ✅ `client/src/components/ExcelFontControls.tsx` - Updated default param AND added 13px to dropdown
   - **Benefits:**
-    - ✨ Font is now more readable and proportionate to cell size
+    - ✨ Font size now properly displays in toolbar (shows "13")
+    - ✨ Font is more readable and proportionate to default 64px × 20px cells
     - ✨ Better visual balance between text and cell dimensions
     - ✨ Improved user experience - text is clearer without being too large
-    - ✨ Maintains compact appearance while enhancing readability
   - **Technical details:**
     - Old default: 11px (Excel standard)
-    - New default: 13px (Optimized for 32px cells)
+    - New default: 13px (Optimized for default 64px × 20px cells)
+    - **Clarification**: Default cell size is 64px × 20px (width × height)
+    - **Note**: 32px is the MINIMUM limit for cells, not the default
     - All existing cells retain their custom font sizes
     - Only affects new/unformatted cells
   - **Verified working:**
+    - ✅ Font size "13" now displays correctly in toolbar
     - ✅ Application hot-reloaded successfully
-    - ✅ Screenshot confirmed new font size looks better
+    - ✅ Screenshot confirmed font size looks better and displays properly
     - ✅ Cells display text more clearly with 13px default
     - ✅ All formatting features still work correctly

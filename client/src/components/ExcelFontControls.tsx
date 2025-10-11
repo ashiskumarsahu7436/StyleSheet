@@ -15,7 +15,7 @@ interface ExcelFontControlsProps {
   currentTextDecoration?: string;
 }
 
-const FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
+const FONT_SIZES = [8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
 const FONT_FAMILIES = ["Calibri", "Arial", "Times New Roman", "Verdana", "Georgia"];
 
 export default function ExcelFontControls({
@@ -24,7 +24,7 @@ export default function ExcelFontControls({
   onFontFamilyChange,
   onItalicToggle,
   onUnderlineToggle,
-  currentFontSize = 11,
+  currentFontSize = 13,
   currentFontWeight = "normal",
   currentFontFamily = "Calibri",
   currentFontStyle = "normal",
