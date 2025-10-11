@@ -155,6 +155,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -173,6 +177,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -191,6 +199,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -209,6 +221,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -231,6 +247,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -253,6 +273,10 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
     }
   };
 
@@ -556,8 +580,30 @@ export default function Home() {
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-background">
       <div className="flex-1 flex flex-col lg:w-2/3">
-        <header className="border-b border-border bg-card">
-          <div className="flex items-center justify-between px-4 lg:px-6 py-2 border-b border-border">
+        <header 
+          className="border-b border-border bg-card"
+          onDoubleClick={(e) => {
+            if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === 'HEADER') {
+              setSelectedCells([]);
+              setTemporarySelectedCells([]);
+              if (tempSelectionTimerRef.current) {
+                clearTimeout(tempSelectionTimerRef.current);
+              }
+            }
+          }}
+        >
+          <div 
+            className="flex items-center justify-between px-4 lg:px-6 py-2 border-b border-border"
+            onDoubleClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setSelectedCells([]);
+                setTemporarySelectedCells([]);
+                if (tempSelectionTimerRef.current) {
+                  clearTimeout(tempSelectionTimerRef.current);
+                }
+              }
+            }}
+          >
             <div className="flex items-center gap-2">
               <h1 className="text-lg lg:text-xl font-semibold" data-testid="text-app-title">
                 StyleSheet
@@ -586,8 +632,30 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="px-4 lg:px-6 py-2">
-            <div className="flex items-center gap-2 flex-wrap">
+          <div 
+            className="px-4 lg:px-6 py-2"
+            onDoubleClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setSelectedCells([]);
+                setTemporarySelectedCells([]);
+                if (tempSelectionTimerRef.current) {
+                  clearTimeout(tempSelectionTimerRef.current);
+                }
+              }
+            }}
+          >
+            <div 
+              className="flex items-center gap-2 flex-wrap"
+              onDoubleClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setSelectedCells([]);
+                  setTemporarySelectedCells([]);
+                  if (tempSelectionTimerRef.current) {
+                    clearTimeout(tempSelectionTimerRef.current);
+                  }
+                }
+              }}
+            >
               <Button
                 variant={selectedCells.length > 0 ? "default" : "secondary"}
                 size="sm"
