@@ -278,13 +278,21 @@ export default function SpreadsheetGrid({
                     const colspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.colspan : 1;
                     const rowspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.rowspan : 1;
                     
+                    let cellHeight = rowHeights.get(rowIndex) || 32;
+                    if (rowspan > 1) {
+                      cellHeight = 0;
+                      for (let i = 0; i < rowspan; i++) {
+                        cellHeight += rowHeights.get(rowIndex + i) || 32;
+                      }
+                    }
+                    
                     return (
                       <td
                         key={address}
                         colSpan={colspan}
                         rowSpan={rowspan}
                         className="border border-border p-0 relative"
-                        style={{ height: '100%' }}
+                        style={{ height: `${cellHeight}px` }}
                         onMouseDown={() => handleCellMouseDown(address)}
                         onMouseEnter={() => handleCellMouseEnter(address)}
                         onMouseUp={handleCellMouseUp}

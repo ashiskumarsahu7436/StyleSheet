@@ -73,7 +73,6 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
       )}
       style={{
         backgroundColor: backgroundColor,
-        minHeight: '32px',
       }}
       onClick={onClick}
       onDoubleClick={onDoubleClick}

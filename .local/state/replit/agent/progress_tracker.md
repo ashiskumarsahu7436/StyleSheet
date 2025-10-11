@@ -55,6 +55,12 @@
 4. Make more formatting changes if needed
 5. Click elsewhere to deselect
 
+## Latest Update (October 11, 2025)
+✅ **Merged Cell Display Fixed** - Merged cells now properly fill the entire merged area instead of appearing as a small cell in the middle
+  - Fixed height calculation for merged cells to sum all row heights in the merged range
+  - Removed minHeight constraint from SpreadsheetCell component to allow proper stretching
+  - Merged cells now display correctly like in Excel, spanning the full width and height of the merged area
+
 ## Session Recovery (Oct 11, 2025)
 ✅ Dependencies reinstalled successfully (tsx was missing)
 ✅ Workflow restarted and confirmed running
