@@ -61,6 +61,17 @@
   - Removed minHeight constraint from SpreadsheetCell component to allow proper stretching
   - Merged cells now display correctly like in Excel, spanning the full width and height of the merged area
 
+✅ **Multi-line Text Support Added** - Cells now support multi-line text entry
+  - Changed from input to textarea element
+  - Enter key now creates line breaks within cells
+  - Text alignment fixed to start from top-left (not centered)
+  - Word-wrap enabled with proper formatting
+
+✅ **Cells at Default Size** - Removed auto-resize feature
+  - Cells remain at default size (80px width, 32px height)
+  - Manual resizing still available via column/row borders
+  - User can manually adjust size as needed
+
 ## Session Recovery (Oct 11, 2025)
 ✅ Dependencies reinstalled successfully (tsx was missing)
 ✅ Workflow restarted and confirmed running
