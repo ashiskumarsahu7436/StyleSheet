@@ -28,7 +28,9 @@ import {
   Folder,
   Cloud,
   Minus,
-  Plus
+  Plus,
+  Download,
+  Layers
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -50,6 +52,9 @@ interface GoogleSheetsToolbarProps {
   currentTextDecoration?: string;
   canUndo?: boolean;
   canRedo?: boolean;
+  onDownload: () => void;
+  isComplexMode: boolean;
+  onModeToggle: () => void;
 }
 
 const FONT_SIZES = [8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
@@ -80,6 +85,9 @@ export default function GoogleSheetsToolbar({
   currentTextDecoration = "none",
   canUndo = false,
   canRedo = false,
+  onDownload,
+  isComplexMode,
+  onModeToggle,
 }: GoogleSheetsToolbarProps) {
   const isBold = currentFontWeight === "bold" || currentFontWeight === "700";
   const isItalic = currentFontStyle === "italic";
@@ -119,18 +127,47 @@ export default function GoogleSheetsToolbar({
       </div>
 
       {/* Menu Bar */}
-      <div className="flex items-center gap-1 px-3 py-1 border-b border-border text-sm">
-        {MENU_ITEMS.map((item) => (
+      <div className="flex items-center justify-between px-3 py-1 border-b border-border text-sm">
+        {/* Left side - Menu Items */}
+        <div className="flex items-center gap-1">
+          {MENU_ITEMS.map((item) => (
+            <Button
+              key={item}
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs font-normal"
+              data-testid={`menu-${item.toLowerCase()}`}
+            >
+              {item}
+            </Button>
+          ))}
+        </div>
+
+        {/* Right side - Download and Mode Toggle */}
+        <div className="flex items-center gap-2">
           <Button
-            key={item}
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="h-7 px-2 text-xs font-normal"
-            data-testid={`menu-${item.toLowerCase()}`}
+            className="h-7 px-3 gap-1.5 text-xs"
+            onClick={onDownload}
+            title="Download spreadsheet"
+            data-testid="button-download-menu"
           >
-            {item}
+            <Download className="h-3.5 w-3.5" />
+            Download
           </Button>
-        ))}
+          <Button
+            variant={isComplexMode ? "default" : "outline"}
+            size="sm"
+            className="h-7 px-3 gap-1.5 text-xs"
+            onClick={onModeToggle}
+            title={isComplexMode ? "Switch to Simple Mode" : "Switch to Complex Mode"}
+            data-testid="button-mode-toggle"
+          >
+            <Layers className="h-3.5 w-3.5" />
+            {isComplexMode ? "Complex" : "Simple"}
+          </Button>
+        </div>
       </div>
 
       {/* Toolbar - All Icons */}

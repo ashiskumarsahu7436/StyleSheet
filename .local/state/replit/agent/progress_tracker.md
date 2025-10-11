@@ -394,3 +394,43 @@
     - ✅ Auto-resize columns (expand only)
   - **Migration status: COMPLETE ✓**
   - **Project is fully functional and ready for development!**
+
+## Download & Mode Toggle Buttons Added (Oct 11, 2025 - 8:09 PM)
+[x] **IMPLEMENTED: Download and Mode Toggle buttons in menu bar section**
+  - **User Request**: Add Download and Mode Toggle buttons in the menu bar area (opposite to File/Edit/View/Help)
+  - **Location**: Right end of menu bar section (opposite to Help menu item)
+  - **Buttons Added**:
+    - ✅ **Download Button**: 
+      - Icon: Download icon (📥)
+      - Text: "Download"
+      - Functionality: Downloads spreadsheet as Excel (.xlsx) with all formatting
+      - Size: Medium (h-7 px-3) - not too big, not too small
+      - Variant: Outline style
+    - ✅ **Mode Toggle Button**:
+      - Icon: Layers icon (📚)
+      - Text: "Simple" or "Complex" based on current mode
+      - Functionality: Switches between Simple and Complex modes
+      - Size: Medium (h-7 px-3) - matches Download button
+      - Variant: Outline when Simple, Default (filled) when Complex
+      - Shows toast notification when toggled
+  
+  - **Implementation Details**:
+    - ✅ Updated GoogleSheetsToolbar component with new props
+    - ✅ Added Download and Layers icons from lucide-react
+    - ✅ Modified menu bar layout to justify-between (left: menu items, right: new buttons)
+    - ✅ Added isComplexMode state in home.tsx
+    - ✅ Created handleModeToggle handler with toast notifications
+    - ✅ Passed all props correctly to GoogleSheetsToolbar
+    - ✅ Both buttons positioned at right end as requested
+    - ✅ Medium size buttons (not too wide, perfect fit)
+  
+  - **Verified Working**:
+    - ✅ Screenshot confirms both buttons visible in menu bar
+    - ✅ Download button positioned at right end (opposite to Help)
+    - ✅ Mode toggle button shows "Simple" (current mode)
+    - ✅ Buttons have proper medium size (h-7)
+    - ✅ Proper spacing and alignment with menu items
+    - ✅ Application hot-reloaded successfully
+    - ✅ No errors in console
+  
+  - **✅ COMPLETE - Download and Mode Toggle buttons successfully added to menu bar! ✓**

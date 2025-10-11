@@ -40,6 +40,7 @@ export default function Home() {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [mergedCells, setMergedCells] = useState<MergedCell[]>([]);
   const [spreadsheetName, setSpreadsheetName] = useState("My Spreadsheet");
+  const [isComplexMode, setIsComplexMode] = useState(false);
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveToHistory = (newCellData: Map<string, CellData>, newMergedCells: MergedCell[] = mergedCells) => {
@@ -769,6 +770,16 @@ export default function Home() {
     }
   };
 
+  const handleModeToggle = () => {
+    setIsComplexMode((prev) => !prev);
+    toast({
+      title: isComplexMode ? "Switched to Simple Mode" : "Switched to Complex Mode",
+      description: isComplexMode 
+        ? "Basic features are now active" 
+        : "Advanced features are now available",
+    });
+  };
+
   useEffect(() => {
     return () => {
       if (tempSelectionTimerRef.current) {
@@ -812,6 +823,9 @@ export default function Home() {
           currentTextDecoration={currentTextDecoration}
           canUndo={historyIndex > 0}
           canRedo={historyIndex < history.length - 1}
+          onDownload={handleDownload}
+          isComplexMode={isComplexMode}
+          onModeToggle={handleModeToggle}
         />
         <div 
           className="flex-1 overflow-hidden"
