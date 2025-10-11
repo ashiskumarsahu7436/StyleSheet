@@ -13,6 +13,7 @@
 [x] Added Lock button (🔒) to retain selections across multiple changes
 [x] Fixed selection clearing - all change handlers now properly clear selections when Lock is OFF
 [x] Added double-click deselection on header areas (where buttons are)
+[x] Fixed Lock button to directly convert temporary selections to permanent (no need to click Select first)
 
 ## Summary
 ✅ All packages installed successfully (478 packages)
@@ -29,6 +30,9 @@
 ## Current Workflow
 1. **Drag Selection**: Creates temporary selection (5 seconds)
 2. **Select Button**: Converts temporary → permanent OR toggles existing selection
-3. **Lock Button**: When ON, selections persist through multiple changes
+3. **Lock Button**: Directly converts temporary → permanent AND enables lock mode (or toggles if already permanent)
 4. **Apply Changes**: Selection clears after one change (if Lock OFF)
 5. **Double-click Header/Grid**: Deselects all cells instantly
+
+## Latest Fix
+✅ Lock button now works directly - no need to click Select first! It automatically converts temporary selections to permanent and enables lock mode in one click.

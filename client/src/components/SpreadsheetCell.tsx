@@ -68,11 +68,11 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
       data-testid={`cell-${address}`}
       className={cn(
         "relative w-full h-full hover-elevate cursor-pointer transition-all duration-75",
-        isSelected && "ring-2 ring-primary bg-primary/10",
-        isTemporary && !isSelected && "ring-2 ring-blue-500 bg-blue-500/20"
+        isSelected && "ring-2 ring-primary",
+        isTemporary && !isSelected && "ring-2 ring-blue-500"
       )}
       style={{
-        backgroundColor: isSelected || isTemporary ? undefined : backgroundColor,
+        backgroundColor: backgroundColor,
         minHeight: '32px',
       }}
       onClick={onClick}
