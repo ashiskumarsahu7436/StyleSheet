@@ -2,7 +2,7 @@
 
 ## Overview
 
-StyleSheet is a web-based spreadsheet application that provides Excel-like functionality with advanced customization capabilities. The application features a split-panel interface with a spreadsheet grid on the left and a comprehensive control panel on the right, allowing users to create, customize, and manipulate spreadsheet data with features including cell selection, styling, formulas, and bulk data operations.
+StyleSheet is a web-based spreadsheet application that provides Excel-like functionality with advanced customization capabilities. The application features a compact header with essential controls (selection, merge, and font tools), a central spreadsheet grid, and a right sidebar with advanced features (colors, formulas, bulk operations). This layout allows users to efficiently create, customize, and manipulate spreadsheet data with quick access to frequently-used controls.
 
 ## User Preferences
 
@@ -30,15 +30,24 @@ Preferred communication style: Simple, everyday language.
 - No global state management library; relies on prop drilling and composition
 
 **Key Frontend Features**
-1. **Spreadsheet Grid**: Interactive cell grid with selection, editing, and drag functionality
-2. **Control Panel**: Right-side panel with styling tools, formulas, and bulk operations
-3. **Cell Customization**: Color, font size, font weight controls
-4. **Formula System**: Built-in formulas (SUM, AVERAGE, COUNT, MIN, MAX, MULTIPLY) with custom formula support
-5. **Bulk Operations**: Text area-based bulk value input with configurable separators
-6. **Input/Output Selection**: Temporary and permanent cell selection mechanisms
-7. **Resizable Grid**: Column and row resizing capabilities
-8. **Cell Merging**: Merge cells with rowspan/colspan support, preserving original cell data for unmerge operations
-9. **Theme Support**: Light/dark mode toggle with localStorage persistence
+1. **Compact Header**: Two-row header with frequently-used controls
+   - Row 1: App branding, spreadsheet name input, download, and theme toggle
+   - Row 2: Select All, Retain Selection, Merge/Unmerge buttons, and Font controls (size, weight)
+2. **Spreadsheet Grid**: Interactive cell grid with selection, editing, and drag functionality
+3. **Control Sidebar**: Right panel with advanced features
+   - Undo/Redo operations
+   - Color picker for cell customization
+   - Formula system with built-in and custom formulas
+   - Input/Output selection tools
+   - Bulk value operations
+4. **Cell Customization**: Color, font size, font weight controls
+5. **Formula System**: Built-in formulas (SUM, AVERAGE, COUNT, MIN, MAX, MULTIPLY) with custom formula support
+6. **Bulk Operations**: Text area-based bulk value input with configurable separators
+7. **Input/Output Selection**: Temporary and permanent cell selection mechanisms
+8. **Resizable Grid**: Column and row resizing capabilities
+9. **Cell Merging**: Merge cells with rowspan/colspan support, preserving original cell data for unmerge operations
+10. **Theme Support**: Light/dark mode toggle with localStorage persistence
+11. **Performance Optimizations**: React.memo with custom comparator for efficient rendering of 5,200 cells
 
 ### Backend Architecture
 
