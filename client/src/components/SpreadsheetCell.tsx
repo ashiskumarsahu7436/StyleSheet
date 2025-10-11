@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { cn } from "@/lib/utils";
 
 interface SpreadsheetCellProps {
@@ -15,7 +15,7 @@ interface SpreadsheetCellProps {
   onAddressChange?: (address: string) => void;
 }
 
-export default function SpreadsheetCell({
+const SpreadsheetCell = memo(function SpreadsheetCell({
   address,
   value,
   isSelected,
@@ -102,4 +102,16 @@ export default function SpreadsheetCell({
       />
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.address === nextProps.address &&
+    prevProps.value === nextProps.value &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.isTemporary === nextProps.isTemporary &&
+    prevProps.backgroundColor === nextProps.backgroundColor &&
+    prevProps.fontSize === nextProps.fontSize &&
+    prevProps.fontWeight === nextProps.fontWeight
+  );
+});
+
+export default SpreadsheetCell;

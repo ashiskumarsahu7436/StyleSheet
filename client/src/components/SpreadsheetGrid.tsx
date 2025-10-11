@@ -295,7 +295,7 @@ export default function SpreadsheetGrid({
                           fontSize={cell.fontSize}
                           fontWeight={cell.fontWeight}
                           onClick={() => onCellSelect(cell.address)}
-                          onDoubleClick={() => console.log(`Double clicked ${cell.address}`)}
+                          onDoubleClick={() => {}}
                           onChange={(value) => onCellChange(cell.address, value)}
                           onAddressChange={(newAddr) => onAddressChange?.(cell.address, newAddr)}
                         />

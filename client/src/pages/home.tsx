@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import ControlPanel from "@/components/ControlPanel";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -466,22 +466,22 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-background">
-      <div className="flex-1 flex flex-col" style={{ width: "66.666%" }}>
-        <header className="h-14 border-b border-border flex items-center justify-between px-6 bg-card">
+    <div className="flex flex-col lg:flex-row h-screen bg-background">
+      <div className="flex-1 flex flex-col lg:w-2/3">
+        <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-card">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold" data-testid="text-app-title">
+            <h1 className="text-lg lg:text-xl font-semibold" data-testid="text-app-title">
               StyleSheet
             </h1>
-            <span className="text-sm text-muted-foreground">Excel-like Builder</span>
+            <span className="hidden sm:inline text-sm text-muted-foreground">Excel-like Builder</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 lg:gap-3">
             <Input
               type="text"
               value={spreadsheetName}
               onChange={(e) => setSpreadsheetName(e.target.value)}
               placeholder="Spreadsheet Name"
-              className="w-48"
+              className="w-32 sm:w-48"
               data-testid="input-spreadsheet-name"
             />
             <Button
@@ -490,8 +490,8 @@ export default function Home() {
               size="sm"
               data-testid="button-download"
             >
-              <Download className="w-4 h-4 mr-2" />
-              Download
+              <Download className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Download</span>
             </Button>
             <ThemeToggle />
           </div>
@@ -525,7 +525,7 @@ export default function Home() {
           />
         </div>
       </div>
-      <div style={{ width: "33.333%" }}>
+      <div className="w-full lg:w-1/3 border-t lg:border-t-0 lg:border-l border-border">
         <ControlPanel
           selectedCells={selectedCells}
           temporarySelectedCells={temporarySelectedCells}

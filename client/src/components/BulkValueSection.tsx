@@ -15,7 +15,6 @@ export default function BulkValueSection({ onBulkAdd }: BulkValueSectionProps) {
   const handleBulkAdd = () => {
     const values = bulkText.split(separator).map((v) => v.trim()).filter((v) => v);
     onBulkAdd(values, separator);
-    console.log("Bulk add with separator:", separator, "Values:", values);
   };
 
   return (
