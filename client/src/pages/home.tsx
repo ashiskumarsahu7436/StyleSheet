@@ -16,6 +16,7 @@ interface MergedCell {
   endAddress: string;
   colspan: number;
   rowspan: number;
+  originalCells?: Map<string, CellData>;
 }
 
 export default function Home() {
@@ -310,6 +311,22 @@ export default function Home() {
     const colspan = maxCol - minCol + 1;
     const rowspan = maxRow - minRow + 1;
 
+    const originalCells = new Map<string, CellData>();
+    for (let row = minRow; row <= maxRow; row++) {
+      for (let col = minCol; col <= maxCol; col++) {
+        const addr = `${getColumnLabel(col)}${row + 1}`;
+        const existing = cellData.get(addr);
+        if (existing) {
+          originalCells.set(addr, { ...existing });
+        } else {
+          originalCells.set(addr, {
+            address: addr,
+            value: "",
+          });
+        }
+      }
+    }
+
     const values = selectedCells
       .map((addr) => cellData.get(addr)?.value || "")
       .filter((val) => val !== "")
@@ -318,7 +335,9 @@ export default function Home() {
     const newData = new Map(cellData);
     
     selectedCells.forEach((addr) => {
-      newData.delete(addr);
+      if (addr !== startAddress) {
+        newData.delete(addr);
+      }
     });
     
     newData.set(startAddress, { 
@@ -329,7 +348,7 @@ export default function Home() {
       fontWeight: cellData.get(startAddress)?.fontWeight,
     });
     
-    const newMergedCells = [...mergedCells, { startAddress, endAddress, colspan, rowspan }];
+    const newMergedCells = [...mergedCells, { startAddress, endAddress, colspan, rowspan, originalCells }];
     
     saveToHistory(newData, newMergedCells);
     setCellData(newData);
@@ -358,8 +377,6 @@ export default function Home() {
     };
 
     const start = getCellRowCol(mergedCell.startAddress);
-    const mergedCellData = cellData.get(selectedAddress);
-    
     const newData = new Map(cellData);
     const allCellsInMerge: string[] = [];
     
@@ -367,14 +384,12 @@ export default function Home() {
       for (let col = start.col; col < start.col + mergedCell.colspan; col++) {
         const addr = `${getColumnLabel(col)}${row + 1}`;
         allCellsInMerge.push(addr);
-        if (addr === mergedCell.startAddress) {
-          newData.set(addr, {
-            address: addr,
-            value: mergedCellData?.value || "",
-            backgroundColor: mergedCellData?.backgroundColor,
-            fontSize: mergedCellData?.fontSize,
-            fontWeight: mergedCellData?.fontWeight,
-          });
+        
+        if (mergedCell.originalCells && mergedCell.originalCells.has(addr)) {
+          const originalCell = mergedCell.originalCells.get(addr);
+          if (originalCell) {
+            newData.set(addr, { ...originalCell });
+          }
         } else {
           newData.set(addr, {
             address: addr,

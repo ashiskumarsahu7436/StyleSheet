@@ -8,11 +8,20 @@ import FormulaSection from "./FormulaSection";
 import BulkValueSection from "./BulkValueSection";
 import { Undo2, Redo2, MousePointer2, Check, Lock, Split } from "lucide-react";
 
+interface CellData {
+  address: string;
+  value: string;
+  backgroundColor?: string;
+  fontSize?: number;
+  fontWeight?: string;
+}
+
 interface MergedCell {
   startAddress: string;
   endAddress: string;
   colspan: number;
   rowspan: number;
+  originalCells?: Map<string, CellData>;
 }
 
 interface ControlPanelProps {
