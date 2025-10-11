@@ -280,7 +280,8 @@ export default function SpreadsheetGrid({
                         key={address}
                         colSpan={colspan}
                         rowSpan={rowspan}
-                        className="border-0 p-0"
+                        className="border border-border p-0 relative"
+                        style={{ height: '100%' }}
                         onMouseDown={() => handleCellMouseDown(address)}
                         onMouseEnter={() => handleCellMouseEnter(address)}
                         onMouseUp={handleCellMouseUp}
