@@ -38,3 +38,5 @@
 ## Latest Fixes
 ✅ Lock button now works directly - no need to click Select first! It automatically converts temporary selections to permanent and enables lock mode in one click.
 ✅ Selection styling improved - now uses colored border with transparent interior, so cell content and background colors remain visible when selected.
+✅ **Font display issue fixed** - Font name (Calibri/Arial/etc) and size (11/12/etc) now properly display current values in toolbar using SelectValue placeholders
+✅ **Double-click selection border removed** - Added select-none CSS to toolbar controls (buttons, labels) while keeping text selection enabled in Input field
