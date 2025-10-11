@@ -134,8 +134,8 @@ export default function Home() {
       colIndex = colIndex - 1;
       
       // Get cell formatting
-      const fontSize = existing.fontSize || 13; // Optimized for default 64x20px cells
-      const fontFamily = existing.fontFamily || 'Calibri';
+      const fontSize = existing.fontSize || 10; // Google Sheets default
+      const fontFamily = existing.fontFamily || 'Arial'; // Google Sheets default
       const fontWeight = existing.fontWeight || 'normal';
       
       // Measure text width
@@ -147,26 +147,22 @@ export default function Home() {
         
         // Add padding (px-1 = 4px on each side, so 8px total, plus some buffer)
         const requiredWidth = textWidth + 16;
-        const maxWidth = 150; // ~4cm max width
-        const minWidth = 64; // Excel default column width
+        const maxWidth = 300; // Max width
+        const minWidth = 100; // Google Sheets default column width
         const currentWidth = columnWidths.get(colIndex) || minWidth;
         
-        // Auto-adjust column width (both increase and decrease)
-        const finalWidth = Math.max(Math.min(requiredWidth, maxWidth), minWidth);
-        if (finalWidth !== currentWidth) {
+        // Auto-adjust column width (Google Sheets behavior: only increase, never decrease)
+        const finalWidth = Math.max(Math.min(requiredWidth, maxWidth), currentWidth);
+        if (finalWidth > currentWidth) {
           setColumnWidths(prev => {
             const newMap = new Map(prev);
-            if (finalWidth > minWidth) {
-              newMap.set(colIndex, finalWidth);
-            } else {
-              newMap.delete(colIndex); // Reset to default if minimum
-            }
+            newMap.set(colIndex, finalWidth);
             return newMap;
           });
         }
         
         // Calculate wrapped lines - use actual column width for wrapping
-        const actualColumnWidth = columnWidths.get(colIndex) || 64;
+        const actualColumnWidth = columnWidths.get(colIndex) || 100; // Google Sheets default
         const effectiveWidth = actualColumnWidth - 8; // subtract padding (px-1 = 4px each side)
         
         // Split text by newlines first (for Enter key), then wrap words
@@ -217,8 +213,8 @@ export default function Home() {
         
         // Auto-adjust row height based on lines (both increase and decrease)
         const lineHeight = fontSize * 1.4; // line height multiplier
-        const requiredHeight = Math.max(totalLines * lineHeight + 6, 20); // add small padding, min 20px
-        const minHeight = 20; // Excel default row height
+        const requiredHeight = Math.max(totalLines * lineHeight + 6, 21); // add small padding, min 21px
+        const minHeight = 21; // Google Sheets default row height
         
         // Always update height (can increase or decrease)
         setRowHeights(prev => {
@@ -662,7 +658,7 @@ export default function Home() {
       
       // Set column widths
       for (let colIndex = 0; colIndex < cols; colIndex++) {
-        const width = columnWidths.get(colIndex) || 64; // Excel default: 64px
+        const width = columnWidths.get(colIndex) || 100; // Google Sheets default: 100px
         // Excel column width is in "character units" (8.43 chars = 64px in Calibri 11pt)
         // Direct conversion: pixels / 7.6 (64px / 8.43 chars ≈ 7.6 pixels per char)
         worksheet.getColumn(colIndex + 1).width = width / 7.6;
@@ -671,7 +667,7 @@ export default function Home() {
       // Set row heights and cell data
       for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
         const row = worksheet.getRow(rowIndex + 1);
-        const height = rowHeights.get(rowIndex) || 20; // Excel default: 20px (15 points)
+        const height = rowHeights.get(rowIndex) || 21; // Google Sheets default: 21px
         // Excel height is in points (20px = 15 points, so 1 pixel = 0.75 points)
         row.height = height * 0.75;
         
@@ -683,9 +679,9 @@ export default function Home() {
             const excelCell = row.getCell(colIndex + 1);
             excelCell.value = cellData_item.value || "";
             
-            // Apply font formatting (use same defaults as UI: 13pt Calibri)
-            const fontFamily = cellData_item.fontFamily || 'Calibri';
-            const fontSize = cellData_item.fontSize || 13; // Optimized for default 64x20px cells
+            // Apply font formatting (use same defaults as UI: 10pt Arial)
+            const fontFamily = cellData_item.fontFamily || 'Arial'; // Google Sheets default
+            const fontSize = cellData_item.fontSize || 10; // Google Sheets default
             const fontWeight = cellData_item.fontWeight || 'normal';
             const fontStyle = cellData_item.fontStyle || 'normal';
             const textDecoration = cellData_item.textDecoration || 'none';
@@ -793,9 +789,9 @@ export default function Home() {
   };
   
   const firstCell = getFirstSelectedCell();
-  const currentFontSize = firstCell?.fontSize || 13;
+  const currentFontSize = firstCell?.fontSize || 10; // Google Sheets default
   const currentFontWeight = firstCell?.fontWeight || "normal";
-  const currentFontFamily = firstCell?.fontFamily || "Calibri";
+  const currentFontFamily = firstCell?.fontFamily || "Arial"; // Google Sheets default
   const currentFontStyle = firstCell?.fontStyle || "normal";
   const currentTextDecoration = firstCell?.textDecoration || "none";
 

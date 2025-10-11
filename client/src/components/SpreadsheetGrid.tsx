@@ -204,7 +204,7 @@ export default function SpreadsheetGrid({
           <colgroup>
             <col style={{ width: '48px' }} />
             {Array.from({ length: cols }).map((_, colIndex) => {
-              const width = columnWidths.get(colIndex) || 64; // Excel default
+              const width = columnWidths.get(colIndex) || 100; // Google Sheets default
               return <col key={colIndex} style={{ width: `${width}px` }} />;
             })}
           </colgroup>
@@ -229,7 +229,7 @@ export default function SpreadsheetGrid({
           </thead>
           <tbody>
             {Array.from({ length: rows }).map((_, rowIndex) => {
-              const height = rowHeights.get(rowIndex) || 20; // Excel default
+              const height = rowHeights.get(rowIndex) || 21; // Google Sheets default
               return (
                 <tr key={rowIndex} style={{ height: `${height}px` }}>
                   <th
@@ -262,7 +262,7 @@ export default function SpreadsheetGrid({
                         address,
                         value: "",
                         backgroundColor: "transparent",
-                        fontSize: 13, // Optimized for default 64x20px cells
+                        fontSize: 10, // Google Sheets default
                         fontWeight: "normal",
                       };
                     }

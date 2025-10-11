@@ -16,7 +16,7 @@ interface ExcelFontControlsProps {
 }
 
 const FONT_SIZES = [8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
-const FONT_FAMILIES = ["Calibri", "Arial", "Times New Roman", "Verdana", "Georgia"];
+const FONT_FAMILIES = ["Arial", "Calibri", "Times New Roman", "Verdana", "Georgia"]; // Arial first (Google Sheets default)
 
 export default function ExcelFontControls({
   onFontSizeChange,
@@ -24,9 +24,9 @@ export default function ExcelFontControls({
   onFontFamilyChange,
   onItalicToggle,
   onUnderlineToggle,
-  currentFontSize = 13,
+  currentFontSize = 10, // Google Sheets default
   currentFontWeight = "normal",
-  currentFontFamily = "Calibri",
+  currentFontFamily = "Arial", // Google Sheets default
   currentFontStyle = "normal",
   currentTextDecoration = "none",
 }: ExcelFontControlsProps) {
