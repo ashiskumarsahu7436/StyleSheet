@@ -369,6 +369,19 @@ export default function Home() {
     }
   };
 
+  const handleLockToggle = () => {
+    if (temporarySelectedCells.length > 0) {
+      setSelectedCells(temporarySelectedCells);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
+      setRetainSelection(true);
+    } else {
+      setRetainSelection(!retainSelection);
+    }
+  };
+
   const handleUndo = () => {
     if (historyIndex > 0) {
       setHistoryIndex(historyIndex - 1);
@@ -670,7 +683,7 @@ export default function Home() {
                 variant={retainSelection ? "default" : "outline"}
                 size="icon"
                 className="h-8 w-8"
-                onClick={() => setRetainSelection(!retainSelection)}
+                onClick={handleLockToggle}
                 data-testid="button-retain-selection"
               >
                 <Lock className="w-4 h-4" />
