@@ -2,10 +2,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import ControlPanel from "@/components/ControlPanel";
 import ThemeToggle from "@/components/ThemeToggle";
+import FontControls from "@/components/FontControls";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, MousePointer2, Lock, Check, Split } from "lucide-react";
 
 interface CellData {
   address: string;
@@ -465,35 +466,97 @@ export default function Home() {
     };
   }, []);
 
+  const isMergedCell = selectedCells.length === 1 && mergedCells.some(m => m.startAddress === selectedCells[0]);
+
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-background">
       <div className="flex-1 flex flex-col lg:w-2/3">
-        <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-card">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg lg:text-xl font-semibold" data-testid="text-app-title">
-              StyleSheet
-            </h1>
-            <span className="hidden sm:inline text-sm text-muted-foreground">Excel-like Builder</span>
+        <header className="border-b border-border bg-card">
+          <div className="flex items-center justify-between px-4 lg:px-6 py-2 border-b border-border">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg lg:text-xl font-semibold" data-testid="text-app-title">
+                StyleSheet
+              </h1>
+              <span className="hidden sm:inline text-sm text-muted-foreground">Excel-like Builder</span>
+            </div>
+            <div className="flex items-center gap-2 lg:gap-3">
+              <Input
+                type="text"
+                value={spreadsheetName}
+                onChange={(e) => setSpreadsheetName(e.target.value)}
+                placeholder="Spreadsheet Name"
+                className="w-32 sm:w-48"
+                data-testid="input-spreadsheet-name"
+              />
+              <Button
+                onClick={handleDownload}
+                variant="default"
+                size="sm"
+                data-testid="button-download"
+              >
+                <Download className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Download</span>
+              </Button>
+              <ThemeToggle />
+            </div>
           </div>
-          <div className="flex items-center gap-2 lg:gap-3">
-            <Input
-              type="text"
-              value={spreadsheetName}
-              onChange={(e) => setSpreadsheetName(e.target.value)}
-              placeholder="Spreadsheet Name"
-              className="w-32 sm:w-48"
-              data-testid="input-spreadsheet-name"
-            />
-            <Button
-              onClick={handleDownload}
-              variant="default"
-              size="sm"
-              data-testid="button-download"
-            >
-              <Download className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Download</span>
-            </Button>
-            <ThemeToggle />
+          
+          <div className="px-4 lg:px-6 py-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={selectedCells.length > 0 ? "default" : "secondary"}
+                  size="sm"
+                  onClick={handleSelectAll}
+                  data-testid="button-select-all"
+                >
+                  <MousePointer2 className="w-4 h-4 mr-2" />
+                  Select All
+                </Button>
+                
+                <Button
+                  variant={retainSelection ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setRetainSelection(!retainSelection)}
+                  data-testid="button-retain-selection"
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Retain</span>
+                  <span className="sm:hidden">{retainSelection ? "ON" : "OFF"}</span>
+                </Button>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleMergeCells}
+                  disabled={selectedCells.length < 2}
+                  data-testid="button-merge-cells"
+                >
+                  <Check className="w-4 h-4 mr-2" />
+                  Merge
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUnmergeCells}
+                  disabled={!isMergedCell}
+                  data-testid="button-unmerge-cells"
+                >
+                  <Split className="w-4 h-4 mr-2" />
+                  Unmerge
+                </Button>
+              </div>
+              
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <FontControls
+                  onFontSizeChange={handleFontSizeChange}
+                  onFontWeightChange={handleFontWeightChange}
+                />
+              </div>
+            </div>
           </div>
         </header>
         <div className="flex-1 overflow-hidden">
@@ -531,26 +594,18 @@ export default function Home() {
           temporarySelectedCells={temporarySelectedCells}
           onMakePermanent={handleMakePermanent}
           onColorApply={handleColorApply}
-          onFontSizeChange={handleFontSizeChange}
-          onFontWeightChange={handleFontWeightChange}
           onFormulaApply={handleFormulaApply}
           customFormulas={customFormulas}
           onAddCustomFormula={handleAddCustomFormula}
           onBulkAdd={handleBulkAdd}
           onUndo={handleUndo}
           onRedo={handleRedo}
-          onSelectAll={handleSelectAll}
-          onMergeCells={handleMergeCells}
-          onUnmergeCells={handleUnmergeCells}
-          mergedCells={mergedCells}
           inputValue={inputValue}
           outputValue={outputValue}
           onInputChange={setInputValue}
           onOutputChange={setOutputValue}
           onShowInput={handleShowInput}
           onShowOutput={handleShowOutput}
-          retainSelection={retainSelection}
-          onToggleRetainSelection={() => setRetainSelection(!retainSelection)}
         />
       </div>
     </div>

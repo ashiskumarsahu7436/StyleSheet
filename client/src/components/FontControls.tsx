@@ -23,14 +23,14 @@ export default function FontControls({
   currentFontWeight = "normal",
 }: FontControlsProps) {
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Font Size</Label>
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
+        <Label className="text-xs font-medium whitespace-nowrap">Font Size</Label>
         <Select
           value={currentFontSize.toString()}
           onValueChange={(value) => onFontSizeChange(parseInt(value))}
         >
-          <SelectTrigger data-testid="select-font-size">
+          <SelectTrigger className="w-20" data-testid="select-font-size">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -43,10 +43,10 @@ export default function FontControls({
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Font Weight</Label>
+      <div className="flex items-center gap-1.5">
+        <Label className="text-xs font-medium whitespace-nowrap">Font Weight</Label>
         <Select value={currentFontWeight} onValueChange={onFontWeightChange}>
-          <SelectTrigger data-testid="select-font-weight">
+          <SelectTrigger className="w-24" data-testid="select-font-weight">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

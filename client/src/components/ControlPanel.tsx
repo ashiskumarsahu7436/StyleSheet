@@ -2,11 +2,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import ColorPicker from "./ColorPicker";
-import FontControls from "./FontControls";
 import InputOutputSection from "./InputOutputSection";
 import FormulaSection from "./FormulaSection";
 import BulkValueSection from "./BulkValueSection";
-import { Undo2, Redo2, MousePointer2, Check, Lock, Split } from "lucide-react";
+import { Undo2, Redo2, Check } from "lucide-react";
 
 interface CellData {
   address: string;
@@ -29,26 +28,18 @@ interface ControlPanelProps {
   temporarySelectedCells?: string[];
   onMakePermanent?: () => void;
   onColorApply: (color: string) => void;
-  onFontSizeChange: (size: number) => void;
-  onFontWeightChange: (weight: string) => void;
   onFormulaApply: (formula: string) => void;
   customFormulas?: Array<{ name: string; logic: string }>;
   onAddCustomFormula?: (name: string, logic: string) => void;
   onBulkAdd: (values: string[], separator: string) => void;
   onUndo: () => void;
   onRedo: () => void;
-  onSelectAll: () => void;
-  onMergeCells?: () => void;
-  onUnmergeCells?: () => void;
-  mergedCells?: MergedCell[];
   inputValue: string;
   outputValue: string;
   onInputChange: (value: string) => void;
   onOutputChange: (value: string) => void;
   onShowInput: () => void;
   onShowOutput: () => void;
-  retainSelection?: boolean;
-  onToggleRetainSelection?: () => void;
 }
 
 export default function ControlPanel({
@@ -56,28 +47,19 @@ export default function ControlPanel({
   temporarySelectedCells = [],
   onMakePermanent,
   onColorApply,
-  onFontSizeChange,
-  onFontWeightChange,
   onFormulaApply,
   customFormulas,
   onAddCustomFormula,
   onBulkAdd,
   onUndo,
   onRedo,
-  onSelectAll,
-  onMergeCells,
-  onUnmergeCells,
-  mergedCells = [],
   inputValue,
   outputValue,
   onInputChange,
   onOutputChange,
   onShowInput,
   onShowOutput,
-  retainSelection = false,
-  onToggleRetainSelection,
 }: ControlPanelProps) {
-  const isMergedCell = selectedCells.length === 1 && mergedCells.some(m => m.startAddress === selectedCells[0]);
   return (
     <div className="w-full h-full border-l border-border bg-card flex flex-col">
       <div className="p-4 border-b border-border">
@@ -130,69 +112,9 @@ export default function ControlPanel({
             </Button>
           )}
 
-          <Button
-            variant={selectedCells.length > 0 ? "default" : "secondary"}
-            size="sm"
-            className="w-full gap-2"
-            onClick={onSelectAll}
-            data-testid="button-select-all"
-          >
-            <MousePointer2 className="w-4 h-4" />
-            Select All
-          </Button>
-
-          {onToggleRetainSelection && (
-            <Button
-              variant={retainSelection ? "default" : "outline"}
-              size="sm"
-              className="w-full gap-2"
-              onClick={onToggleRetainSelection}
-              data-testid="button-retain-selection"
-            >
-              <Lock className="w-4 h-4" />
-              Retain Selection {retainSelection ? "(ON)" : "(OFF)"}
-            </Button>
-          )}
-
-          <div className="flex gap-2">
-            {onMergeCells && (
-              <Button
-                variant="default"
-                size="sm"
-                className="flex-1 gap-2"
-                onClick={onMergeCells}
-                disabled={selectedCells.length < 2}
-                data-testid="button-merge-cells"
-              >
-                <Check className="w-4 h-4" />
-                Merge Cells
-              </Button>
-            )}
-            {onUnmergeCells && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 gap-2"
-                onClick={onUnmergeCells}
-                disabled={!isMergedCell}
-                data-testid="button-unmerge-cells"
-              >
-                <Split className="w-4 h-4" />
-                Unmerge
-              </Button>
-            )}
-          </div>
-
           <Separator />
 
           <ColorPicker onColorApply={onColorApply} />
-
-          <Separator />
-
-          <FontControls
-            onFontSizeChange={onFontSizeChange}
-            onFontWeightChange={onFontWeightChange}
-          />
 
           <Separator />
 
