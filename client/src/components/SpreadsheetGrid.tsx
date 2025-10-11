@@ -98,7 +98,7 @@ export default function SpreadsheetGrid({
   const handleMouseMove = (e: React.MouseEvent) => {
     if (resizingCol !== null && onColumnResize) {
       const deltaX = e.clientX - startPosRef.current.x;
-      const currentWidth = columnWidths.get(resizingCol) || 80;
+      const currentWidth = columnWidths.get(resizingCol) || 120;
       const newWidth = Math.max(40, currentWidth + deltaX);
       onColumnResize(resizingCol, newWidth);
       startPosRef.current = { x: e.clientX, y: e.clientY };
@@ -201,7 +201,7 @@ export default function SpreadsheetGrid({
           <colgroup>
             <col style={{ width: '48px' }} />
             {Array.from({ length: cols }).map((_, colIndex) => {
-              const width = columnWidths.get(colIndex) || 80;
+              const width = columnWidths.get(colIndex) || 120;
               return <col key={colIndex} style={{ width: `${width}px` }} />;
             })}
           </colgroup>
