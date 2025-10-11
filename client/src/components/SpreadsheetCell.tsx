@@ -97,17 +97,20 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           address.length > 15 ? address.substring(0, 12) + "..." : address
         )}
       </div>
-      <input
-        type="text"
+      <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full h-full bg-transparent border-none outline-none px-2 pt-3 text-foreground"
+        className="w-full h-full bg-transparent border-none outline-none px-2 pt-3 text-foreground resize-none align-top"
         style={{ 
           fontSize: `${fontSize}px`, 
           fontWeight,
           fontFamily,
           fontStyle,
-          textDecoration
+          textDecoration,
+          verticalAlign: 'top',
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word'
         }}
         data-testid={`input-${address}`}
       />
