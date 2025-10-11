@@ -28,14 +28,16 @@ export default function Home() {
   const [rowHeights, setRowHeights] = useState<Map<number, number>>(new Map());
   const [customFormulas, setCustomFormulas] = useState<Array<{ name: string; logic: string }>>([]);
   const [retainSelection, setRetainSelection] = useState(false);
-  const [history, setHistory] = useState<Map<string, CellData>[]>([new Map()]);
+  const [history, setHistory] = useState<{ cellData: Map<string, CellData>; mergedCells: MergedCell[] }[]>([
+    { cellData: new Map(), mergedCells: [] }
+  ]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [mergedCells, setMergedCells] = useState<MergedCell[]>([]);
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const saveToHistory = (newCellData: Map<string, CellData>) => {
+  const saveToHistory = (newCellData: Map<string, CellData>, newMergedCells: MergedCell[] = mergedCells) => {
     const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(new Map(newCellData));
+    newHistory.push({ cellData: new Map(newCellData), mergedCells: [...newMergedCells] });
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   };
@@ -100,12 +102,12 @@ export default function Home() {
   };
 
   const handleCellChange = (address: string, value: string) => {
-    setCellData((prev) => {
-      const newData = new Map(prev);
-      const existing = newData.get(address) || { address, value: "" };
-      newData.set(address, { ...existing, value });
-      return newData;
-    });
+    const newData = new Map(cellData);
+    const existing = newData.get(address) || { address, value: "" };
+    newData.set(address, { ...existing, value });
+    
+    saveToHistory(newData);
+    setCellData(newData);
   };
 
   const handleAddressChange = (oldAddress: string, newAddress: string) => {
@@ -127,18 +129,17 @@ export default function Home() {
   const handleColorApply = (color: string) => {
     if (selectedCells.length === 0) return;
     
-    setCellData((prev) => {
-      const newData = new Map(prev);
-      selectedCells.forEach((address) => {
-        const existing = newData.get(address) || { address, value: "" };
-        newData.set(address, {
-          ...existing,
-          backgroundColor: color === "transparent" ? undefined : color,
-        });
+    const newData = new Map(cellData);
+    selectedCells.forEach((address) => {
+      const existing = newData.get(address) || { address, value: "" };
+      newData.set(address, {
+        ...existing,
+        backgroundColor: color === "transparent" ? undefined : color,
       });
-      saveToHistory(newData);
-      return newData;
     });
+    
+    saveToHistory(newData);
+    setCellData(newData);
     
     if (!retainSelection) {
       setSelectedCells([]);
@@ -148,15 +149,14 @@ export default function Home() {
   const handleFontSizeChange = (size: number) => {
     if (selectedCells.length === 0) return;
     
-    setCellData((prev) => {
-      const newData = new Map(prev);
-      selectedCells.forEach((address) => {
-        const existing = newData.get(address) || { address, value: "" };
-        newData.set(address, { ...existing, fontSize: size });
-      });
-      saveToHistory(newData);
-      return newData;
+    const newData = new Map(cellData);
+    selectedCells.forEach((address) => {
+      const existing = newData.get(address) || { address, value: "" };
+      newData.set(address, { ...existing, fontSize: size });
     });
+    
+    saveToHistory(newData);
+    setCellData(newData);
     
     if (!retainSelection) {
       setSelectedCells([]);
@@ -166,15 +166,14 @@ export default function Home() {
   const handleFontWeightChange = (weight: string) => {
     if (selectedCells.length === 0) return;
     
-    setCellData((prev) => {
-      const newData = new Map(prev);
-      selectedCells.forEach((address) => {
-        const existing = newData.get(address) || { address, value: "" };
-        newData.set(address, { ...existing, fontWeight: weight });
-      });
-      saveToHistory(newData);
-      return newData;
+    const newData = new Map(cellData);
+    selectedCells.forEach((address) => {
+      const existing = newData.get(address) || { address, value: "" };
+      newData.set(address, { ...existing, fontWeight: weight });
     });
+    
+    saveToHistory(newData);
+    setCellData(newData);
     
     if (!retainSelection) {
       setSelectedCells([]);
@@ -242,16 +241,16 @@ export default function Home() {
   const handleBulkAdd = (values: string[], separator: string) => {
     if (selectedCells.length === 0) return;
 
-    setCellData((prev) => {
-      const newData = new Map(prev);
-      selectedCells.forEach((address, index) => {
-        if (index < values.length) {
-          const existing = newData.get(address) || { address, value: "" };
-          newData.set(address, { ...existing, value: values[index] });
-        }
-      });
-      return newData;
+    const newData = new Map(cellData);
+    selectedCells.forEach((address, index) => {
+      if (index < values.length) {
+        const existing = newData.get(address) || { address, value: "" };
+        newData.set(address, { ...existing, value: values[index] });
+      }
     });
+    
+    saveToHistory(newData);
+    setCellData(newData);
   };
 
   const handleSelectAll = () => {
@@ -272,14 +271,16 @@ export default function Home() {
   const handleUndo = () => {
     if (historyIndex > 0) {
       setHistoryIndex(historyIndex - 1);
-      setCellData(new Map(history[historyIndex - 1]));
+      setCellData(new Map(history[historyIndex - 1].cellData));
+      setMergedCells([...history[historyIndex - 1].mergedCells]);
     }
   };
 
   const handleRedo = () => {
     if (historyIndex < history.length - 1) {
       setHistoryIndex(historyIndex + 1);
-      setCellData(new Map(history[historyIndex + 1]));
+      setCellData(new Map(history[historyIndex + 1].cellData));
+      setMergedCells([...history[historyIndex + 1].mergedCells]);
     }
   };
 
@@ -306,6 +307,7 @@ export default function Home() {
 
     const startAddress = `${getColumnLabel(minCol)}${minRow + 1}`;
     const endAddress = `${getColumnLabel(maxCol)}${maxRow + 1}`;
+    const mergedAddress = `${startAddress}${endAddress}`;
     const colspan = maxCol - minCol + 1;
     const rowspan = maxRow - minRow + 1;
 
@@ -314,27 +316,26 @@ export default function Home() {
       .filter((val) => val !== "")
       .join(" ");
 
-    setCellData((prev) => {
-      const newData = new Map(prev);
-      
-      selectedCells.forEach((addr) => {
-        if (addr !== startAddress) {
-          newData.delete(addr);
-        }
-      });
-      
-      const firstCellData = newData.get(startAddress) || { address: startAddress, value: "" };
-      newData.set(startAddress, { 
-        ...firstCellData,
-        value: values 
-      });
-      
-      saveToHistory(newData);
-      return newData;
+    const newData = new Map(cellData);
+    
+    selectedCells.forEach((addr) => {
+      newData.delete(addr);
     });
-
-    setMergedCells(prev => [...prev, { startAddress, endAddress, colspan, rowspan }]);
-    setSelectedCells([startAddress]);
+    
+    newData.set(mergedAddress, { 
+      address: mergedAddress,
+      value: values,
+      backgroundColor: cellData.get(startAddress)?.backgroundColor,
+      fontSize: cellData.get(startAddress)?.fontSize,
+      fontWeight: cellData.get(startAddress)?.fontWeight,
+    });
+    
+    const newMergedCells = [...mergedCells, { startAddress: mergedAddress, endAddress, colspan, rowspan }];
+    
+    saveToHistory(newData, newMergedCells);
+    setCellData(newData);
+    setMergedCells(newMergedCells);
+    setSelectedCells([mergedAddress]);
   };
 
   useEffect(() => {

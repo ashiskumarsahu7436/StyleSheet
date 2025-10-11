@@ -155,30 +155,35 @@ export default function SpreadsheetGrid({
     setDragStart(null);
   };
 
+  const getCellRowCol = (addr: string) => {
+    const match = addr.match(/^([A-Z]+)(\d+)/);
+    if (!match) return { row: 0, col: 0 };
+    const colLabel = match[1];
+    const row = parseInt(match[2]) - 1;
+    let col = 0;
+    for (let i = 0; i < colLabel.length; i++) {
+      col = col * 26 + (colLabel.charCodeAt(i) - 65 + 1);
+    }
+    return { row, col: col - 1 };
+  };
+
   const getMergedCellInfo = (address: string) => {
-    const merged = mergedCells.find(m => m.startAddress === address);
+    const merged = mergedCells.find(m => {
+      const start = getCellRowCol(m.startAddress);
+      const current = getCellRowCol(address);
+      return current.row === start.row && current.col === start.col;
+    });
     if (merged) return merged;
     
     const hiddenIn = mergedCells.find(m => {
-      const getCellRowCol = (addr: string) => {
-        const match = addr.match(/^([A-Z]+)(\d+)$/);
-        if (!match) return { row: 0, col: 0 };
-        const colLabel = match[1];
-        const row = parseInt(match[2]) - 1;
-        let col = 0;
-        for (let i = 0; i < colLabel.length; i++) {
-          col = col * 26 + (colLabel.charCodeAt(i) - 65 + 1);
-        }
-        return { row, col: col - 1 };
-      };
-
       const start = getCellRowCol(m.startAddress);
       const current = getCellRowCol(address);
       
       return current.row >= start.row && 
              current.row < start.row + m.rowspan &&
              current.col >= start.col && 
-             current.col < start.col + m.colspan;
+             current.col < start.col + m.colspan &&
+             !(current.row === start.row && current.col === start.col);
     });
     
     return hiddenIn ? { ...hiddenIn, isHidden: true } : null;
@@ -235,10 +240,21 @@ export default function SpreadsheetGrid({
                   const mergeInfo = getMergedCellInfo(address);
                   
                   if (mergeInfo && (mergeInfo as any).isHidden) {
-                    return null;
+                    const width = columnWidths.get(colIndex) || 80;
+                    return (
+                      <div
+                        key={address}
+                        style={{ width: `${width}px`, height: `${height}px`, visibility: 'hidden' }}
+                      />
+                    );
                   }
                   
                   let cell = cellData.get(address);
+                  
+                  if (!cell && mergeInfo && !((mergeInfo as any).isHidden)) {
+                    cell = cellData.get(mergeInfo.startAddress);
+                  }
+                  
                   if (!cell) {
                     cell = {
                       address,
@@ -283,10 +299,10 @@ export default function SpreadsheetGrid({
                         backgroundColor={cell.backgroundColor}
                         fontSize={cell.fontSize}
                         fontWeight={cell.fontWeight}
-                        onClick={() => onCellSelect(address)}
-                        onDoubleClick={() => console.log(`Double clicked ${address}`)}
-                        onChange={(value) => onCellChange(address, value)}
-                        onAddressChange={(newAddr) => onAddressChange?.(address, newAddr)}
+                        onClick={() => onCellSelect(cell.address)}
+                        onDoubleClick={() => console.log(`Double clicked ${cell.address}`)}
+                        onChange={(value) => onCellChange(cell.address, value)}
+                        onAddressChange={(newAddr) => onAddressChange?.(cell.address, newAddr)}
                       />
                     </div>
                   );
