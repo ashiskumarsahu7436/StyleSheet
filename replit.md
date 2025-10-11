@@ -37,7 +37,8 @@ Preferred communication style: Simple, everyday language.
 5. **Bulk Operations**: Text area-based bulk value input with configurable separators
 6. **Input/Output Selection**: Temporary and permanent cell selection mechanisms
 7. **Resizable Grid**: Column and row resizing capabilities
-8. **Theme Support**: Light/dark mode toggle with localStorage persistence
+8. **Cell Merging**: Merge cells with rowspan/colspan support, preserving original cell data for unmerge operations
+9. **Theme Support**: Light/dark mode toggle with localStorage persistence
 
 ### Backend Architecture
 
