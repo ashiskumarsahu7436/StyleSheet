@@ -88,7 +88,7 @@ export default function SpreadsheetCell({
             data-testid={`input-address-${address}`}
           />
         ) : (
-          address
+          address.length > 15 ? address.substring(0, 12) + "..." : address
         )}
       </div>
       <input
