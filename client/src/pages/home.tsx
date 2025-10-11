@@ -134,7 +134,7 @@ export default function Home() {
       colIndex = colIndex - 1;
       
       // Get cell formatting
-      const fontSize = existing.fontSize || 11; // Excel default (Calibri 11pt)
+      const fontSize = existing.fontSize || 13; // Optimized for 32px cells
       const fontFamily = existing.fontFamily || 'Calibri';
       const fontWeight = existing.fontWeight || 'normal';
       
@@ -683,9 +683,9 @@ export default function Home() {
             const excelCell = row.getCell(colIndex + 1);
             excelCell.value = cellData_item.value || "";
             
-            // Apply font formatting (use same defaults as UI: 14pt Calibri)
+            // Apply font formatting (use same defaults as UI: 13pt Calibri)
             const fontFamily = cellData_item.fontFamily || 'Calibri';
-            const fontSize = cellData_item.fontSize || 11; // Excel default
+            const fontSize = cellData_item.fontSize || 13; // Optimized for 32px cells
             const fontWeight = cellData_item.fontWeight || 'normal';
             const fontStyle = cellData_item.fontStyle || 'normal';
             const textDecoration = cellData_item.textDecoration || 'none';
@@ -793,7 +793,7 @@ export default function Home() {
   };
   
   const firstCell = getFirstSelectedCell();
-  const currentFontSize = firstCell?.fontSize || 11;
+  const currentFontSize = firstCell?.fontSize || 13;
   const currentFontWeight = firstCell?.fontWeight || "normal";
   const currentFontFamily = firstCell?.fontFamily || "Calibri";
   const currentFontStyle = firstCell?.fontStyle || "normal";

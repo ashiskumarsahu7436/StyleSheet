@@ -9,7 +9,7 @@ interface FontControlsProps {
   currentFontWeight?: string;
 }
 
-const FONT_SIZES = [10, 12, 14, 16, 18, 20, 24];
+const FONT_SIZES = [10, 12, 13, 14, 16, 18, 20, 24];
 const FONT_WEIGHTS = [
   { label: "Normal", value: "normal" },
   { label: "Medium", value: "500" },
