@@ -197,125 +197,115 @@ export default function SpreadsheetGrid({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        <div className="inline-block border border-border">
-          <div className="flex">
-            <div className="w-12 h-8 bg-card border-r border-border flex items-center justify-center sticky left-0 z-10" />
+        <table className="border-collapse border border-border" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '48px' }} />
             {Array.from({ length: cols }).map((_, colIndex) => {
               const width = columnWidths.get(colIndex) || 80;
-              return (
-                <div
+              return <col key={colIndex} style={{ width: `${width}px` }} />;
+            })}
+          </colgroup>
+          <thead>
+            <tr>
+              <th className="bg-card border-r border-b border-border sticky left-0 top-0 z-20" />
+              {Array.from({ length: cols }).map((_, colIndex) => (
+                <th
                   key={colIndex}
-                  className="relative bg-card border-r border-border flex items-center justify-center font-semibold text-sm sticky top-0 z-10 hover-elevate cursor-pointer"
-                  style={{ width: `${width}px`, height: "32px" }}
+                  className="relative bg-card border-r border-b border-border font-semibold text-sm sticky top-0 z-10 hover-elevate cursor-pointer h-8"
                   onClick={() => onColumnSelect(colIndex)}
                   data-testid={`header-col-${getColumnLabel(colIndex)}`}
                 >
                   {getColumnLabel(colIndex)}
                   <div
-                    className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/50"
+                    className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/50 z-10"
                     onMouseDown={(e) => handleColumnBorderMouseDown(e, colIndex)}
                   />
-                </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: rows }).map((_, rowIndex) => {
+              const height = rowHeights.get(rowIndex) || 32;
+              return (
+                <tr key={rowIndex} style={{ height: `${height}px` }}>
+                  <th
+                    className="relative bg-card border-r border-b border-border text-sm font-medium sticky left-0 z-10 hover-elevate cursor-pointer"
+                    onClick={() => onRowSelect(rowIndex)}
+                    data-testid={`header-row-${rowIndex + 1}`}
+                  >
+                    {rowIndex + 1}
+                    <div
+                      className="absolute bottom-0 left-0 w-full h-1 cursor-row-resize hover:bg-primary/50 z-10"
+                      onMouseDown={(e) => handleRowBorderMouseDown(e, rowIndex)}
+                    />
+                  </th>
+                  {Array.from({ length: cols }).map((_, colIndex) => {
+                    const address = getCellAddress(rowIndex, colIndex);
+                    const mergeInfo = getMergedCellInfo(address);
+                    
+                    if (mergeInfo && (mergeInfo as any).isHidden) {
+                      return null;
+                    }
+                    
+                    let cell = cellData.get(address);
+                    
+                    if (!cell && mergeInfo && !((mergeInfo as any).isHidden)) {
+                      cell = cellData.get(mergeInfo.startAddress);
+                    }
+                    
+                    if (!cell) {
+                      cell = {
+                        address,
+                        value: "",
+                        backgroundColor: "transparent",
+                        fontSize: 14,
+                        fontWeight: "normal",
+                      };
+                    }
+                    
+                    let displayAddress = cell.address;
+                    if (mergeInfo && !((mergeInfo as any).isHidden) && (mergeInfo.colspan > 1 || mergeInfo.rowspan > 1)) {
+                      displayAddress = `${mergeInfo.startAddress}:${mergeInfo.endAddress}`;
+                    }
+                    
+                    const isSelected = selectedCells.includes(address) || selectedCells.includes(cell.address);
+                    const isTemporary = temporarySelectedCells.includes(address);
+                    
+                    const colspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.colspan : 1;
+                    const rowspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.rowspan : 1;
+                    
+                    return (
+                      <td
+                        key={address}
+                        colSpan={colspan}
+                        rowSpan={rowspan}
+                        className="border-0 p-0"
+                        onMouseDown={() => handleCellMouseDown(address)}
+                        onMouseEnter={() => handleCellMouseEnter(address)}
+                        onMouseUp={handleCellMouseUp}
+                      >
+                        <SpreadsheetCell
+                          address={displayAddress}
+                          value={cell.value}
+                          isSelected={isSelected}
+                          isTemporary={isTemporary}
+                          backgroundColor={cell.backgroundColor}
+                          fontSize={cell.fontSize}
+                          fontWeight={cell.fontWeight}
+                          onClick={() => onCellSelect(cell.address)}
+                          onDoubleClick={() => console.log(`Double clicked ${cell.address}`)}
+                          onChange={(value) => onCellChange(cell.address, value)}
+                          onAddressChange={(newAddr) => onAddressChange?.(cell.address, newAddr)}
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
               );
             })}
-          </div>
-          {Array.from({ length: rows }).map((_, rowIndex) => {
-            const height = rowHeights.get(rowIndex) || 32;
-            return (
-              <div key={rowIndex} className="flex relative">
-                <div
-                  className="relative w-12 bg-card border-r border-b border-border flex items-center justify-center text-sm font-medium sticky left-0 z-10 hover-elevate cursor-pointer"
-                  style={{ height: `${height}px` }}
-                  onClick={() => onRowSelect(rowIndex)}
-                  data-testid={`header-row-${rowIndex + 1}`}
-                >
-                  {rowIndex + 1}
-                  <div
-                    className="absolute bottom-0 left-0 w-full h-1 cursor-row-resize hover:bg-primary/50"
-                    onMouseDown={(e) => handleRowBorderMouseDown(e, rowIndex)}
-                  />
-                </div>
-                {Array.from({ length: cols }).map((_, colIndex) => {
-                  const address = getCellAddress(rowIndex, colIndex);
-                  const mergeInfo = getMergedCellInfo(address);
-                  
-                  if (mergeInfo && (mergeInfo as any).isHidden) {
-                    const width = columnWidths.get(colIndex) || 80;
-                    return (
-                      <div
-                        key={address}
-                        style={{ width: `${width}px`, height: `${height}px`, visibility: 'hidden' }}
-                      />
-                    );
-                  }
-                  
-                  let cell = cellData.get(address);
-                  
-                  if (!cell && mergeInfo && !((mergeInfo as any).isHidden)) {
-                    cell = cellData.get(mergeInfo.startAddress);
-                  }
-                  
-                  if (!cell) {
-                    cell = {
-                      address,
-                      value: "",
-                      backgroundColor: "transparent",
-                      fontSize: 14,
-                      fontWeight: "normal",
-                    };
-                  }
-                  
-                  let displayAddress = cell.address;
-                  if (mergeInfo && !((mergeInfo as any).isHidden) && (mergeInfo.colspan > 1 || mergeInfo.rowspan > 1)) {
-                    displayAddress = `${mergeInfo.startAddress}:${mergeInfo.endAddress}`;
-                  }
-                  
-                  const baseWidth = columnWidths.get(colIndex) || 80;
-                  let cellWidth = baseWidth;
-                  let cellHeight = height;
-                  
-                  if (mergeInfo && !((mergeInfo as any).isHidden)) {
-                    cellWidth = 0;
-                    for (let i = 0; i < mergeInfo.colspan; i++) {
-                      cellWidth += columnWidths.get(colIndex + i) || 80;
-                    }
-                    cellHeight = 0;
-                    for (let i = 0; i < mergeInfo.rowspan; i++) {
-                      cellHeight += rowHeights.get(rowIndex + i) || 32;
-                    }
-                  }
-                  
-                  const isSelected = selectedCells.includes(address) || selectedCells.includes(cell.address);
-                  const isTemporary = temporarySelectedCells.includes(address);
-                  
-                  return (
-                    <div
-                      key={address}
-                      style={{ width: `${cellWidth}px`, height: `${cellHeight}px` }}
-                      onMouseDown={() => handleCellMouseDown(address)}
-                      onMouseEnter={() => handleCellMouseEnter(address)}
-                      onMouseUp={handleCellMouseUp}
-                    >
-                      <SpreadsheetCell
-                        address={displayAddress}
-                        value={cell.value}
-                        isSelected={isSelected}
-                        isTemporary={isTemporary}
-                        backgroundColor={cell.backgroundColor}
-                        fontSize={cell.fontSize}
-                        fontWeight={cell.fontWeight}
-                        onClick={() => onCellSelect(cell.address)}
-                        onDoubleClick={() => console.log(`Double clicked ${cell.address}`)}
-                        onChange={(value) => onCellChange(cell.address, value)}
-                        onAddressChange={(newAddr) => onAddressChange?.(cell.address, newAddr)}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
+          </tbody>
+        </table>
       </div>
     </div>
   );
