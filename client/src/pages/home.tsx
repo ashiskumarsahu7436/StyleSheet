@@ -155,10 +155,6 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
-      setTemporarySelectedCells([]);
-      if (tempSelectionTimerRef.current) {
-        clearTimeout(tempSelectionTimerRef.current);
-      }
     }
   };
 
@@ -177,10 +173,6 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
-      setTemporarySelectedCells([]);
-      if (tempSelectionTimerRef.current) {
-        clearTimeout(tempSelectionTimerRef.current);
-      }
     }
   };
 
@@ -199,10 +191,6 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
-      setTemporarySelectedCells([]);
-      if (tempSelectionTimerRef.current) {
-        clearTimeout(tempSelectionTimerRef.current);
-      }
     }
   };
 
@@ -221,10 +209,6 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
-      setTemporarySelectedCells([]);
-      if (tempSelectionTimerRef.current) {
-        clearTimeout(tempSelectionTimerRef.current);
-      }
     }
   };
 
@@ -247,10 +231,6 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
-      setTemporarySelectedCells([]);
-      if (tempSelectionTimerRef.current) {
-        clearTimeout(tempSelectionTimerRef.current);
-      }
     }
   };
 
@@ -273,10 +253,6 @@ export default function Home() {
     
     if (!retainSelection) {
       setSelectedCells([]);
-      setTemporarySelectedCells([]);
-      if (tempSelectionTimerRef.current) {
-        clearTimeout(tempSelectionTimerRef.current);
-      }
     }
   };
 
