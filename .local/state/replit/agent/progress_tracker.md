@@ -38,5 +38,15 @@
 ## Latest Fixes
 ✅ Lock button now works directly - no need to click Select first! It automatically converts temporary selections to permanent and enables lock mode in one click.
 ✅ Selection styling improved - now uses colored border with transparent interior, so cell content and background colors remain visible when selected.
-✅ **Font display issue fixed** - Font name (Calibri/Arial/etc) and size (11/12/etc) now properly display current values in toolbar using SelectValue placeholders
+✅ **Font display issue PROPERLY FIXED** - Selection now stays active after changing font/size, so toolbar always shows the current font of selected cells
+  - Changed all font formatting handlers to preserve selection instead of clearing it
+  - When cells are selected and you change font, selection stays so you can see the current values
+  - Temporary selections automatically convert to permanent when formatting is applied
 ✅ **Double-click selection border removed** - Added select-none CSS to toolbar controls (buttons, labels) while keeping text selection enabled in Input field
+
+## Updated Workflow for Fonts
+1. Select cells (drag or click)
+2. Change font, size, bold, italic, or underline
+3. **Selection stays active** - you can see the current font/size in toolbar
+4. Make more formatting changes if needed
+5. Click elsewhere to deselect
