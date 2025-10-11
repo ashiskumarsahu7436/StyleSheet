@@ -119,6 +119,78 @@ export default function Home() {
     
     saveToHistory(newData);
     setCellData(newData);
+    
+    // Auto-adjust column width and row height
+    const match = address.match(/^([A-Z]+)(\d+)$/);
+    if (match) {
+      const colLabel = match[1];
+      const rowIndex = parseInt(match[2]) - 1;
+      
+      // Calculate column index
+      let colIndex = 0;
+      for (let i = 0; i < colLabel.length; i++) {
+        colIndex = colIndex * 26 + (colLabel.charCodeAt(i) - 65 + 1);
+      }
+      colIndex = colIndex - 1;
+      
+      // Get cell formatting
+      const fontSize = existing.fontSize || 14;
+      const fontFamily = existing.fontFamily || 'Calibri';
+      const fontWeight = existing.fontWeight || 'normal';
+      
+      // Measure text width
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        const textWidth = context.measureText(value).width;
+        
+        // Add padding (px-2 = 8px on each side, so 16px total, plus some buffer)
+        const requiredWidth = textWidth + 24;
+        const maxWidth = 150; // ~4cm
+        const minWidth = 80; // default minimum
+        const currentWidth = columnWidths.get(colIndex) || minWidth;
+        
+        // Auto-adjust column width up to max
+        if (requiredWidth > currentWidth && requiredWidth <= maxWidth) {
+          setColumnWidths(prev => {
+            const newMap = new Map(prev);
+            newMap.set(colIndex, Math.min(requiredWidth, maxWidth));
+            return newMap;
+          });
+        }
+        
+        // Calculate wrapped lines if text exceeds max width
+        const effectiveWidth = Math.min(requiredWidth, maxWidth) - 24; // subtract padding
+        const words = value.split(/\s+/);
+        let lines = 1;
+        let currentLineWidth = 0;
+        
+        for (const word of words) {
+          const wordWidth = context.measureText(word + ' ').width;
+          if (currentLineWidth + wordWidth > effectiveWidth && currentLineWidth > 0) {
+            lines++;
+            currentLineWidth = wordWidth;
+          } else {
+            currentLineWidth += wordWidth;
+          }
+        }
+        
+        // Auto-adjust row height based on lines
+        const lineHeight = fontSize * 1.5; // typical line height multiplier
+        const requiredHeight = lines * lineHeight + 16; // add padding (pt-3 = 12px, plus buffer)
+        const minHeight = 32; // default minimum
+        const currentHeight = rowHeights.get(rowIndex) || minHeight;
+        
+        if (requiredHeight > currentHeight) {
+          setRowHeights(prev => {
+            const newMap = new Map(prev);
+            newMap.set(rowIndex, requiredHeight);
+            return newMap;
+          });
+        }
+      }
+    }
   };
 
   const handleAddressChange = (oldAddress: string, newAddress: string) => {
