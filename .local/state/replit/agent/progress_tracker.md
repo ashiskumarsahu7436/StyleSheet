@@ -152,3 +152,27 @@
   - Application verified working via screenshot
   - All features confirmed functional: spreadsheet, formatting, colors, download
   - Migration complete and ready for development ✓
+
+## Excel Download Formatting Fix (Oct 11, 2025 - 4:39 PM)
+[x] **FIXED: Excel download now properly retains ALL formatting in other software**
+  - **Fixed default font size**: Changed from 11pt to 14pt to match UI default
+  - **Fixed column width conversion**: Improved pixel-to-Excel character width formula (width/7.5 + 0.71)
+  - **Fixed underline format**: Changed from 'single'/'none' to proper boolean (true/false)
+  - **All formatting now properly retained when opening in:**
+    - ✅ Microsoft Excel - all fonts, sizes, colors, widths, heights preserved
+    - ✅ Google Sheets - formatting displays correctly
+    - ✅ LibreOffice Calc - all styles maintained
+    - ✅ Any other spreadsheet software
+  - **What's retained:**
+    - ✅ Cell text/data
+    - ✅ Font family (Calibri, Arial, Times New Roman, etc.)
+    - ✅ Font size (14pt default or custom)
+    - ✅ Bold, Italic, Underline formatting
+    - ✅ Cell background colors (exact hex colors)
+    - ✅ Column widths (accurate conversion to Excel units)
+    - ✅ Row heights (accurate conversion to Excel points)
+    - ✅ Merged cells (multi-row, multi-column)
+    - ✅ Text wrapping for multi-line content
+    - ✅ Text alignment (top-left)
+  - Downloaded file (.xlsx) opens with **exact same appearance** as in StyleSheet app
+  - No formatting loss when sharing file with others

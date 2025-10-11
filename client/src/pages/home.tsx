@@ -663,15 +663,17 @@ export default function Home() {
       // Set column widths
       for (let colIndex = 0; colIndex < cols; colIndex++) {
         const width = columnWidths.get(colIndex) || 32;
-        // Excel width is in characters, convert pixels to approximate character width
-        worksheet.getColumn(colIndex + 1).width = width / 7;
+        // Excel width is in characters (1 character ≈ 7.5 pixels for default font)
+        // Use more accurate conversion: pixels / 7.5 + 0.71 (Excel adjustment)
+        worksheet.getColumn(colIndex + 1).width = (width / 7.5) + 0.71;
       }
       
       // Set row heights and cell data
       for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
         const row = worksheet.getRow(rowIndex + 1);
         const height = rowHeights.get(rowIndex) || 32;
-        // Excel height is in points, convert pixels to points
+        // Excel height is in points (1 point = 1.333 pixels)
+        // Use more accurate conversion
         row.height = height * 0.75;
         
         for (let colIndex = 0; colIndex < cols; colIndex++) {
@@ -682,9 +684,9 @@ export default function Home() {
             const excelCell = row.getCell(colIndex + 1);
             excelCell.value = cellData_item.value || "";
             
-            // Apply font formatting
+            // Apply font formatting (use same defaults as UI: 14pt Calibri)
             const fontFamily = cellData_item.fontFamily || 'Calibri';
-            const fontSize = cellData_item.fontSize || 11;
+            const fontSize = cellData_item.fontSize || 14;
             const fontWeight = cellData_item.fontWeight || 'normal';
             const fontStyle = cellData_item.fontStyle || 'normal';
             const textDecoration = cellData_item.textDecoration || 'none';
@@ -694,7 +696,7 @@ export default function Home() {
               size: fontSize,
               bold: fontWeight === 'bold',
               italic: fontStyle === 'italic',
-              underline: textDecoration === 'underline' ? 'single' : 'none',
+              underline: textDecoration === 'underline' ? true : false,
             };
             
             // Apply cell background color
