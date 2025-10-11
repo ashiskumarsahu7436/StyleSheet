@@ -8,16 +8,8 @@ import {
   Bold, 
   Italic, 
   Underline,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignVerticalJustifyStart,
-  AlignVerticalJustifyCenter,
-  AlignVerticalJustifyEnd,
-  WrapText,
   MergeIcon,
   Split,
-  Link,
   Download
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -239,85 +231,6 @@ export default function GoogleSheetsToolbar({
 
         <div className="h-6 w-px bg-border mx-1" />
 
-        {/* Alignment Group */}
-        <div className="flex items-center gap-0.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            title="Align left"
-            data-testid="button-align-left"
-          >
-            <AlignLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            title="Align center"
-            data-testid="button-align-center"
-          >
-            <AlignCenter className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            title="Align right"
-            data-testid="button-align-right"
-          >
-            <AlignRight className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="h-6 w-px bg-border mx-1" />
-
-        {/* Vertical Alignment */}
-        <div className="flex items-center gap-0.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            title="Align top"
-            data-testid="button-align-top"
-          >
-            <AlignVerticalJustifyStart className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            title="Align middle"
-            data-testid="button-align-middle"
-          >
-            <AlignVerticalJustifyCenter className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            title="Align bottom"
-            data-testid="button-align-bottom"
-          >
-            <AlignVerticalJustifyEnd className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="h-6 w-px bg-border mx-1" />
-
-        {/* Text Wrap */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          title="Text wrapping"
-          data-testid="button-text-wrap"
-        >
-          <WrapText className="h-4 w-4" />
-        </Button>
-
-        <div className="h-6 w-px bg-border mx-1" />
-
         {/* Merge Cells */}
         <div className="flex items-center gap-0.5">
           <Button
@@ -341,19 +254,6 @@ export default function GoogleSheetsToolbar({
             <Split className="h-4 w-4" />
           </Button>
         </div>
-
-        <div className="h-6 w-px bg-border mx-1" />
-
-        {/* Link */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          title="Insert link"
-          data-testid="button-link"
-        >
-          <Link className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );
