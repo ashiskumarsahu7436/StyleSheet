@@ -651,29 +651,96 @@ export default function Home() {
     setSelectedCells(allCellsInMerge);
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
+    const ExcelJS = await import('exceljs');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sheet1');
+    
     const rows = 100;
     const cols = 52;
     
-    let csvContent = "";
-    
-    for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
-      const rowData: string[] = [];
-      for (let colIndex = 0; colIndex < cols; colIndex++) {
-        const address = `${getColumnLabel(colIndex)}${rowIndex + 1}`;
-        const cell = cellData.get(address);
-        const value = cell?.value || "";
-        rowData.push(`"${value.replace(/"/g, '""')}"`);
-      }
-      csvContent += rowData.join(",") + "\n";
+    // Set column widths
+    for (let colIndex = 0; colIndex < cols; colIndex++) {
+      const width = columnWidths.get(colIndex) || 32;
+      // Excel width is in characters, convert pixels to approximate character width
+      worksheet.getColumn(colIndex + 1).width = width / 7;
     }
     
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    // Set row heights and cell data
+    for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+      const row = worksheet.getRow(rowIndex + 1);
+      const height = rowHeights.get(rowIndex) || 32;
+      // Excel height is in points, convert pixels to points
+      row.height = height * 0.75;
+      
+      for (let colIndex = 0; colIndex < cols; colIndex++) {
+        const address = `${getColumnLabel(colIndex)}${rowIndex + 1}`;
+        const cellData_item = cellData.get(address);
+        
+        if (cellData_item) {
+          const excelCell = row.getCell(colIndex + 1);
+          excelCell.value = cellData_item.value || "";
+          
+          // Apply font formatting
+          const fontFamily = cellData_item.fontFamily || 'Calibri';
+          const fontSize = cellData_item.fontSize || 11;
+          const fontWeight = cellData_item.fontWeight || 'normal';
+          const fontStyle = cellData_item.fontStyle || 'normal';
+          const textDecoration = cellData_item.textDecoration || 'none';
+          
+          excelCell.font = {
+            name: fontFamily,
+            size: fontSize,
+            bold: fontWeight === 'bold',
+            italic: fontStyle === 'italic',
+            underline: textDecoration === 'underline' ? 'single' : 'none',
+          };
+          
+          // Apply cell background color
+          if (cellData_item.backgroundColor) {
+            const color = cellData_item.backgroundColor.replace('#', '');
+            excelCell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FF' + color },
+            };
+          }
+          
+          // Enable text wrapping for multi-line content
+          excelCell.alignment = {
+            wrapText: true,
+            vertical: 'top',
+            horizontal: 'left',
+          };
+        }
+      }
+    }
+    
+    // Apply merged cells
+    mergedCells.forEach(merge => {
+      const startMatch = merge.startAddress.match(/^([A-Z]+)(\d+)$/);
+      const endMatch = merge.endAddress.match(/^([A-Z]+)(\d+)$/);
+      
+      if (startMatch && endMatch) {
+        const startCol = startMatch[1];
+        const startRow = parseInt(startMatch[2]);
+        const endCol = endMatch[1];
+        const endRow = parseInt(endMatch[2]);
+        
+        worksheet.mergeCells(`${startCol}${startRow}:${endCol}${endRow}`);
+      }
+    });
+    
+    // Generate Excel file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { 
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+    });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     
     link.setAttribute("href", url);
-    link.setAttribute("download", `${spreadsheetName}.csv`);
+    link.setAttribute("download", `${spreadsheetName}.xlsx`);
     link.style.visibility = "hidden";
     
     document.body.appendChild(link);
@@ -682,7 +749,7 @@ export default function Home() {
     
     toast({
       title: "Downloaded Successfully",
-      description: `${spreadsheetName}.csv has been downloaded.`,
+      description: `${spreadsheetName}.xlsx has been downloaded with all formatting preserved.`,
     });
   };
 
