@@ -511,7 +511,7 @@ export default function Home() {
                   data-testid="button-select-all"
                 >
                   <MousePointer2 className="w-4 h-4 mr-2" />
-                  Select All
+                  Select
                 </Button>
                 
                 <Button
@@ -591,8 +591,6 @@ export default function Home() {
       <div className="w-full lg:w-1/3 border-t lg:border-t-0 lg:border-l border-border">
         <ControlPanel
           selectedCells={selectedCells}
-          temporarySelectedCells={temporarySelectedCells}
-          onMakePermanent={handleMakePermanent}
           onColorApply={handleColorApply}
           onFormulaApply={handleFormulaApply}
           customFormulas={customFormulas}
