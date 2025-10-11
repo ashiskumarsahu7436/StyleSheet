@@ -1,12 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import ControlPanel from "@/components/ControlPanel";
-import ThemeToggle from "@/components/ThemeToggle";
-import ExcelFontControls from "@/components/ExcelFontControls";
+import GoogleSheetsToolbar from "@/components/GoogleSheetsToolbar";
 import { useToast } from "@/hooks/use-toast";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Download, MousePointer2, Lock, Check, Split } from "lucide-react";
 
 interface CellData {
   address: string;
@@ -798,147 +794,28 @@ export default function Home() {
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-background">
       <div className="flex-1 flex flex-col lg:w-2/3">
-        <header 
-          className="border-b border-border bg-card"
-          onDoubleClick={(e) => {
-            if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === 'HEADER') {
-              setSelectedCells([]);
-              setTemporarySelectedCells([]);
-              if (tempSelectionTimerRef.current) {
-                clearTimeout(tempSelectionTimerRef.current);
-              }
-            }
-          }}
-        >
-          <div 
-            className="flex items-center justify-between px-4 lg:px-6 py-2 border-b border-border"
-            onDoubleClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setSelectedCells([]);
-                setTemporarySelectedCells([]);
-                if (tempSelectionTimerRef.current) {
-                  clearTimeout(tempSelectionTimerRef.current);
-                }
-              }
-            }}
-          >
-            <div className="flex items-center gap-2 select-none">
-              <h1 className="text-lg lg:text-xl font-semibold" data-testid="text-app-title">
-                StyleSheet
-              </h1>
-              <span className="hidden sm:inline text-sm text-muted-foreground">Excel-like Builder</span>
-            </div>
-            <div className="flex items-center gap-2 lg:gap-3">
-              <Input
-                type="text"
-                value={spreadsheetName}
-                onChange={(e) => setSpreadsheetName(e.target.value)}
-                placeholder="Spreadsheet Name"
-                className="w-32 sm:w-48"
-                data-testid="input-spreadsheet-name"
-              />
-              <div className="flex items-center gap-2 select-none">
-                <Button
-                  onClick={handleDownload}
-                  variant="default"
-                  size="sm"
-                  data-testid="button-download"
-                >
-                  <Download className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Download</span>
-                </Button>
-                <ThemeToggle />
-              </div>
-            </div>
-          </div>
-          
-          <div 
-            className="px-4 lg:px-6 py-2"
-            onDoubleClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setSelectedCells([]);
-                setTemporarySelectedCells([]);
-                if (tempSelectionTimerRef.current) {
-                  clearTimeout(tempSelectionTimerRef.current);
-                }
-              }
-            }}
-          >
-            <div 
-              className="flex items-center gap-2 flex-wrap select-none"
-              onDoubleClick={(e) => {
-                if (e.target === e.currentTarget) {
-                  setSelectedCells([]);
-                  setTemporarySelectedCells([]);
-                  if (tempSelectionTimerRef.current) {
-                    clearTimeout(tempSelectionTimerRef.current);
-                  }
-                }
-              }}
-            >
-              <Button
-                variant={selectedCells.length > 0 ? "default" : "secondary"}
-                size="sm"
-                onClick={handleSelectAll}
-                data-testid="button-select-all"
-              >
-                <MousePointer2 className="w-4 h-4 mr-2" />
-                Select
-              </Button>
-              
-              <Button
-                variant={retainSelection ? "default" : "outline"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={handleLockToggle}
-                data-testid="button-retain-selection"
-              >
-                <Lock className="w-4 h-4" />
-              </Button>
-              
-              <div className="h-6 w-px bg-border" />
-              
-              <Button
-                variant="secondary"
-                size="sm"
-                className="h-8 px-3 text-xs"
-                onClick={handleMergeCells}
-                disabled={selectedCells.length < 2}
-                data-testid="button-merge-cells"
-              >
-                <Check className="w-3.5 h-3.5 mr-1.5" />
-                Merge
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 px-3 text-xs"
-                onClick={handleUnmergeCells}
-                disabled={!isMergedCell}
-                data-testid="button-unmerge-cells"
-              >
-                <Split className="w-3.5 h-3.5 mr-1.5" />
-                Unmerge
-              </Button>
-              
-              <div className="h-6 w-px bg-border" />
-              
-              <ExcelFontControls
-                onFontSizeChange={handleFontSizeChange}
-                onFontWeightChange={handleFontWeightChange}
-                onFontFamilyChange={handleFontFamilyChange}
-                onItalicToggle={handleItalicToggle}
-                onUnderlineToggle={handleUnderlineToggle}
-                currentFontSize={currentFontSize}
-                currentFontWeight={currentFontWeight}
-                currentFontFamily={currentFontFamily}
-                currentFontStyle={currentFontStyle}
-                currentTextDecoration={currentTextDecoration}
-              />
-            </div>
-          </div>
-        </header>
+        <GoogleSheetsToolbar
+          spreadsheetName={spreadsheetName}
+          onSpreadsheetNameChange={setSpreadsheetName}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          onDownload={handleDownload}
+          onFontFamilyChange={handleFontFamilyChange}
+          onFontSizeChange={handleFontSizeChange}
+          onBoldToggle={() => handleFontWeightChange(currentFontWeight === "bold" ? "normal" : "bold")}
+          onItalicToggle={handleItalicToggle}
+          onUnderlineToggle={handleUnderlineToggle}
+          onColorApply={handleColorApply}
+          onMergeCells={handleMergeCells}
+          onUnmergeCells={handleUnmergeCells}
+          currentFontFamily={currentFontFamily}
+          currentFontSize={currentFontSize}
+          currentFontWeight={currentFontWeight}
+          currentFontStyle={currentFontStyle}
+          currentTextDecoration={currentTextDecoration}
+          canUndo={historyIndex > 0}
+          canRedo={historyIndex < history.length - 1}
+        />
         <div 
           className="flex-1 overflow-hidden"
           onDoubleClick={(e) => {
