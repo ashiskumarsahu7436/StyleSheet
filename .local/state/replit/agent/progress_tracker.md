@@ -14,6 +14,7 @@
 [x] Fixed selection clearing - all change handlers now properly clear selections when Lock is OFF
 [x] Added double-click deselection on header areas (where buttons are)
 [x] Fixed Lock button to directly convert temporary selections to permanent (no need to click Select first)
+[x] Changed selection styling - transparent interior with colored border (cell content and colors now visible)
 
 ## Summary
 ✅ All packages installed successfully (478 packages)
@@ -34,5 +35,6 @@
 4. **Apply Changes**: Selection clears after one change (if Lock OFF)
 5. **Double-click Header/Grid**: Deselects all cells instantly
 
-## Latest Fix
+## Latest Fixes
 ✅ Lock button now works directly - no need to click Select first! It automatically converts temporary selections to permanent and enables lock mode in one click.
+✅ Selection styling improved - now uses colored border with transparent interior, so cell content and background colors remain visible when selected.
