@@ -110,3 +110,13 @@
   - All wrapped text is now fully visible with proper height adjustment
   - Works for both manual line breaks (Enter key) and automatic word wrapping
   - Supports mixed wrapping scenarios (spaces, long words, newlines)
+
+## Column Width Auto-Decrease Fix (Oct 11, 2025)
+[x] **Fixed column width to automatically decrease when text is deleted**
+  - Column width now automatically increases AND decreases based on text length
+  - When text is deleted, column width shrinks back towards default 32px
+  - Width adjusts dynamically as you type or delete text
+  - Minimum column width remains 32px (square cells)
+  - Maximum column width capped at 150px
+  - Matches the row height behavior - both dimensions auto-adjust bidirectionally
+  - Provides smooth, responsive cell sizing in both directions

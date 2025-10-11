@@ -151,11 +151,16 @@ export default function Home() {
         const minWidth = 32; // square size like color palette
         const currentWidth = columnWidths.get(colIndex) || minWidth;
         
-        // Auto-adjust column width up to max
-        if (requiredWidth > currentWidth && requiredWidth <= maxWidth) {
+        // Auto-adjust column width (both increase and decrease)
+        const finalWidth = Math.max(Math.min(requiredWidth, maxWidth), minWidth);
+        if (finalWidth !== currentWidth) {
           setColumnWidths(prev => {
             const newMap = new Map(prev);
-            newMap.set(colIndex, Math.min(requiredWidth, maxWidth));
+            if (finalWidth > minWidth) {
+              newMap.set(colIndex, finalWidth);
+            } else {
+              newMap.delete(colIndex); // Reset to default if minimum
+            }
             return newMap;
           });
         }
