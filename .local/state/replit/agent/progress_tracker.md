@@ -67,10 +67,12 @@
   - Text alignment fixed to start from top-left (not centered)
   - Word-wrap enabled with proper formatting
 
-✅ **Cells at Default Size** - Removed auto-resize feature
-  - Cells remain at default size (80px width, 32px height)
-  - Manual resizing still available via column/row borders
-  - User can manually adjust size as needed
+✅ **Compact Cells with Auto-Resize** - Smaller default size with smart resizing
+  - Cells start compact (60px width × 28px height) for better appearance
+  - **Auto-resize enabled** - cells expand as you type (up to 150px max width)
+  - **Auto word-wrap** - text wraps to new lines when exceeding max width
+  - **Auto-height** - rows expand automatically for multi-line content
+  - Manual resizing still available via column/row borders drag
 
 ## Session Recovery (Oct 11, 2025)
 ✅ Dependencies reinstalled successfully (tsx was missing)
