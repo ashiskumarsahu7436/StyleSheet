@@ -453,7 +453,11 @@ export default function Home() {
             columnWidths={columnWidths}
             rowHeights={rowHeights}
             onColumnResize={(col, width) => {
-              setColumnWidths((prev) => new Map(prev).set(col, width));
+              setColumnWidths((prev) => {
+                const newMap = new Map(prev);
+                newMap.set(col, width);
+                return newMap;
+              });
             }}
             onRowResize={(row, height) => {
               setRowHeights((prev) => new Map(prev).set(row, height));

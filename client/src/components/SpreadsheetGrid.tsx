@@ -98,8 +98,8 @@ export default function SpreadsheetGrid({
   const handleMouseMove = (e: React.MouseEvent) => {
     if (resizingCol !== null && onColumnResize) {
       const deltaX = e.clientX - startPosRef.current.x;
-      const currentWidth = columnWidths.get(resizingCol) || 120;
-      const newWidth = Math.max(40, currentWidth + deltaX);
+      const currentWidth = columnWidths.get(resizingCol) || 200;
+      const newWidth = Math.max(50, currentWidth + deltaX);
       onColumnResize(resizingCol, newWidth);
       startPosRef.current = { x: e.clientX, y: e.clientY };
     } else if (resizingRow !== null && onRowResize) {
@@ -197,11 +197,11 @@ export default function SpreadsheetGrid({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        <table className="border-collapse border border-border" style={{ tableLayout: 'fixed' }}>
+        <table className="border-collapse border border-border" style={{ tableLayout: 'fixed', width: 'max-content', minWidth: '100%' }}>
           <colgroup>
             <col style={{ width: '48px' }} />
             {Array.from({ length: cols }).map((_, colIndex) => {
-              const width = columnWidths.get(colIndex) || 120;
+              const width = columnWidths.get(colIndex) || 200;
               return <col key={colIndex} style={{ width: `${width}px` }} />;
             })}
           </colgroup>
@@ -217,7 +217,7 @@ export default function SpreadsheetGrid({
                 >
                   {getColumnLabel(colIndex)}
                   <div
-                    className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/50 z-10"
+                    className="absolute right-0 top-0 h-full w-2 cursor-col-resize hover:bg-primary z-10 transition-colors"
                     onMouseDown={(e) => handleColumnBorderMouseDown(e, colIndex)}
                   />
                 </th>
@@ -236,7 +236,7 @@ export default function SpreadsheetGrid({
                   >
                     {rowIndex + 1}
                     <div
-                      className="absolute bottom-0 left-0 w-full h-1 cursor-row-resize hover:bg-primary/50 z-10"
+                      className="absolute bottom-0 left-0 w-full h-2 cursor-row-resize hover:bg-primary z-10 transition-colors"
                       onMouseDown={(e) => handleRowBorderMouseDown(e, rowIndex)}
                     />
                   </th>
