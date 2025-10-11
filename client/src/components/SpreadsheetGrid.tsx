@@ -7,6 +7,9 @@ interface CellData {
   backgroundColor?: string;
   fontSize?: number;
   fontWeight?: string;
+  fontFamily?: string;
+  fontStyle?: string;
+  textDecoration?: string;
 }
 
 interface MergedCell {
@@ -294,6 +297,9 @@ export default function SpreadsheetGrid({
                           backgroundColor={cell.backgroundColor}
                           fontSize={cell.fontSize}
                           fontWeight={cell.fontWeight}
+                          fontFamily={cell.fontFamily}
+                          fontStyle={cell.fontStyle}
+                          textDecoration={cell.textDecoration}
                           onClick={() => onCellSelect(cell.address)}
                           onDoubleClick={() => {}}
                           onChange={(value) => onCellChange(cell.address, value)}

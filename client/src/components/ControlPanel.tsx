@@ -25,6 +25,7 @@ interface MergedCell {
 
 interface ControlPanelProps {
   selectedCells: string[];
+  temporarySelectedCells?: string[];
   onColorApply: (color: string) => void;
   onFormulaApply: (formula: string) => void;
   customFormulas?: Array<{ name: string; logic: string }>;
@@ -42,6 +43,7 @@ interface ControlPanelProps {
 
 export default function ControlPanel({
   selectedCells,
+  temporarySelectedCells = [],
   onColorApply,
   onFormulaApply,
   customFormulas,
@@ -56,13 +58,19 @@ export default function ControlPanel({
   onShowInput,
   onShowOutput,
 }: ControlPanelProps) {
+  const totalSelected = selectedCells.length + temporarySelectedCells.length;
   return (
     <div className="w-full h-full border-l border-border bg-card flex flex-col">
       <div className="p-4 border-b border-border">
         <h2 className="font-semibold text-lg">Controls</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          {selectedCells.length} cell{selectedCells.length !== 1 ? "s" : ""} selected
+          {totalSelected} cell{totalSelected !== 1 ? "s" : ""} selected
         </p>
+        {temporarySelectedCells.length > 0 && (
+          <p className="text-xs text-chart-2 mt-0.5">
+            ({temporarySelectedCells.length} temporary - 5s)
+          </p>
+        )}
       </div>
 
       <ScrollArea className="flex-1">

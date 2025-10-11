@@ -9,6 +9,9 @@ interface SpreadsheetCellProps {
   backgroundColor?: string;
   fontSize?: number;
   fontWeight?: string;
+  fontFamily?: string;
+  fontStyle?: string;
+  textDecoration?: string;
   onClick: () => void;
   onDoubleClick: () => void;
   onChange: (value: string) => void;
@@ -23,6 +26,9 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   backgroundColor = "transparent",
   fontSize = 14,
   fontWeight = "normal",
+  fontFamily = "Calibri",
+  fontStyle = "normal",
+  textDecoration = "none",
   onClick,
   onDoubleClick,
   onChange,
@@ -97,7 +103,13 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full h-full bg-transparent border-none outline-none px-2 pt-3 text-foreground"
-        style={{ fontSize: `${fontSize}px`, fontWeight }}
+        style={{ 
+          fontSize: `${fontSize}px`, 
+          fontWeight,
+          fontFamily,
+          fontStyle,
+          textDecoration
+        }}
         data-testid={`input-${address}`}
       />
     </div>
@@ -110,7 +122,10 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
     prevProps.isTemporary === nextProps.isTemporary &&
     prevProps.backgroundColor === nextProps.backgroundColor &&
     prevProps.fontSize === nextProps.fontSize &&
-    prevProps.fontWeight === nextProps.fontWeight
+    prevProps.fontWeight === nextProps.fontWeight &&
+    prevProps.fontFamily === nextProps.fontFamily &&
+    prevProps.fontStyle === nextProps.fontStyle &&
+    prevProps.textDecoration === nextProps.textDecoration
   );
 });
 

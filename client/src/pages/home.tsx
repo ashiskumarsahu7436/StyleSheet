@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import ControlPanel from "@/components/ControlPanel";
 import ThemeToggle from "@/components/ThemeToggle";
-import FontControls from "@/components/FontControls";
+import ExcelFontControls from "@/components/ExcelFontControls";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,9 @@ interface CellData {
   backgroundColor?: string;
   fontSize?: number;
   fontWeight?: string;
+  fontFamily?: string;
+  fontStyle?: string;
+  textDecoration?: string;
 }
 
 interface MergedCell {
@@ -135,10 +138,11 @@ export default function Home() {
   };
 
   const handleColorApply = (color: string) => {
-    if (selectedCells.length === 0) return;
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    if (allSelected.length === 0) return;
     
     const newData = new Map(cellData);
-    selectedCells.forEach((address) => {
+    allSelected.forEach((address) => {
       const existing = newData.get(address) || { address, value: "" };
       newData.set(address, {
         ...existing,
@@ -155,10 +159,11 @@ export default function Home() {
   };
 
   const handleFontSizeChange = (size: number) => {
-    if (selectedCells.length === 0) return;
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    if (allSelected.length === 0) return;
     
     const newData = new Map(cellData);
-    selectedCells.forEach((address) => {
+    allSelected.forEach((address) => {
       const existing = newData.get(address) || { address, value: "" };
       newData.set(address, { ...existing, fontSize: size });
     });
@@ -172,10 +177,11 @@ export default function Home() {
   };
 
   const handleFontWeightChange = (weight: string) => {
-    if (selectedCells.length === 0) return;
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    if (allSelected.length === 0) return;
     
     const newData = new Map(cellData);
-    selectedCells.forEach((address) => {
+    allSelected.forEach((address) => {
       const existing = newData.get(address) || { address, value: "" };
       newData.set(address, { ...existing, fontWeight: weight });
     });
@@ -188,20 +194,85 @@ export default function Home() {
     }
   };
 
+  const handleFontFamilyChange = (family: string) => {
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    if (allSelected.length === 0) return;
+    
+    const newData = new Map(cellData);
+    allSelected.forEach((address) => {
+      const existing = newData.get(address) || { address, value: "" };
+      newData.set(address, { ...existing, fontFamily: family });
+    });
+    
+    saveToHistory(newData);
+    setCellData(newData);
+    
+    if (!retainSelection) {
+      setSelectedCells([]);
+    }
+  };
+
+  const handleItalicToggle = () => {
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    if (allSelected.length === 0) return;
+    
+    const newData = new Map(cellData);
+    allSelected.forEach((address) => {
+      const existing = newData.get(address) || { address, value: "" };
+      const currentStyle = existing.fontStyle || "normal";
+      newData.set(address, { 
+        ...existing, 
+        fontStyle: currentStyle === "italic" ? "normal" : "italic" 
+      });
+    });
+    
+    saveToHistory(newData);
+    setCellData(newData);
+    
+    if (!retainSelection) {
+      setSelectedCells([]);
+    }
+  };
+
+  const handleUnderlineToggle = () => {
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    if (allSelected.length === 0) return;
+    
+    const newData = new Map(cellData);
+    allSelected.forEach((address) => {
+      const existing = newData.get(address) || { address, value: "" };
+      const currentDecoration = existing.textDecoration || "none";
+      newData.set(address, { 
+        ...existing, 
+        textDecoration: currentDecoration === "underline" ? "none" : "underline" 
+      });
+    });
+    
+    saveToHistory(newData);
+    setCellData(newData);
+    
+    if (!retainSelection) {
+      setSelectedCells([]);
+    }
+  };
+
   const handleShowInput = () => {
-    const values = selectedCells.map((addr) => cellData.get(addr)?.value || "").join(", ");
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    const values = allSelected.map((addr) => cellData.get(addr)?.value || "").join(", ");
     setInputValue(values);
   };
 
   const handleShowOutput = () => {
-    const addresses = selectedCells.join(", ");
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    const addresses = allSelected.join(", ");
     setOutputValue(addresses);
   };
 
   const handleFormulaApply = (formula: string) => {
-    if (selectedCells.length === 0) return;
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    if (allSelected.length === 0) return;
 
-    const values = selectedCells
+    const values = allSelected
       .map((addr) => parseFloat(cellData.get(addr)?.value || "0"))
       .filter((v) => !isNaN(v));
 
@@ -247,10 +318,11 @@ export default function Home() {
   };
 
   const handleBulkAdd = (values: string[], separator: string) => {
-    if (selectedCells.length === 0) return;
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    if (allSelected.length === 0) return;
 
     const newData = new Map(cellData);
-    selectedCells.forEach((address, index) => {
+    allSelected.forEach((address, index) => {
       if (index < values.length) {
         const existing = newData.get(address) || { address, value: "" };
         newData.set(address, { ...existing, value: values[index] });
@@ -262,18 +334,7 @@ export default function Home() {
   };
 
   const handleSelectAll = () => {
-    if (selectedCells.length > 0) {
-      setSelectedCells([]);
-    } else {
-      const allCells: string[] = [];
-      for (let row = 0; row < 100; row++) {
-        for (let col = 0; col < 52; col++) {
-          const colLabel = getColumnLabel(col);
-          allCells.push(`${colLabel}${row + 1}`);
-        }
-      }
-      setSelectedCells(allCells);
-    }
+    setSelectedCells([]);
   };
 
   const handleUndo = () => {
@@ -356,12 +417,16 @@ export default function Home() {
       }
     });
     
+    const startCell = cellData.get(startAddress);
     newData.set(startAddress, { 
       address: startAddress,
       value: values,
-      backgroundColor: cellData.get(startAddress)?.backgroundColor,
-      fontSize: cellData.get(startAddress)?.fontSize,
-      fontWeight: cellData.get(startAddress)?.fontWeight,
+      backgroundColor: startCell?.backgroundColor,
+      fontSize: startCell?.fontSize,
+      fontWeight: startCell?.fontWeight,
+      fontFamily: startCell?.fontFamily,
+      fontStyle: startCell?.fontStyle,
+      textDecoration: startCell?.textDecoration,
     });
     
     const newMergedCells = [...mergedCells, { startAddress, endAddress, colspan, rowspan, originalCells }];
@@ -467,6 +532,18 @@ export default function Home() {
   }, []);
 
   const isMergedCell = selectedCells.length === 1 && mergedCells.some(m => m.startAddress === selectedCells[0]);
+  
+  const getFirstSelectedCell = () => {
+    const firstCell = selectedCells[0] || temporarySelectedCells[0];
+    return firstCell ? cellData.get(firstCell) : undefined;
+  };
+  
+  const firstCell = getFirstSelectedCell();
+  const currentFontSize = firstCell?.fontSize || 11;
+  const currentFontWeight = firstCell?.fontWeight || "normal";
+  const currentFontFamily = firstCell?.fontFamily || "Calibri";
+  const currentFontStyle = firstCell?.fontStyle || "normal";
+  const currentTextDecoration = firstCell?.textDecoration || "none";
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-background">
@@ -502,60 +579,67 @@ export default function Home() {
           </div>
           
           <div className="px-4 lg:px-6 py-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={selectedCells.length > 0 ? "default" : "secondary"}
-                  size="sm"
-                  onClick={handleSelectAll}
-                  data-testid="button-select-all"
-                >
-                  <MousePointer2 className="w-4 h-4 mr-2" />
-                  Select
-                </Button>
-                
-                <Button
-                  variant={retainSelection ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setRetainSelection(!retainSelection)}
-                  data-testid="button-retain-selection"
-                >
-                  <Lock className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Retain</span>
-                  <span className="sm:hidden">{retainSelection ? "ON" : "OFF"}</span>
-                </Button>
-              </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant={selectedCells.length > 0 ? "default" : "secondary"}
+                size="sm"
+                onClick={handleSelectAll}
+                data-testid="button-select-all"
+              >
+                <MousePointer2 className="w-4 h-4 mr-2" />
+                Select
+              </Button>
               
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleMergeCells}
-                  disabled={selectedCells.length < 2}
-                  data-testid="button-merge-cells"
-                >
-                  <Check className="w-4 h-4 mr-2" />
-                  Merge
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleUnmergeCells}
-                  disabled={!isMergedCell}
-                  data-testid="button-unmerge-cells"
-                >
-                  <Split className="w-4 h-4 mr-2" />
-                  Unmerge
-                </Button>
-              </div>
+              <Button
+                variant={retainSelection ? "default" : "outline"}
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setRetainSelection(!retainSelection)}
+                data-testid="button-retain-selection"
+              >
+                <Lock className="w-4 h-4" />
+              </Button>
               
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <FontControls
-                  onFontSizeChange={handleFontSizeChange}
-                  onFontWeightChange={handleFontWeightChange}
-                />
-              </div>
+              <div className="h-6 w-px bg-border" />
+              
+              <Button
+                variant="secondary"
+                size="sm"
+                className="h-8 px-3 text-xs"
+                onClick={handleMergeCells}
+                disabled={selectedCells.length < 2}
+                data-testid="button-merge-cells"
+              >
+                <Check className="w-3.5 h-3.5 mr-1.5" />
+                Merge
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 text-xs"
+                onClick={handleUnmergeCells}
+                disabled={!isMergedCell}
+                data-testid="button-unmerge-cells"
+              >
+                <Split className="w-3.5 h-3.5 mr-1.5" />
+                Unmerge
+              </Button>
+              
+              <div className="h-6 w-px bg-border" />
+              
+              <ExcelFontControls
+                onFontSizeChange={handleFontSizeChange}
+                onFontWeightChange={handleFontWeightChange}
+                onFontFamilyChange={handleFontFamilyChange}
+                onItalicToggle={handleItalicToggle}
+                onUnderlineToggle={handleUnderlineToggle}
+                currentFontSize={currentFontSize}
+                currentFontWeight={currentFontWeight}
+                currentFontFamily={currentFontFamily}
+                currentFontStyle={currentFontStyle}
+                currentTextDecoration={currentTextDecoration}
+              />
             </div>
           </div>
         </header>
@@ -591,6 +675,7 @@ export default function Home() {
       <div className="w-full lg:w-1/3 border-t lg:border-t-0 lg:border-l border-border">
         <ControlPanel
           selectedCells={selectedCells}
+          temporarySelectedCells={temporarySelectedCells}
           onColorApply={handleColorApply}
           onFormulaApply={handleFormulaApply}
           customFormulas={customFormulas}
