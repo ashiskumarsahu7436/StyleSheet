@@ -307,7 +307,6 @@ export default function Home() {
 
     const startAddress = `${getColumnLabel(minCol)}${minRow + 1}`;
     const endAddress = `${getColumnLabel(maxCol)}${maxRow + 1}`;
-    const mergedAddress = `${startAddress}${endAddress}`;
     const colspan = maxCol - minCol + 1;
     const rowspan = maxRow - minRow + 1;
 
@@ -322,20 +321,75 @@ export default function Home() {
       newData.delete(addr);
     });
     
-    newData.set(mergedAddress, { 
-      address: mergedAddress,
+    newData.set(startAddress, { 
+      address: startAddress,
       value: values,
       backgroundColor: cellData.get(startAddress)?.backgroundColor,
       fontSize: cellData.get(startAddress)?.fontSize,
       fontWeight: cellData.get(startAddress)?.fontWeight,
     });
     
-    const newMergedCells = [...mergedCells, { startAddress: mergedAddress, endAddress, colspan, rowspan }];
+    const newMergedCells = [...mergedCells, { startAddress, endAddress, colspan, rowspan }];
     
     saveToHistory(newData, newMergedCells);
     setCellData(newData);
     setMergedCells(newMergedCells);
-    setSelectedCells([mergedAddress]);
+    setSelectedCells([startAddress]);
+  };
+
+  const handleUnmergeCells = () => {
+    if (selectedCells.length !== 1) return;
+    
+    const selectedAddress = selectedCells[0];
+    const mergedCell = mergedCells.find(m => m.startAddress === selectedAddress);
+    
+    if (!mergedCell) return;
+
+    const getCellRowCol = (addr: string) => {
+      const match = addr.match(/^([A-Z]+)(\d+)$/);
+      if (!match) return { row: 0, col: 0 };
+      const colLabel = match[1];
+      const row = parseInt(match[2]) - 1;
+      let col = 0;
+      for (let i = 0; i < colLabel.length; i++) {
+        col = col * 26 + (colLabel.charCodeAt(i) - 65 + 1);
+      }
+      return { row, col: col - 1 };
+    };
+
+    const start = getCellRowCol(mergedCell.startAddress);
+    const mergedCellData = cellData.get(selectedAddress);
+    
+    const newData = new Map(cellData);
+    const allCellsInMerge: string[] = [];
+    
+    for (let row = start.row; row < start.row + mergedCell.rowspan; row++) {
+      for (let col = start.col; col < start.col + mergedCell.colspan; col++) {
+        const addr = `${getColumnLabel(col)}${row + 1}`;
+        allCellsInMerge.push(addr);
+        if (addr === mergedCell.startAddress) {
+          newData.set(addr, {
+            address: addr,
+            value: mergedCellData?.value || "",
+            backgroundColor: mergedCellData?.backgroundColor,
+            fontSize: mergedCellData?.fontSize,
+            fontWeight: mergedCellData?.fontWeight,
+          });
+        } else {
+          newData.set(addr, {
+            address: addr,
+            value: "",
+          });
+        }
+      }
+    }
+    
+    const newMergedCells = mergedCells.filter(m => m.startAddress !== selectedAddress);
+    
+    saveToHistory(newData, newMergedCells);
+    setCellData(newData);
+    setMergedCells(newMergedCells);
+    setSelectedCells(allCellsInMerge);
   };
 
   useEffect(() => {
@@ -399,6 +453,8 @@ export default function Home() {
           onRedo={handleRedo}
           onSelectAll={handleSelectAll}
           onMergeCells={handleMergeCells}
+          onUnmergeCells={handleUnmergeCells}
+          mergedCells={mergedCells}
           inputValue={inputValue}
           outputValue={outputValue}
           onInputChange={setInputValue}

@@ -6,7 +6,14 @@ import FontControls from "./FontControls";
 import InputOutputSection from "./InputOutputSection";
 import FormulaSection from "./FormulaSection";
 import BulkValueSection from "./BulkValueSection";
-import { Undo2, Redo2, MousePointer2, Check, Lock } from "lucide-react";
+import { Undo2, Redo2, MousePointer2, Check, Lock, Split } from "lucide-react";
+
+interface MergedCell {
+  startAddress: string;
+  endAddress: string;
+  colspan: number;
+  rowspan: number;
+}
 
 interface ControlPanelProps {
   selectedCells: string[];
@@ -23,6 +30,8 @@ interface ControlPanelProps {
   onRedo: () => void;
   onSelectAll: () => void;
   onMergeCells?: () => void;
+  onUnmergeCells?: () => void;
+  mergedCells?: MergedCell[];
   inputValue: string;
   outputValue: string;
   onInputChange: (value: string) => void;
@@ -48,6 +57,8 @@ export default function ControlPanel({
   onRedo,
   onSelectAll,
   onMergeCells,
+  onUnmergeCells,
+  mergedCells = [],
   inputValue,
   outputValue,
   onInputChange,
@@ -57,6 +68,7 @@ export default function ControlPanel({
   retainSelection = false,
   onToggleRetainSelection,
 }: ControlPanelProps) {
+  const isMergedCell = selectedCells.length === 1 && mergedCells.some(m => m.startAddress === selectedCells[0]);
   return (
     <div className="w-full h-full border-l border-border bg-card flex flex-col">
       <div className="p-4 border-b border-border">
@@ -133,19 +145,34 @@ export default function ControlPanel({
             </Button>
           )}
 
-          {onMergeCells && (
-            <Button
-              variant="default"
-              size="sm"
-              className="w-full gap-2"
-              onClick={onMergeCells}
-              disabled={selectedCells.length < 2}
-              data-testid="button-merge-shells"
-            >
-              <Check className="w-4 h-4" />
-              Merge Shells
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {onMergeCells && (
+              <Button
+                variant="default"
+                size="sm"
+                className="flex-1 gap-2"
+                onClick={onMergeCells}
+                disabled={selectedCells.length < 2}
+                data-testid="button-merge-cells"
+              >
+                <Check className="w-4 h-4" />
+                Merge Cells
+              </Button>
+            )}
+            {onUnmergeCells && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 gap-2"
+                onClick={onUnmergeCells}
+                disabled={!isMergedCell}
+                data-testid="button-unmerge-cells"
+              >
+                <Split className="w-4 h-4" />
+                Unmerge
+              </Button>
+            )}
+          </div>
 
           <Separator />
 
