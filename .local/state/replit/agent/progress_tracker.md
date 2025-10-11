@@ -100,3 +100,13 @@
   - Text content is now fully visible - no more hidden/cutoff data
   - Minimum row height remains 32px (square cells by default)
   - Height calculation uses fontSize * 1.4 for proper line spacing
+
+## Auto Line-Break Height Fix (Oct 11, 2025)
+[x] **Fixed row height adjustment for automatic word wrapping**
+  - Added character-level breaking for very long words (URLs, continuous text)
+  - Row height now properly adjusts when text automatically wraps (not just Enter key)
+  - Long words that exceed cell width are broken across multiple lines
+  - Height calculation matches exactly what the textarea displays with CSS break-word
+  - All wrapped text is now fully visible with proper height adjustment
+  - Works for both manual line breaks (Enter key) and automatic word wrapping
+  - Supports mixed wrapping scenarios (spaces, long words, newlines)

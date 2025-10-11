@@ -179,12 +179,32 @@ export default function Home() {
           let wrappedLines = 1;
           
           for (const word of words) {
-            const wordWidth = context.measureText(word + ' ').width;
-            if (currentLineWidth + wordWidth > effectiveWidth && currentLineWidth > 0) {
-              wrappedLines++;
-              currentLineWidth = wordWidth;
+            const wordWidth = context.measureText(word).width;
+            const spaceWidth = context.measureText(' ').width;
+            
+            // Check if single word is too long and needs to be broken
+            if (wordWidth > effectiveWidth) {
+              // Word needs character-level breaking
+              let charLine = '';
+              for (let char of word) {
+                const testWidth = context.measureText(charLine + char).width;
+                if (testWidth > effectiveWidth && charLine.length > 0) {
+                  wrappedLines++;
+                  charLine = char;
+                } else {
+                  charLine += char;
+                }
+              }
+              currentLineWidth = context.measureText(charLine).width + spaceWidth;
             } else {
-              currentLineWidth += wordWidth;
+              // Normal word wrapping
+              const totalWidth = currentLineWidth + wordWidth + (currentLineWidth > 0 ? spaceWidth : 0);
+              if (totalWidth > effectiveWidth && currentLineWidth > 0) {
+                wrappedLines++;
+                currentLineWidth = wordWidth + spaceWidth;
+              } else {
+                currentLineWidth = totalWidth;
+              }
             }
           }
           totalLines += wrappedLines;
