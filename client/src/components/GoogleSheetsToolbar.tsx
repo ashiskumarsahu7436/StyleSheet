@@ -159,13 +159,13 @@ export default function GoogleSheetsToolbar({
           <Button
             variant={isComplexMode ? "default" : "outline"}
             size="sm"
-            className="h-7 px-3 gap-1.5 text-xs"
+            className="h-7 w-32 px-3 gap-1.5 text-xs"
             onClick={onModeToggle}
             title={isComplexMode ? "Switch to Simple Mode" : "Switch to Complex Mode"}
             data-testid="button-mode-toggle"
           >
             <Layers className="h-3.5 w-3.5" />
-            {isComplexMode ? "Complex" : "Simple"}
+            {isComplexMode ? "Complex Mode" : "Simple Mode"}
           </Button>
         </div>
       </div>
