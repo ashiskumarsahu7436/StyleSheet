@@ -3,6 +3,9 @@ import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import ControlPanel from "@/components/ControlPanel";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 interface CellData {
   address: string;
@@ -36,6 +39,7 @@ export default function Home() {
   ]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [mergedCells, setMergedCells] = useState<MergedCell[]>([]);
+  const [spreadsheetName, setSpreadsheetName] = useState("My Spreadsheet");
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveToHistory = (newCellData: Map<string, CellData>, newMergedCells: MergedCell[] = mergedCells) => {
@@ -418,6 +422,41 @@ export default function Home() {
     setSelectedCells(allCellsInMerge);
   };
 
+  const handleDownload = () => {
+    const rows = 100;
+    const cols = 52;
+    
+    let csvContent = "";
+    
+    for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+      const rowData: string[] = [];
+      for (let colIndex = 0; colIndex < cols; colIndex++) {
+        const address = `${getColumnLabel(colIndex)}${rowIndex + 1}`;
+        const cell = cellData.get(address);
+        const value = cell?.value || "";
+        rowData.push(`"${value.replace(/"/g, '""')}"`);
+      }
+      csvContent += rowData.join(",") + "\n";
+    }
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${spreadsheetName}.csv`);
+    link.style.visibility = "hidden";
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Downloaded Successfully",
+      description: `${spreadsheetName}.csv has been downloaded.`,
+    });
+  };
+
   useEffect(() => {
     return () => {
       if (tempSelectionTimerRef.current) {
@@ -436,7 +475,26 @@ export default function Home() {
             </h1>
             <span className="text-sm text-muted-foreground">Excel-like Builder</span>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-3">
+            <Input
+              type="text"
+              value={spreadsheetName}
+              onChange={(e) => setSpreadsheetName(e.target.value)}
+              placeholder="Spreadsheet Name"
+              className="w-48"
+              data-testid="input-spreadsheet-name"
+            />
+            <Button
+              onClick={handleDownload}
+              variant="default"
+              size="sm"
+              data-testid="button-download"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+            <ThemeToggle />
+          </div>
         </header>
         <div className="flex-1 overflow-hidden">
           <SpreadsheetGrid
