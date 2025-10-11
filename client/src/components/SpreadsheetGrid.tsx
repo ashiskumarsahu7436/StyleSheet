@@ -265,6 +265,11 @@ export default function SpreadsheetGrid({
                     };
                   }
                   
+                  let displayAddress = cell.address;
+                  if (mergeInfo && !((mergeInfo as any).isHidden) && (mergeInfo.colspan > 1 || mergeInfo.rowspan > 1)) {
+                    displayAddress = `${mergeInfo.startAddress}:${mergeInfo.endAddress}`;
+                  }
+                  
                   const baseWidth = columnWidths.get(colIndex) || 80;
                   let cellWidth = baseWidth;
                   let cellHeight = height;
@@ -292,7 +297,7 @@ export default function SpreadsheetGrid({
                       onMouseUp={handleCellMouseUp}
                     >
                       <SpreadsheetCell
-                        address={cell.address}
+                        address={displayAddress}
                         value={cell.value}
                         isSelected={isSelected}
                         isTemporary={isTemporary}
