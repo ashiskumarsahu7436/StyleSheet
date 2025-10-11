@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import ControlPanel from "@/components/ControlPanel";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useToast } from "@/hooks/use-toast";
 
 interface CellData {
   address: string;
@@ -20,6 +21,7 @@ interface MergedCell {
 }
 
 export default function Home() {
+  const { toast } = useToast();
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
   const [temporarySelectedCells, setTemporarySelectedCells] = useState<string[]>([]);
   const [cellData, setCellData] = useState<Map<string, CellData>>(new Map());
@@ -287,6 +289,15 @@ export default function Home() {
 
   const handleMergeCells = () => {
     if (selectedCells.length < 2) return;
+
+    if (selectedCells.length > 100) {
+      toast({
+        title: "Too Many Cells Selected",
+        description: `You selected ${selectedCells.length} cells. Please select 100 or fewer cells to merge.`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     const getCellRowCol = (addr: string) => {
       const match = addr.match(/^([A-Z]+)(\d+)$/);
