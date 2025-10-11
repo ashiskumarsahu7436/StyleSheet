@@ -334,21 +334,14 @@ export default function Home() {
   };
 
   const handleSelectAll = () => {
-    if (selectedCells.length > 0 || temporarySelectedCells.length > 0) {
-      setSelectedCells([]);
+    if (temporarySelectedCells.length > 0) {
+      setSelectedCells(temporarySelectedCells);
       setTemporarySelectedCells([]);
       if (tempSelectionTimerRef.current) {
         clearTimeout(tempSelectionTimerRef.current);
       }
-    } else {
-      const allCells: string[] = [];
-      for (let row = 0; row < 100; row++) {
-        for (let col = 0; col < 52; col++) {
-          const colLabel = getColumnLabel(col);
-          allCells.push(`${colLabel}${row + 1}`);
-        }
-      }
-      setSelectedCells(allCells);
+    } else if (selectedCells.length > 0) {
+      setSelectedCells([]);
     }
   };
 
