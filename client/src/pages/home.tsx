@@ -606,7 +606,7 @@ export default function Home() {
           }}
         >
           <div 
-            className="flex items-center justify-between px-4 lg:px-6 py-2 border-b border-border select-none"
+            className="flex items-center justify-between px-4 lg:px-6 py-2 border-b border-border"
             onDoubleClick={(e) => {
               if (e.target === e.currentTarget) {
                 setSelectedCells([]);
@@ -617,7 +617,7 @@ export default function Home() {
               }
             }}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 select-none">
               <h1 className="text-lg lg:text-xl font-semibold" data-testid="text-app-title">
                 StyleSheet
               </h1>
@@ -632,21 +632,23 @@ export default function Home() {
                 className="w-32 sm:w-48"
                 data-testid="input-spreadsheet-name"
               />
-              <Button
-                onClick={handleDownload}
-                variant="default"
-                size="sm"
-                data-testid="button-download"
-              >
-                <Download className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Download</span>
-              </Button>
-              <ThemeToggle />
+              <div className="flex items-center gap-2 select-none">
+                <Button
+                  onClick={handleDownload}
+                  variant="default"
+                  size="sm"
+                  data-testid="button-download"
+                >
+                  <Download className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Download</span>
+                </Button>
+                <ThemeToggle />
+              </div>
             </div>
           </div>
           
           <div 
-            className="px-4 lg:px-6 py-2 select-none"
+            className="px-4 lg:px-6 py-2"
             onDoubleClick={(e) => {
               if (e.target === e.currentTarget) {
                 setSelectedCells([]);
@@ -658,7 +660,7 @@ export default function Home() {
             }}
           >
             <div 
-              className="flex items-center gap-2 flex-wrap"
+              className="flex items-center gap-2 flex-wrap select-none"
               onDoubleClick={(e) => {
                 if (e.target === e.currentTarget) {
                   setSelectedCells([]);
