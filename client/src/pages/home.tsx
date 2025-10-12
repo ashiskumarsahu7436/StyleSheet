@@ -270,7 +270,14 @@ export default function Home() {
 
   const handleFontSizeChange = (size: number) => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
-    if (allSelected.length === 0) return;
+    if (allSelected.length === 0) {
+      toast({
+        title: "No cells selected",
+        description: "Please select cells first to change font size",
+        variant: "destructive",
+      });
+      return;
+    }
     
     const newData = new Map(cellData);
     allSelected.forEach((address) => {

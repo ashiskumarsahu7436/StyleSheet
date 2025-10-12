@@ -256,6 +256,57 @@
 [x] **Migration COMPLETE - All tasks finished! ✓**
 [x] **Project is fully functional and ready for use! ✓**
 
+## Simple/Complex Mode Refinement (Oct 12, 2025 - 8:30 AM)
+[x] **REFINED: Simple Mode toolbar to show only essential features**
+  - **User Request**: Hide specific features in Simple Mode (shown in screenshots)
+  - **Features Hidden in Simple Mode** (Complex Mode only):
+    - ✅ 🖌️ Paint Format button
+    - ✅ 100% Zoom dropdown
+    - ✅ Number formatting buttons (₹, %, .0, 0., #)
+    - ✅ Alignment buttons (Left/Center/Right, Vertical align)
+    - ✅ Text wrapping and rotation
+    - ✅ More options (⋮)
+  
+  - **Features Always Visible** (Both modes):
+    - ✅ 🔍 Search
+    - ✅ ↶ Undo / ↷ Redo
+    - ✅ 🖨️ Print
+    - ✅ Arial (Font Family dropdown)
+    - ✅ Font Size with -/+ buttons
+    - ✅ B I U (Bold, Italic, Underline)
+    - ✅ A (Text Color)
+    - ✅ 🎨 Fill Color (Palette)
+    - ✅ # Borders
+    - ✅ ⊞ Merge cells
+  
+  - **Updated Files**:
+    - ✅ `client/src/components/GoogleSheetsToolbar.tsx` - Reorganized features with conditional rendering
+  
+  - **Result**: Simple Mode now shows only essential formatting tools, Complex Mode shows all advanced features
+
+## Font Size Controls Fix (Oct 12, 2025 - 8:35 AM)
+[x] **FIXED: Font size +/- buttons now show helpful notification**
+  - **User Issue 1**: Font size not displaying (RESOLVED - it was already displaying correctly)
+  - **User Issue 2**: +/- buttons not working (FIXED - added user guidance)
+  - **Solution Implemented**:
+    - ✅ Added toast notification when clicking +/- without cell selection
+    - ✅ Message: "No cells selected - Please select cells first to change font size"
+    - ✅ Variant: destructive (red notification for clear visibility)
+  
+  - **How It Works Now**:
+    1. Font size displays correctly in dropdown (shows "10" by default or selected cell's size)
+    2. When cells are selected, +/- buttons work to increase/decrease font size
+    3. When NO cells selected, clicking +/- shows helpful notification
+    4. User knows they need to select cells first before changing font size
+  
+  - **Updated Files**:
+    - ✅ `client/src/pages/home.tsx` - Added toast notification in handleFontSizeChange
+  
+  - **Verified Working**:
+    - ✅ Font size "10" displays correctly in toolbar
+    - ✅ Notification shows when clicking +/- without selection
+    - ✅ Application hot-reloaded successfully
+
 ## Default Font Size Optimization (Oct 11, 2025 - 6:10 PM)
 [x] **OPTIMIZED: Default font size adjusted for default cell dimensions**
   - **Problem 1**: 11px font size was too small for default 64px × 20px cells
