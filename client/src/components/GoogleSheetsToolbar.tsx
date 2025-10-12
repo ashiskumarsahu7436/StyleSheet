@@ -113,9 +113,9 @@ export default function GoogleSheetsToolbar({
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
         <div className="flex items-center gap-3">
           {/* StyleSheet Title */}
-          <div className="flex items-center gap-1">
-            <span className="text-lg font-bold">StyleSheet</span>
-            <span className="text-sm text-muted-foreground">Excel-like spreadsheet builder</span>
+          <div className="flex items-baseline gap-2">
+            <h1 className="text-xl font-bold tracking-tight">StyleSheet</h1>
+            <span className="text-xs text-muted-foreground font-light">Excel-like spreadsheet builder</span>
           </div>
           
           {/* Spreadsheet Name Input Box */}
