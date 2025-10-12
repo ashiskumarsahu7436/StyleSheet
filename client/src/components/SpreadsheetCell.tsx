@@ -27,7 +27,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   isSelected,
   isTemporary = false,
   backgroundColor = "transparent",
-  fontSize = 11, // Default font size for readability
+  fontSize = 13, // Better matches default cell height
   fontWeight = "normal",
   fontFamily = "Arial", // Google Sheets default
   fontStyle = "normal",

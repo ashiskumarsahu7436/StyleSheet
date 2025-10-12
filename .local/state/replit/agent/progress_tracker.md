@@ -414,6 +414,53 @@
   - All keyboard handlers work as intended
 [x] **Feature now works exactly like Excel and Google Sheets! ✓**
 
+## Additional Fixes (Oct 12, 2025 - 9:11 PM)
+[x] **FIXED: Selection timer - keep selection active while typing**
+  - **Issue**: Selection disappeared while typing in a cell
+  - **User Requirement**: Selection should stay active while typing + 5 seconds after last keystroke, only clear after 5 seconds of inactivity
+  - **Solution**:
+    - ✅ Added timer reset logic in handleCellChange
+    - ✅ Timer clears and resets on every keystroke
+    - ✅ Selection clears only after 5 seconds of inactivity
+  - **Technical Implementation**:
+    - Updated `client/src/pages/home.tsx` - handleCellChange function
+    - Added: Clear existing timer and set new 5-second timer on each cell change
+  - **Verified**: Architect confirmed selection timer works correctly
+
+[x] **FIXED: Row height calculation consistency**
+  - **Issue**: Row height calculation used hard-coded 10px font, but textarea rendered with 11px (or cell-specific fontSize), causing content clipping
+  - **Root Cause**: Mismatch between calculation font size and rendered font size
+  - **Solution**:
+    - ✅ Updated row height calculation to use actual cell font size
+    - ✅ Added explicit line-height to textarea: `fontSize * 1.4`
+    - ✅ Updated handleCellChange to use same line-height multiplier (1.4)
+    - ✅ Canvas measurement now uses actual cell font properties
+  - **Technical Implementation**:
+    - Updated `client/src/components/SpreadsheetCell.tsx`:
+      - Added explicit lineHeight style: `fontSize * 1.4`
+    - Updated `client/src/pages/home.tsx` - handleCellChange:
+      - Changed from hard-coded `defaultFontSize = 10` to `cellFontSize = existing.fontSize ?? defaultFormatting.fontSize ?? 11`
+      - Updated canvas font: `context.font = ${cellFontWeight} ${cellFontSize}px ${cellFontFamily}`
+      - Updated line height: `lineHeight = cellFontSize * 1.4` (matches textarea)
+  - **Result**: Row height calculations now match actual rendered content, preventing clipping
+  - **Verified**: Architect confirmed no content clipping will occur
+
+[x] **FIXED: Font size readability**
+  - **Issue**: Default 10px font appeared too small and hard to read
+  - **Solution**:
+    - ✅ Changed default font size from 10px to 11px
+    - ✅ Updated defaultFormatting initial state to fontSize: 11
+    - ✅ Updated SpreadsheetCell default prop to 11
+    - ✅ Updated toolbar to show correct default using defaultFormatting cascade
+  - **Technical Implementation**:
+    - Updated `client/src/pages/home.tsx`:
+      - Changed defaultFormatting initial state: `fontSize: 11`
+      - Updated toolbar current values to use defaultFormatting cascade
+    - Updated `client/src/components/SpreadsheetCell.tsx`:
+      - Changed default prop: `fontSize = 11`
+  - **Result**: Text is now more readable with 11px default font size
+  - **Verified**: Architect confirmed all three fixes work correctly together
+
 ## Critical Bug Fixes (Oct 12, 2025 - 1:00 PM)
 [x] **FIXED: Row height auto-increase when font size changes**
   - **Issue**: Row height was automatically increasing when user increased font size

@@ -50,7 +50,7 @@ export default function Home() {
     textDecoration?: string;
     backgroundColor?: string;
   }>({
-    fontSize: 11, // Slightly larger than 10px for better readability
+    fontSize: 13, // Better matches default 21px cell height
   });
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [editingCell, setEditingCell] = useState<string | null>(null);
@@ -248,7 +248,7 @@ export default function Home() {
       colIndex = colIndex - 1;
       
       // Get actual font size for the cell (cell-specific or global default)
-      const cellFontSize = existing.fontSize ?? defaultFormatting.fontSize ?? 11;
+      const cellFontSize = existing.fontSize ?? defaultFormatting.fontSize ?? 13;
       const cellFontFamily = existing.fontFamily ?? defaultFormatting.fontFamily ?? 'Arial';
       const cellFontWeight = existing.fontWeight ?? defaultFormatting.fontWeight ?? 'normal';
       
@@ -1228,7 +1228,7 @@ export default function Home() {
   };
   
   const firstCell = getFirstSelectedCell();
-  const currentFontSize = firstCell?.fontSize || defaultFormatting.fontSize || 11;
+  const currentFontSize = firstCell?.fontSize || defaultFormatting.fontSize || 13;
   const currentFontWeight = firstCell?.fontWeight || defaultFormatting.fontWeight || "normal";
   const currentFontFamily = firstCell?.fontFamily || defaultFormatting.fontFamily || "Arial";
   const currentFontStyle = firstCell?.fontStyle || defaultFormatting.fontStyle || "normal";
