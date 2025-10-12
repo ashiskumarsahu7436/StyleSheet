@@ -40,6 +40,14 @@ interface SpreadsheetGridProps {
   onInsertRow?: (rowIndex: number) => void;
   onDeleteColumn?: (colIndex: number) => void;
   onInsertColumn?: (colIndex: number) => void;
+  defaultFormatting?: {
+    fontSize?: number;
+    fontWeight?: string;
+    fontFamily?: string;
+    fontStyle?: string;
+    textDecoration?: string;
+    backgroundColor?: string;
+  };
 }
 
 export default function SpreadsheetGrid({
@@ -63,6 +71,7 @@ export default function SpreadsheetGrid({
   onInsertRow,
   onDeleteColumn,
   onInsertColumn,
+  defaultFormatting = {},
 }: SpreadsheetGridProps) {
   const [resizingCol, setResizingCol] = useState<number | null>(null);
   const [resizingRow, setResizingRow] = useState<number | null>(null);
@@ -366,12 +375,12 @@ export default function SpreadsheetGrid({
                           value={cell.value}
                           isSelected={isSelected}
                           isTemporary={isTemporary}
-                          backgroundColor={cell.backgroundColor}
-                          fontSize={cell.fontSize}
-                          fontWeight={cell.fontWeight}
-                          fontFamily={cell.fontFamily}
-                          fontStyle={cell.fontStyle}
-                          textDecoration={cell.textDecoration}
+                          backgroundColor={cell.backgroundColor || defaultFormatting.backgroundColor}
+                          fontSize={cell.fontSize || defaultFormatting.fontSize}
+                          fontWeight={cell.fontWeight || defaultFormatting.fontWeight}
+                          fontFamily={cell.fontFamily || defaultFormatting.fontFamily}
+                          fontStyle={cell.fontStyle || defaultFormatting.fontStyle}
+                          textDecoration={cell.textDecoration || defaultFormatting.textDecoration}
                           onClick={() => onCellSelect(cell.address)}
                           onDoubleClick={() => {}}
                           onChange={(value) => onCellChange(cell.address, value)}

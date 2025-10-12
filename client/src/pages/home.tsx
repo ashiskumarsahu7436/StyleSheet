@@ -41,6 +41,15 @@ export default function Home() {
   const [mergedCells, setMergedCells] = useState<MergedCell[]>([]);
   const [spreadsheetName, setSpreadsheetName] = useState("My Spreadsheet");
   const [isComplexMode, setIsComplexMode] = useState(false);
+  // Global default formatting applied to all cells when no selection
+  const [defaultFormatting, setDefaultFormatting] = useState<{
+    fontSize?: number;
+    fontWeight?: string;
+    fontFamily?: string;
+    fontStyle?: string;
+    textDecoration?: string;
+    backgroundColor?: string;
+  }>({});
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveToHistory = (newCellData: Map<string, CellData>, newMergedCells: MergedCell[] = mergedCells) => {
@@ -130,10 +139,10 @@ export default function Home() {
       }
       colIndex = colIndex - 1;
       
-      // Get cell formatting
-      const fontSize = existing.fontSize || 10; // Google Sheets default
-      const fontFamily = existing.fontFamily || 'Arial'; // Google Sheets default
-      const fontWeight = existing.fontWeight || 'normal';
+      // Get cell formatting (use cell-specific formatting, then global default, then hardcoded default)
+      const fontSize = existing.fontSize ?? defaultFormatting.fontSize ?? 10; // Google Sheets default
+      const fontFamily = existing.fontFamily ?? defaultFormatting.fontFamily ?? 'Arial'; // Google Sheets default
+      const fontWeight = existing.fontWeight ?? defaultFormatting.fontWeight ?? 'normal';
       
       // Measure text width
       const canvas = document.createElement('canvas');
@@ -209,7 +218,10 @@ export default function Home() {
         });
         
         // Auto-adjust row height based on lines (both increase and decrease)
-        const lineHeight = fontSize * 1.4; // line height multiplier
+        // FIXED: Always use default font size (10px) for row height calculation
+        // This prevents row height from changing when font size changes
+        const defaultFontSize = 10; // Always use default font size for height calculation
+        const lineHeight = defaultFontSize * 1.4; // line height multiplier
         const requiredHeight = Math.max(totalLines * lineHeight + 6, 21); // add small padding, min 21px
         const minHeight = 21; // Google Sheets default row height
         
@@ -245,8 +257,17 @@ export default function Home() {
 
   const handleColorApply = (color: string) => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
-    if (allSelected.length === 0) return;
     
+    // If no cells selected, apply to ALL cells (update global default)
+    if (allSelected.length === 0) {
+      setDefaultFormatting(prev => ({
+        ...prev,
+        backgroundColor: color === "transparent" ? undefined : color,
+      }));
+      return;
+    }
+    
+    // Apply to selected cells only
     const newData = new Map(cellData);
     allSelected.forEach((address) => {
       const existing = newData.get(address) || { address, value: "" };
@@ -270,15 +291,17 @@ export default function Home() {
 
   const handleFontSizeChange = (size: number) => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
+    
+    // If no cells selected, apply to ALL cells (update global default)
     if (allSelected.length === 0) {
-      toast({
-        title: "No cells selected",
-        description: "Please select cells first to change font size",
-        variant: "destructive",
-      });
+      setDefaultFormatting(prev => ({
+        ...prev,
+        fontSize: size,
+      }));
       return;
     }
     
+    // Apply to selected cells only
     const newData = new Map(cellData);
     allSelected.forEach((address) => {
       const existing = newData.get(address) || { address, value: "" };
@@ -300,8 +323,17 @@ export default function Home() {
 
   const handleFontWeightChange = (weight: string) => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
-    if (allSelected.length === 0) return;
     
+    // If no cells selected, apply to ALL cells (update global default)
+    if (allSelected.length === 0) {
+      setDefaultFormatting(prev => ({
+        ...prev,
+        fontWeight: weight,
+      }));
+      return;
+    }
+    
+    // Apply to selected cells only
     const newData = new Map(cellData);
     allSelected.forEach((address) => {
       const existing = newData.get(address) || { address, value: "" };
@@ -323,8 +355,17 @@ export default function Home() {
 
   const handleFontFamilyChange = (family: string) => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
-    if (allSelected.length === 0) return;
     
+    // If no cells selected, apply to ALL cells (update global default)
+    if (allSelected.length === 0) {
+      setDefaultFormatting(prev => ({
+        ...prev,
+        fontFamily: family,
+      }));
+      return;
+    }
+    
+    // Apply to selected cells only
     const newData = new Map(cellData);
     allSelected.forEach((address) => {
       const existing = newData.get(address) || { address, value: "" };
@@ -346,8 +387,20 @@ export default function Home() {
 
   const handleItalicToggle = () => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
-    if (allSelected.length === 0) return;
     
+    // If no cells selected, apply to ALL cells (update global default)
+    if (allSelected.length === 0) {
+      setDefaultFormatting(prev => {
+        const currentStyle = prev.fontStyle || "normal";
+        return {
+          ...prev,
+          fontStyle: currentStyle === "italic" ? "normal" : "italic"
+        };
+      });
+      return;
+    }
+    
+    // Apply to selected cells only
     const newData = new Map(cellData);
     allSelected.forEach((address) => {
       const existing = newData.get(address) || { address, value: "" };
@@ -373,8 +426,20 @@ export default function Home() {
 
   const handleUnderlineToggle = () => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
-    if (allSelected.length === 0) return;
     
+    // If no cells selected, apply to ALL cells (update global default)
+    if (allSelected.length === 0) {
+      setDefaultFormatting(prev => {
+        const currentDecoration = prev.textDecoration || "none";
+        return {
+          ...prev,
+          textDecoration: currentDecoration === "underline" ? "none" : "underline"
+        };
+      });
+      return;
+    }
+    
+    // Apply to selected cells only
     const newData = new Map(cellData);
     allSelected.forEach((address) => {
       const existing = newData.get(address) || { address, value: "" };
@@ -1013,6 +1078,7 @@ export default function Home() {
             onInsertRow={handleInsertRow}
             onDeleteColumn={handleDeleteColumn}
             onInsertColumn={handleInsertColumn}
+            defaultFormatting={defaultFormatting}
           />
         </div>
       </div>
