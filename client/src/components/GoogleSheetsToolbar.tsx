@@ -125,14 +125,14 @@ export default function GoogleSheetsToolbar({
               placeholder="Untitled spreadsheet"
               data-testid="input-spreadsheet-name"
             />
-            <Star className="h-4 w-4 text-muted-foreground" />
-            <Folder className="h-4 w-4 text-muted-foreground" />
-            <Cloud className="h-4 w-4 text-muted-foreground" />
           </div>
         </div>
         
-        {/* Right side - Theme Toggle + History */}
+        {/* Right side - Icons, Theme Toggle + History */}
         <div className="flex items-center gap-2">
+          <Star className="h-4 w-4 text-muted-foreground" />
+          <Folder className="h-4 w-4 text-muted-foreground" />
+          <Cloud className="h-4 w-4 text-muted-foreground" />
           <Button variant="ghost" size="icon" className="h-8 w-8" title="Version history">
             <History className="h-4 w-4" />
           </Button>
