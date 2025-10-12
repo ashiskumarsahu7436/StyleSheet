@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { 
   Search,
   Undo2, 
@@ -30,7 +36,8 @@ import {
   Minus,
   Plus,
   Download,
-  Layers
+  Layers,
+  ChevronDown
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -55,6 +62,8 @@ interface GoogleSheetsToolbarProps {
   onDownload: () => void;
   isComplexMode: boolean;
   onModeToggle: () => void;
+  onMergeCells: (type?: 'all' | 'vertical' | 'horizontal') => void;
+  onUnmergeCells: () => void;
 }
 
 const FONT_SIZES = [8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
@@ -88,6 +97,8 @@ export default function GoogleSheetsToolbar({
   onDownload,
   isComplexMode,
   onModeToggle,
+  onMergeCells,
+  onUnmergeCells,
 }: GoogleSheetsToolbarProps) {
   const isBold = currentFontWeight === "bold" || currentFontWeight === "700";
   const isItalic = currentFontStyle === "italic";
@@ -376,9 +387,28 @@ export default function GoogleSheetsToolbar({
         </Button>
 
         {/* Merge cells - Always visible */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Merge cells">
-          <span className="text-xs font-bold">⊞</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-7 px-2 gap-0.5" title="Merge cells" data-testid="button-merge-cells">
+              <Layers className="h-3.5 w-3.5" />
+              <ChevronDown className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuItem onClick={() => onMergeCells('all')} data-testid="merge-all">
+              Merge all
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onMergeCells('vertical')} data-testid="merge-vertically">
+              Merge vertically
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onMergeCells('horizontal')} data-testid="merge-horizontally">
+              Merge horizontally
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onUnmergeCells} data-testid="unmerge">
+              Unmerge
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Complex Mode Only - Alignment buttons (Screenshot 1) */}
         {isComplexMode && (

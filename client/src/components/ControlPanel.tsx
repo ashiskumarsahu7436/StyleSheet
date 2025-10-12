@@ -1,7 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import ColorPicker from "./ColorPicker";
 import InputOutputSection from "./InputOutputSection";
 import FormulaSection from "./FormulaSection";
 import BulkValueSection from "./BulkValueSection";
@@ -97,10 +96,6 @@ export default function ControlPanel({
               Redo
             </Button>
           </div>
-
-          <Separator />
-
-          <ColorPicker onColorApply={onColorApply} />
 
           <Separator />
 

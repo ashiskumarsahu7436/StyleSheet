@@ -516,7 +516,7 @@ export default function Home() {
     }
   };
 
-  const handleMergeCells = () => {
+  const handleMergeCells = (type: 'all' | 'vertical' | 'horizontal' = 'all') => {
     if (selectedCells.length < 2) return;
 
     if (selectedCells.length > 100) {
@@ -541,10 +541,19 @@ export default function Home() {
     };
 
     const cells = selectedCells.map(addr => ({ addr, ...getCellRowCol(addr) }));
-    const minRow = Math.min(...cells.map(c => c.row));
-    const maxRow = Math.max(...cells.map(c => c.row));
-    const minCol = Math.min(...cells.map(c => c.col));
-    const maxCol = Math.max(...cells.map(c => c.col));
+    let minRow = Math.min(...cells.map(c => c.row));
+    let maxRow = Math.max(...cells.map(c => c.row));
+    let minCol = Math.min(...cells.map(c => c.col));
+    let maxCol = Math.max(...cells.map(c => c.col));
+
+    // Adjust range based on merge type
+    if (type === 'vertical') {
+      // Keep all rows, but use only the first column
+      maxCol = minCol;
+    } else if (type === 'horizontal') {
+      // Keep all columns, but use only the first row
+      maxRow = minRow;
+    }
 
     const startAddress = `${getColumnLabel(minCol)}${minRow + 1}`;
     const endAddress = `${getColumnLabel(maxCol)}${maxRow + 1}`;
@@ -833,6 +842,8 @@ export default function Home() {
           onDownload={handleDownload}
           isComplexMode={isComplexMode}
           onModeToggle={handleModeToggle}
+          onMergeCells={handleMergeCells}
+          onUnmergeCells={handleUnmergeCells}
         />
         <div 
           className="flex-1 overflow-hidden"

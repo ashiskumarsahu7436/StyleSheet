@@ -307,6 +307,86 @@
     - ✅ Notification shows when clicking +/- without selection
     - ✅ Application hot-reloaded successfully
 
+## Font Size Dropdown Width Fix (Oct 12, 2025 - 8:40 AM)
+[x] **FIXED: Font size number was getting cut off in dropdown**
+  - **User Issue**: Font size number "10" was showing half cut (आधा कट रहा था)
+  - **Root Cause**: Dropdown width was too narrow (w-12 = 48px)
+  - **Solution**: 
+    - ✅ Increased width from `w-12` to `w-16` (64px)
+    - ✅ Added proper padding `px-2` for better spacing
+  
+  - **Updated Files**:
+    - ✅ `client/src/components/GoogleSheetsToolbar.tsx` - Line 293
+  
+  - **Verified Working**:
+    - ✅ Font size "10" now displays completely (no cutting)
+    - ✅ Application hot-reloaded successfully
+
+## Merge Cells Google Sheets Style (Oct 12, 2025 - 8:45 AM)
+[x] **IMPLEMENTED: Google Sheets-style merge cells dropdown menu**
+  - **User Request**: Make merge cells icon and functionality match Google Sheets
+  - **Features Implemented**:
+    - ✅ **New Icon**: Layers icon with dropdown chevron (matches Google Sheets style)
+    - ✅ **Dropdown Menu** with 4 options:
+      1. **Merge all** - Merges all selected cells
+      2. **Merge vertically** - Merges only in vertical direction (same column)
+      3. **Merge horizontally** - Merges only in horizontal direction (same row)
+      4. **Unmerge** - Unmerges selected merged cell
+    
+  - **Technical Changes**:
+    - ✅ Added DropdownMenu component from shadcn/ui
+    - ✅ Updated `handleMergeCells()` to accept merge type parameter
+    - ✅ Implemented merge logic for all/vertical/horizontal types
+    - ✅ Added proper props to GoogleSheetsToolbar component
+  
+  - **Updated Files**:
+    - ✅ `client/src/components/GoogleSheetsToolbar.tsx`:
+      - Added DropdownMenu imports
+      - Added Layers and ChevronDown icons
+      - Created dropdown with 4 menu options
+      - Added onMergeCells and onUnmergeCells props to interface
+    - ✅ `client/src/pages/home.tsx`:
+      - Updated handleMergeCells to support type: 'all' | 'vertical' | 'horizontal'
+      - Added merge type logic (vertical keeps first column, horizontal keeps first row)
+      - Connected props to GoogleSheetsToolbar
+  
+  - **How It Works**:
+    1. Click the merge cells button (Layers icon with down arrow)
+    2. Dropdown shows 4 options
+    3. Select merge type:
+       - **Merge all**: Merges entire selection range
+       - **Merge vertically**: Merges cells in same column only
+       - **Merge horizontally**: Merges cells in same row only
+       - **Unmerge**: Splits merged cell back to individual cells
+  
+  - **Verified Working**:
+    - ✅ No LSP errors
+    - ✅ Application hot-reloaded successfully
+    - ✅ Dropdown button visible in toolbar with proper icon
+
+## Sidebar Cleanup - Color Palette Removal (Oct 12, 2025 - 8:50 AM)
+[x] **REMOVED: Cell Color palette section from sidebar**
+  - **User Request**: Remove color palette from sidebar (no longer needed, toolbar has it)
+  - **What Was Removed**:
+    - ❌ Entire "Cell Color" section
+    - ❌ All 9 color buttons (White, Red, Orange, Yellow, Green, Blue, Purple, Pink, Gray)
+    - ❌ "Add Color" and "Remove Color" buttons
+    - ❌ Separator lines above and below the section
+    - ❌ All space occupied by the palette
+  
+  - **Updated Files**:
+    - ✅ `client/src/components/ControlPanel.tsx`:
+      - Removed ColorPicker component import
+      - Removed `<ColorPicker onColorApply={onColorApply} />` line
+      - Removed surrounding Separator components
+  
+  - **Result**:
+    - ✅ Sidebar is now cleaner and more compact
+    - ✅ Content below (Input, Output, Formulas, Bulk Value) moved up
+    - ✅ Color functionality still available in toolbar
+    - ✅ No LSP errors
+    - ✅ Application working perfectly
+
 ## Default Font Size Optimization (Oct 11, 2025 - 6:10 PM)
 [x] **OPTIMIZED: Default font size adjusted for default cell dimensions**
   - **Problem 1**: 11px font size was too small for default 64px × 20px cells
