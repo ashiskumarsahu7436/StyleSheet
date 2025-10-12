@@ -895,8 +895,6 @@ export default function Home() {
           customFormulas={customFormulas}
           onAddCustomFormula={handleAddCustomFormula}
           onBulkAdd={handleBulkAdd}
-          onUndo={handleUndo}
-          onRedo={handleRedo}
           inputValue={inputValue}
           outputValue={outputValue}
           onInputChange={setInputValue}

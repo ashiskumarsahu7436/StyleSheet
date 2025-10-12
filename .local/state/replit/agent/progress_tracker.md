@@ -289,6 +289,27 @@
     - ✅ No LSP errors
     - ✅ All features working correctly
 
+## Control Panel Cleanup (Oct 12, 2025 - 9:20 AM)
+[x] **REMOVED: Undo/Redo button section from side control panel**
+  - **User Request**: Remove Undo/Redo buttons and the entire section (including separator lines) from side panel
+  - **Changes Made**:
+    - ✅ Removed Undo/Redo button section from ControlPanel.tsx
+    - ✅ Removed separator line below the section
+    - ✅ Removed unused imports (Undo2, Redo2 icons)
+    - ✅ Removed onUndo and onRedo props from ControlPanel interface
+    - ✅ Updated home.tsx to remove onUndo/onRedo props when using ControlPanel
+  
+  - **Result**:
+    - ✅ Side control panel is now cleaner and more compact
+    - ✅ Input section appears directly at the top of the panel
+    - ✅ Undo/Redo functionality still available in top toolbar
+    - ✅ All other sections (Input, Output, Formulas, Bulk Value) remain intact
+  
+  - **Verified Working**:
+    - ✅ Screenshot confirms clean control panel layout
+    - ✅ No LSP errors
+    - ✅ Application hot-reloaded successfully
+
 ## Simple/Complex Mode Refinement (Oct 12, 2025 - 8:30 AM)
 [x] **REFINED: Simple Mode toolbar to show only essential features**
   - **User Request**: Hide specific features in Simple Mode (shown in screenshots)

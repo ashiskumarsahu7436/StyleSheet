@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import InputOutputSection from "./InputOutputSection";
 import FormulaSection from "./FormulaSection";
 import BulkValueSection from "./BulkValueSection";
-import { Undo2, Redo2 } from "lucide-react";
 
 interface CellData {
   address: string;
@@ -30,8 +29,6 @@ interface ControlPanelProps {
   customFormulas?: Array<{ name: string; logic: string }>;
   onAddCustomFormula?: (name: string, logic: string) => void;
   onBulkAdd: (values: string[], separator: string) => void;
-  onUndo: () => void;
-  onRedo: () => void;
   inputValue: string;
   outputValue: string;
   onInputChange: (value: string) => void;
@@ -48,8 +45,6 @@ export default function ControlPanel({
   customFormulas,
   onAddCustomFormula,
   onBulkAdd,
-  onUndo,
-  onRedo,
   inputValue,
   outputValue,
   onInputChange,
@@ -74,31 +69,6 @@ export default function ControlPanel({
 
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-6 select-none">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 gap-2"
-              onClick={onUndo}
-              data-testid="button-undo"
-            >
-              <Undo2 className="w-4 h-4" />
-              Undo
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 gap-2"
-              onClick={onRedo}
-              data-testid="button-redo"
-            >
-              <Redo2 className="w-4 h-4" />
-              Redo
-            </Button>
-          </div>
-
-          <Separator />
-
           <InputOutputSection
             inputValue={inputValue}
             outputValue={outputValue}
