@@ -112,35 +112,35 @@ export default function GoogleSheetsToolbar({
       {/* First Line - Title, Menu Bar, and Actions */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
         <div className="flex items-center gap-3">
-          {/* StyleSheet Icon + Title */}
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-green-600 rounded flex items-center justify-center text-white font-semibold">
-              S
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold">StyleSheet</span>
-              <span className="text-xs text-muted-foreground">Excel-like Builder</span>
-            </div>
+          {/* StyleSheet Title */}
+          <div className="flex items-center gap-1">
+            <span className="text-lg font-bold">StyleSheet</span>
+            <span className="text-sm text-muted-foreground">Excel-like spreadsheet builder</span>
           </div>
           
-          {/* Spreadsheet Name Input */}
+          {/* Spreadsheet Name Input Box */}
           <input
             type="text"
             value={spreadsheetName}
             onChange={(e) => onSpreadsheetNameChange(e.target.value)}
-            className="text-sm font-normal bg-transparent border-none outline-none focus:bg-muted px-1 rounded"
-            placeholder="Untitled spreadsheet"
+            className="text-sm font-normal bg-background border border-border px-3 py-1 rounded outline-none focus:border-primary"
+            placeholder="My Spreadsheet"
             data-testid="input-spreadsheet-name"
           />
         </div>
         
-        {/* Right side - Icons, Theme Toggle + History */}
+        {/* Right side - Download and Theme Toggle */}
         <div className="flex items-center gap-2">
-          <Star className="h-4 w-4 text-muted-foreground" />
-          <Folder className="h-4 w-4 text-muted-foreground" />
-          <Cloud className="h-4 w-4 text-muted-foreground" />
-          <Button variant="ghost" size="icon" className="h-8 w-8" title="Version history">
-            <History className="h-4 w-4" />
+          <Button
+            variant="default"
+            size="sm"
+            className="h-8 px-3 gap-1.5 text-xs"
+            onClick={onDownload}
+            title="Download spreadsheet"
+            data-testid="button-download-header"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Download
           </Button>
           <ThemeToggle />
         </div>
