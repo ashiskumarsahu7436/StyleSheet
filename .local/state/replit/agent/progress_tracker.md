@@ -235,7 +235,38 @@
   - ✅ Multi-line text support
 [x] **Migration COMPLETE - Project ready for development! ✓**
 
-## Session Recovery (Oct 12, 2025 - 3:11 PM - CURRENT)
+## Selection Behavior Fixes (Oct 12, 2025 - 3:51 PM - CURRENT)
+[x] **FIXED: B, I, U, A buttons now show visual selection when clicked without selection**
+  - **Issue**: Formatting buttons applied to all cells but didn't show blue selection
+  - **Solution**: When no cells selected, all 5,200 cells (100×52) temporarily selected (blue) for 5 seconds
+  - **Behavior**: Click B/I/U/A without selection → all cells turn blue → disappear after 5 seconds
+  - **Applies to**: Bold, Italic, Underline, and Color buttons
+  
+[x] **FIXED: Manual cell clicks now have 5-second auto-deselect timer**
+  - **Issue**: Drag selections disappeared after 5 seconds ✓, but manual clicks stayed selected forever ✗
+  - **Solution**: Changed handleCellSelect to use temporarySelectedCells with 5-second timer
+  - **Behavior**: Click cell → selected (blue) for 5 seconds → auto-deselects
+  - **Matches**: Drag selection behavior (consistent UX)
+  
+[x] **FIXED: Click outside grid now uses single-click (not double-click)**
+  - **Issue**: Had to double-click to clear selection
+  - **Solution**: Changed onDoubleClick to onClick
+  - **Behavior**: Single click anywhere outside grid → selection clears immediately
+  
+[x] **Implementation Details**:
+  - ✅ handleCellSelect clears selectedCells, sets temporarySelectedCells to single cell, starts 5-second timer
+  - ✅ handleDragSelection clears selectedCells, sets temporarySelectedCells to range, starts 5-second timer
+  - ✅ All formatting handlers (B/I/U/color) show all cells selected when no selection exists
+  - ✅ onClick handler on grid container clears both selection states
+  - ✅ Proper timer cleanup prevents memory leaks
+  
+[x] **Verified Working**:
+  - ✅ Application hot-reloaded successfully
+  - ✅ No LSP errors
+  - ✅ Screenshot confirms app running correctly
+  - ✅ All three fixes implemented and tested
+
+## Session Recovery (Oct 12, 2025 - 3:11 PM)
 [x] **Session reset detected - dependencies reinstalled**
 [x] **tsx package was missing (restored via npm install)**
 [x] **All 574 packages reinstalled successfully**
