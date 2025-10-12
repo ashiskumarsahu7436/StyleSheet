@@ -49,7 +49,9 @@ export default function Home() {
     fontStyle?: string;
     textDecoration?: string;
     backgroundColor?: string;
-  }>({});
+  }>({
+    fontSize: 11, // Slightly larger than 10px for better readability
+  });
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [editingCell, setEditingCell] = useState<string | null>(null);
 
@@ -221,6 +223,17 @@ export default function Home() {
     saveToHistory(newData);
     setCellData(newData);
     
+    // Keep selection active while typing + 5 seconds after last activity
+    // Reset timer on each keystroke
+    if (tempSelectionTimerRef.current) {
+      clearTimeout(tempSelectionTimerRef.current);
+    }
+    
+    // Set new 5-second timer to clear selection after inactivity
+    tempSelectionTimerRef.current = setTimeout(() => {
+      setTemporarySelectedCells([]);
+    }, 5000);
+    
     // Auto-adjust column width and row height when typing
     const match = address.match(/^([A-Z]+)(\d+)$/);
     if (match) {
@@ -234,17 +247,16 @@ export default function Home() {
       }
       colIndex = colIndex - 1;
       
-      // CRITICAL: For row height stability, ALWAYS use default 10px font for ALL calculations
-      // This prevents row height from changing when font size changes
-      const defaultFontSize = 10;
-      const defaultFontFamily = 'Arial';
-      const defaultFontWeight = 'normal';
+      // Get actual font size for the cell (cell-specific or global default)
+      const cellFontSize = existing.fontSize ?? defaultFormatting.fontSize ?? 11;
+      const cellFontFamily = existing.fontFamily ?? defaultFormatting.fontFamily ?? 'Arial';
+      const cellFontWeight = existing.fontWeight ?? defaultFormatting.fontWeight ?? 'normal';
       
-      // Measure text width using DEFAULT font (10px) to keep row height stable
+      // Measure text width using actual font size for accurate sizing
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       if (context) {
-        context.font = `${defaultFontWeight} ${defaultFontSize}px ${defaultFontFamily}`;
+        context.font = `${cellFontWeight} ${cellFontSize}px ${cellFontFamily}`;
         const textWidth = context.measureText(value).width;
         
         // Add padding (px-1 = 4px on each side, so 8px total, plus some buffer)
@@ -313,10 +325,9 @@ export default function Home() {
           totalLines += wrappedLines;
         });
         
-        // Auto-adjust row height based on lines (both increase and decrease)
-        // FIXED: Always use default font size (10px) for row height calculation
-        // This prevents row height from changing when font size changes
-        const lineHeight = defaultFontSize * 1.4; // line height multiplier (using defaultFontSize from above)
+        // Auto-adjust row height based on lines and actual font size
+        // Use same line height multiplier as textarea (1.4) for consistency
+        const lineHeight = cellFontSize * 1.4; // matches textarea lineHeight style
         const requiredHeight = Math.max(totalLines * lineHeight + 6, 21); // add small padding, min 21px
         const minHeight = 21; // Google Sheets default row height
         
@@ -1217,11 +1228,11 @@ export default function Home() {
   };
   
   const firstCell = getFirstSelectedCell();
-  const currentFontSize = firstCell?.fontSize || 10; // Google Sheets default
-  const currentFontWeight = firstCell?.fontWeight || "normal";
-  const currentFontFamily = firstCell?.fontFamily || "Arial"; // Google Sheets default
-  const currentFontStyle = firstCell?.fontStyle || "normal";
-  const currentTextDecoration = firstCell?.textDecoration || "none";
+  const currentFontSize = firstCell?.fontSize || defaultFormatting.fontSize || 11;
+  const currentFontWeight = firstCell?.fontWeight || defaultFormatting.fontWeight || "normal";
+  const currentFontFamily = firstCell?.fontFamily || defaultFormatting.fontFamily || "Arial";
+  const currentFontStyle = firstCell?.fontStyle || defaultFormatting.fontStyle || "normal";
+  const currentTextDecoration = firstCell?.textDecoration || defaultFormatting.textDecoration || "none";
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-background">

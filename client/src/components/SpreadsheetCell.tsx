@@ -27,7 +27,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   isSelected,
   isTemporary = false,
   backgroundColor = "transparent",
-  fontSize = 10, // Google Sheets default
+  fontSize = 11, // Default font size for readability
   fontWeight = "normal",
   fontFamily = "Arial", // Google Sheets default
   fontStyle = "normal",
@@ -147,7 +147,8 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
         onFocus={() => onEnterEditMode?.()}
         className="w-full h-full bg-transparent border-none outline-none px-1 pt-0.5 text-foreground resize-none align-top overflow-hidden"
         style={{ 
-          fontSize: `${fontSize}px`, 
+          fontSize: `${fontSize}px`,
+          lineHeight: `${fontSize * 1.4}px`,
           fontWeight,
           fontFamily,
           fontStyle,
