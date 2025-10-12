@@ -36,6 +36,10 @@ interface SpreadsheetGridProps {
   onRowResize?: (rowIndex: number, height: number) => void;
   onDragSelection?: (addresses: string[]) => void;
   mergedCells?: MergedCell[];
+  onDeleteRow?: (rowIndex: number) => void;
+  onInsertRow?: (rowIndex: number) => void;
+  onDeleteColumn?: (colIndex: number) => void;
+  onInsertColumn?: (colIndex: number) => void;
 }
 
 export default function SpreadsheetGrid({
@@ -55,6 +59,10 @@ export default function SpreadsheetGrid({
   onRowResize,
   onDragSelection,
   mergedCells = [],
+  onDeleteRow,
+  onInsertRow,
+  onDeleteColumn,
+  onInsertColumn,
 }: SpreadsheetGridProps) {
   const [resizingCol, setResizingCol] = useState<number | null>(null);
   const [resizingRow, setResizingRow] = useState<number | null>(null);
@@ -219,6 +227,34 @@ export default function SpreadsheetGrid({
                   data-testid={`header-col-${getColumnLabel(colIndex)}`}
                 >
                   {getColumnLabel(colIndex)}
+                  {/* Delete Column Button */}
+                  {onDeleteColumn && (
+                    <button
+                      className="absolute left-0 top-0 w-3 h-3 text-[8px] flex items-center justify-center bg-muted/40 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-red-500 hover:text-white transition-all z-20"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteColumn(colIndex);
+                      }}
+                      title="Delete column"
+                      data-testid={`button-delete-col-${colIndex}`}
+                    >
+                      ×
+                    </button>
+                  )}
+                  {/* Insert Column Button */}
+                  {onInsertColumn && (
+                    <button
+                      className="absolute right-0 top-0 w-3 h-3 text-[8px] flex items-center justify-center bg-muted/40 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-green-500 hover:text-white transition-all z-20"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onInsertColumn(colIndex);
+                      }}
+                      title="Insert column"
+                      data-testid={`button-insert-col-${colIndex}`}
+                    >
+                      +
+                    </button>
+                  )}
                   <div
                     className="absolute right-0 top-0 h-full w-2 cursor-col-resize hover:bg-primary z-10 transition-colors"
                     onMouseDown={(e) => handleColumnBorderMouseDown(e, colIndex)}
@@ -238,6 +274,34 @@ export default function SpreadsheetGrid({
                     data-testid={`header-row-${rowIndex + 1}`}
                   >
                     {rowIndex + 1}
+                    {/* Delete Row Button */}
+                    {onDeleteRow && (
+                      <button
+                        className="absolute left-0 top-0 w-3 h-3 text-[8px] flex items-center justify-center bg-muted/40 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-red-500 hover:text-white transition-all z-20"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteRow(rowIndex);
+                        }}
+                        title="Delete row"
+                        data-testid={`button-delete-row-${rowIndex}`}
+                      >
+                        ×
+                      </button>
+                    )}
+                    {/* Insert Row Button */}
+                    {onInsertRow && (
+                      <button
+                        className="absolute right-0 top-0 w-3 h-3 text-[8px] flex items-center justify-center bg-muted/40 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-green-500 hover:text-white transition-all z-20"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onInsertRow(rowIndex);
+                        }}
+                        title="Insert row"
+                        data-testid={`button-insert-row-${rowIndex}`}
+                      >
+                        +
+                      </button>
+                    )}
                     <div
                       className="absolute bottom-0 left-0 w-full h-2 cursor-row-resize hover:bg-primary z-10 transition-colors"
                       onMouseDown={(e) => handleRowBorderMouseDown(e, rowIndex)}

@@ -796,6 +796,132 @@ export default function Home() {
     });
   };
 
+  const handleDeleteRow = (rowIndex: number) => {
+    const newCellData = new Map(cellData);
+    const newMergedCells = mergedCells.filter(m => {
+      const startRow = parseInt(m.startAddress.match(/\d+/)?.[0] || '0') - 1;
+      return startRow !== rowIndex;
+    });
+    
+    for (let col = 0; col < 52; col++) {
+      const address = `${getColumnLabel(col)}${rowIndex + 1}`;
+      newCellData.delete(address);
+    }
+    
+    const updatedCellData = new Map<string, CellData>();
+    newCellData.forEach((data, address) => {
+      const match = address.match(/([A-Z]+)(\d+)/);
+      if (match) {
+        const col = match[1];
+        const row = parseInt(match[2]);
+        if (row > rowIndex + 1) {
+          const newAddress = `${col}${row - 1}`;
+          updatedCellData.set(newAddress, { ...data, address: newAddress });
+        } else {
+          updatedCellData.set(address, data);
+        }
+      }
+    });
+    
+    setCellData(updatedCellData);
+    setMergedCells(newMergedCells);
+    saveToHistory(updatedCellData, newMergedCells);
+    setSelectedCells([]);
+  };
+
+  const handleInsertRow = (rowIndex: number) => {
+    const newCellData = new Map<string, CellData>();
+    
+    cellData.forEach((data, address) => {
+      const match = address.match(/([A-Z]+)(\d+)/);
+      if (match) {
+        const col = match[1];
+        const row = parseInt(match[2]);
+        if (row >= rowIndex + 1) {
+          const newAddress = `${col}${row + 1}`;
+          newCellData.set(newAddress, { ...data, address: newAddress });
+        } else {
+          newCellData.set(address, data);
+        }
+      }
+    });
+    
+    setCellData(newCellData);
+    saveToHistory(newCellData);
+  };
+
+  const handleDeleteColumn = (colIndex: number) => {
+    const colLabel = getColumnLabel(colIndex);
+    const newCellData = new Map(cellData);
+    const newMergedCells = mergedCells.filter(m => {
+      const startCol = m.startAddress.match(/[A-Z]+/)?.[0];
+      return startCol !== colLabel;
+    });
+    
+    for (let row = 0; row < 100; row++) {
+      const address = `${colLabel}${row + 1}`;
+      newCellData.delete(address);
+    }
+    
+    const updatedCellData = new Map<string, CellData>();
+    const getColumnIndexFromLabel = (label: string): number => {
+      let index = 0;
+      for (let i = 0; i < label.length; i++) {
+        index = index * 26 + (label.charCodeAt(i) - 65 + 1);
+      }
+      return index - 1;
+    };
+    
+    newCellData.forEach((data, address) => {
+      const match = address.match(/([A-Z]+)(\d+)/);
+      if (match) {
+        const col = match[1];
+        const row = match[2];
+        const currentColIndex = getColumnIndexFromLabel(col);
+        if (currentColIndex > colIndex) {
+          const newAddress = `${getColumnLabel(currentColIndex - 1)}${row}`;
+          updatedCellData.set(newAddress, { ...data, address: newAddress });
+        } else {
+          updatedCellData.set(address, data);
+        }
+      }
+    });
+    
+    setCellData(updatedCellData);
+    setMergedCells(newMergedCells);
+    saveToHistory(updatedCellData, newMergedCells);
+    setSelectedCells([]);
+  };
+
+  const handleInsertColumn = (colIndex: number) => {
+    const newCellData = new Map<string, CellData>();
+    const getColumnIndexFromLabel = (label: string): number => {
+      let index = 0;
+      for (let i = 0; i < label.length; i++) {
+        index = index * 26 + (label.charCodeAt(i) - 65 + 1);
+      }
+      return index - 1;
+    };
+    
+    cellData.forEach((data, address) => {
+      const match = address.match(/([A-Z]+)(\d+)/);
+      if (match) {
+        const col = match[1];
+        const row = match[2];
+        const currentColIndex = getColumnIndexFromLabel(col);
+        if (currentColIndex >= colIndex) {
+          const newAddress = `${getColumnLabel(currentColIndex + 1)}${row}`;
+          newCellData.set(newAddress, { ...data, address: newAddress });
+        } else {
+          newCellData.set(address, data);
+        }
+      }
+    });
+    
+    setCellData(newCellData);
+    saveToHistory(newCellData);
+  };
+
   useEffect(() => {
     return () => {
       if (tempSelectionTimerRef.current) {
@@ -883,6 +1009,10 @@ export default function Home() {
             }}
             onDragSelection={handleDragSelection}
             mergedCells={mergedCells}
+            onDeleteRow={handleDeleteRow}
+            onInsertRow={handleInsertRow}
+            onDeleteColumn={handleDeleteColumn}
+            onInsertColumn={handleInsertColumn}
           />
         </div>
       </div>
