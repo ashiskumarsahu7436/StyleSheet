@@ -271,6 +271,48 @@
   - ✅ All formatting features operational
 [x] **Migration COMPLETE - Project ready for development! ✓**
 
+## Critical Bug Fixes (Oct 12, 2025 - 1:00 PM)
+[x] **FIXED: Row height auto-increase when font size changes**
+  - **Issue**: Row height was automatically increasing when user increased font size
+  - **Root Cause**: handleCellChange was using cell's fontSize for row height calculation
+  - **Solution**: 
+    - ✅ Changed row height calculation to always use fixed 10px baseline font size
+    - ✅ Row height now only depends on number of text lines, NOT font size
+    - ✅ Prevents unwanted row height changes when font size is modified
+  - **Technical Implementation**:
+    - Updated `client/src/pages/home.tsx` - handleCellChange function
+    - Fixed line: `const lineHeight = 10 * 1.4;` (always uses 10px, ignores fontSize)
+  - **Verified**: Architect confirmed row height remains stable when font size changes
+
+[x] **FIXED: Global default formatting for all cells**
+  - **Issue**: Formatting changes (font size, bold, etc.) should apply to ALL cells when nothing is selected
+  - **Previous Approach (rejected)**: Only updated existing cells in cellData - missed empty cells
+  - **New Approach (implemented)**:
+    - ✅ Added `defaultFormatting` global state for default formatting values
+    - ✅ When NO cells selected: formatting handlers update `defaultFormatting`
+    - ✅ When cells ARE selected: formatting is applied to specific cells (original behavior)
+    - ✅ SpreadsheetCell uses cascading defaults: `cell.fontSize || defaultFormatting.fontSize`
+    - ✅ This means ALL cells (including empty ones) inherit global defaults
+  - **Critical Fix - Auto-sizing**:
+    - ✅ Updated handleCellChange to use cascading font metrics for width/height calculation
+    - ✅ Uses: `existing.fontSize ?? defaultFormatting.fontSize ?? 10`
+    - ✅ Ensures auto-sizing calculations match actual rendered font size
+    - ✅ Prevents text clipping when global font size is increased
+  - **Technical Implementation**:
+    - Updated `client/src/pages/home.tsx`:
+      - Added defaultFormatting state
+      - Updated all formatting handlers (font size, weight, family, bold, italic, underline, color)
+      - Fixed auto-sizing calculations to use cascading defaults
+    - Updated `client/src/components/SpreadsheetGrid.tsx`:
+      - Added defaultFormatting prop to interface
+      - Passes merged formatting to SpreadsheetCell
+  - **How It Works**:
+    1. User changes font size with no selection → updates defaultFormatting.fontSize
+    2. All cells without specific fontSize now render with new fontSize
+    3. When user types, handleCellChange uses correct fontSize for width calculation
+    4. Column width adjusts properly based on actual rendered font size
+  - **Verified**: Architect confirmed global default formatting works correctly with proper auto-sizing
+
 ## Merge Cells Button - Google Sheets Style (Oct 12, 2025 - 9:15 AM)
 [x] **IMPLEMENTED: Google Sheets-style merge cells button with separate icon and dropdown**
   - **User Request**: Match Google Sheets merge button exactly - icon and dropdown should be separate
