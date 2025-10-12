@@ -844,6 +844,7 @@ export default function Home() {
           onModeToggle={handleModeToggle}
           onMergeCells={handleMergeCells}
           onUnmergeCells={handleUnmergeCells}
+          isMergedCell={isMergedCell}
         />
         <div 
           className="flex-1 overflow-hidden"

@@ -256,6 +256,39 @@
 [x] **Migration COMPLETE - All tasks finished! ✓**
 [x] **Project is fully functional and ready for use! ✓**
 
+## Merge Cells Button - Google Sheets Style (Oct 12, 2025 - 9:15 AM)
+[x] **IMPLEMENTED: Google Sheets-style merge cells button with separate icon and dropdown**
+  - **User Request**: Match Google Sheets merge button exactly - icon and dropdown should be separate
+  - **Changes Made**:
+    - ✅ Changed icon from Layers to Table2 (grid/table icon matching Google Sheets)
+    - ✅ Split into TWO separate buttons visually grouped together:
+      - **Main Icon Button** (Table2): Directly merges/unmerges cells (no dropdown)
+      - **Dropdown Button** (ChevronDown): Opens menu to select merge type
+    - ✅ Icon button intelligently toggles between merge/unmerge based on selection state
+    - ✅ Dropdown menu shows all merge type options (all/vertical/horizontal/unmerge)
+  
+  - **Technical Implementation**:
+    - ✅ Updated `GoogleSheetsToolbar.tsx`:
+      - Imported Table2 and SlidersHorizontal icons (replaced Layers)
+      - Added `isMergedCell` prop to track merge state
+      - Created flex container with two buttons (rounded edges for visual grouping)
+      - Main button has `rounded-r-none`, dropdown has `rounded-l-none` with border separator
+    - ✅ Updated `client/src/pages/home.tsx`:
+      - Passed `isMergedCell` prop to GoogleSheetsToolbar
+      - isMergedCell already tracked: `selectedCells.length === 1 && mergedCells.some(m => m.startAddress === selectedCells[0])`
+    
+  - **How It Works Now**:
+    1. Click main icon (Table2) → Directly merges (if not merged) or unmerges (if merged)
+    2. Click dropdown (ChevronDown) → Opens menu to select merge type (all/vertical/horizontal/unmerge)
+    3. Icon and dropdown are separate but visually grouped as one unit
+  
+  - **Verified Working**:
+    - ✅ Application restarted successfully
+    - ✅ Screenshot confirms Google Sheets-style button with correct icon
+    - ✅ Two separate buttons visually grouped together
+    - ✅ No LSP errors
+    - ✅ All features working correctly
+
 ## Simple/Complex Mode Refinement (Oct 12, 2025 - 8:30 AM)
 [x] **REFINED: Simple Mode toolbar to show only essential features**
   - **User Request**: Hide specific features in Simple Mode (shown in screenshots)
