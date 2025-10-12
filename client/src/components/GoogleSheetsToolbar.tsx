@@ -287,7 +287,7 @@ export default function GoogleSheetsToolbar({
             value={currentFontSize.toString()}
             onValueChange={(value) => onFontSizeChange(parseInt(value))}
           >
-            <SelectTrigger className="w-12 h-7 text-xs" data-testid="select-font-size">
+            <SelectTrigger className="w-16 h-7 text-xs px-2" data-testid="select-font-size">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
