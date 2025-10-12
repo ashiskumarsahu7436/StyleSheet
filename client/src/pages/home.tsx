@@ -69,6 +69,64 @@ export default function Home() {
     return label;
   };
 
+  // Helper function to convert column label (like "A", "B", "AZ") to index
+  const getColumnIndex = (label: string): number => {
+    let index = 0;
+    for (let i = 0; i < label.length; i++) {
+      index = index * 26 + (label.charCodeAt(i) - 65 + 1);
+    }
+    return index - 1;
+  };
+
+  // Helper function to parse cell address into column and row
+  const parseCellAddress = (address: string): { col: number; row: number } | null => {
+    const match = address.match(/^([A-Z]+)(\d+)$/);
+    if (!match) return null;
+    
+    const colLabel = match[1];
+    const rowNum = parseInt(match[2], 10);
+    
+    return {
+      col: getColumnIndex(colLabel),
+      row: rowNum - 1
+    };
+  };
+
+  // Navigate to adjacent cell using arrow keys
+  const navigateCell = (direction: 'up' | 'down' | 'left' | 'right') => {
+    // Only navigate if exactly one cell is selected
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    if (allSelected.length !== 1) return;
+
+    const currentAddress = allSelected[0];
+    const parsed = parseCellAddress(currentAddress);
+    if (!parsed) return;
+
+    let { col, row } = parsed;
+
+    // Calculate next cell based on direction
+    switch (direction) {
+      case 'up':
+        row = Math.max(0, row - 1);
+        break;
+      case 'down':
+        row = Math.min(99, row + 1); // Max 100 rows
+        break;
+      case 'left':
+        col = Math.max(0, col - 1);
+        break;
+      case 'right':
+        col = Math.min(51, col + 1); // Max 52 columns (A-AZ)
+        break;
+    }
+
+    // Generate new cell address
+    const newAddress = `${getColumnLabel(col)}${row + 1}`;
+    
+    // Move selection to new cell
+    handleCellSelect(newAddress);
+  };
+
   const handleCellSelect = (address: string) => {
     // Clear any permanent selections first (row/column selections)
     setSelectedCells([]);
@@ -1106,6 +1164,44 @@ export default function Home() {
       }
     };
   }, []);
+
+  // Keyboard navigation with arrow keys (Excel/Google Sheets style)
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle arrow keys when not typing in an input field
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Check if an arrow key was pressed
+      switch (event.key) {
+        case 'ArrowUp':
+          event.preventDefault();
+          navigateCell('up');
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          navigateCell('down');
+          break;
+        case 'ArrowLeft':
+          event.preventDefault();
+          navigateCell('left');
+          break;
+        case 'ArrowRight':
+          event.preventDefault();
+          navigateCell('right');
+          break;
+      }
+    };
+
+    // Add event listener to document
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup on unmount
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedCells, temporarySelectedCells]); // Re-run when selection changes
 
   const isMergedCell = selectedCells.length === 1 && mergedCells.some(m => m.startAddress === selectedCells[0]);
   
