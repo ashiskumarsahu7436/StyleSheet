@@ -213,14 +213,14 @@ export default function GoogleSheetsToolbar({
           <Printer className="h-3.5 w-3.5" />
         </Button>
 
-        {/* Paint Format - Always visible */}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Paint format">
-          <Paintbrush className="h-3.5 w-3.5" />
-        </Button>
-
-        {/* Complex Mode Only - Zoom and Number Formatting */}
+        {/* Complex Mode Only - Paint Format, Zoom and Number Formatting */}
         {isComplexMode && (
           <>
+            {/* Paint Format */}
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Paint format">
+              <Paintbrush className="h-3.5 w-3.5" />
+            </Button>
+
             {/* Zoom */}
             <Select defaultValue="100">
               <SelectTrigger className="w-16 h-7 text-xs">
