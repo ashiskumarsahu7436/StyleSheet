@@ -139,16 +139,17 @@ export default function Home() {
       }
       colIndex = colIndex - 1;
       
-      // Get cell formatting (use cell-specific formatting, then global default, then hardcoded default)
-      const fontSize = existing.fontSize ?? defaultFormatting.fontSize ?? 10; // Google Sheets default
-      const fontFamily = existing.fontFamily ?? defaultFormatting.fontFamily ?? 'Arial'; // Google Sheets default
-      const fontWeight = existing.fontWeight ?? defaultFormatting.fontWeight ?? 'normal';
+      // CRITICAL: For row height stability, ALWAYS use default 10px font for ALL calculations
+      // This prevents row height from changing when font size changes
+      const defaultFontSize = 10;
+      const defaultFontFamily = 'Arial';
+      const defaultFontWeight = 'normal';
       
-      // Measure text width
+      // Measure text width using DEFAULT font (10px) to keep row height stable
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       if (context) {
-        context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        context.font = `${defaultFontWeight} ${defaultFontSize}px ${defaultFontFamily}`;
         const textWidth = context.measureText(value).width;
         
         // Add padding (px-1 = 4px on each side, so 8px total, plus some buffer)
@@ -220,8 +221,7 @@ export default function Home() {
         // Auto-adjust row height based on lines (both increase and decrease)
         // FIXED: Always use default font size (10px) for row height calculation
         // This prevents row height from changing when font size changes
-        const defaultFontSize = 10; // Always use default font size for height calculation
-        const lineHeight = defaultFontSize * 1.4; // line height multiplier
+        const lineHeight = defaultFontSize * 1.4; // line height multiplier (using defaultFontSize from above)
         const requiredHeight = Math.max(totalLines * lineHeight + 6, 21); // add small padding, min 21px
         const minHeight = 21; // Google Sheets default row height
         

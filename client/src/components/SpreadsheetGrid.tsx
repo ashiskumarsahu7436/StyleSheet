@@ -334,9 +334,7 @@ export default function SpreadsheetGrid({
                       cell = {
                         address,
                         value: "",
-                        backgroundColor: "transparent",
-                        fontSize: 10, // Google Sheets default
-                        fontWeight: "normal",
+                        // Don't set defaults here - let them come from defaultFormatting prop
                       };
                     }
                     
@@ -375,12 +373,12 @@ export default function SpreadsheetGrid({
                           value={cell.value}
                           isSelected={isSelected}
                           isTemporary={isTemporary}
-                          backgroundColor={cell.backgroundColor || defaultFormatting.backgroundColor}
-                          fontSize={cell.fontSize || defaultFormatting.fontSize}
-                          fontWeight={cell.fontWeight || defaultFormatting.fontWeight}
-                          fontFamily={cell.fontFamily || defaultFormatting.fontFamily}
-                          fontStyle={cell.fontStyle || defaultFormatting.fontStyle}
-                          textDecoration={cell.textDecoration || defaultFormatting.textDecoration}
+                          backgroundColor={cell.backgroundColor ?? defaultFormatting.backgroundColor}
+                          fontSize={cell.fontSize ?? defaultFormatting.fontSize}
+                          fontWeight={cell.fontWeight ?? defaultFormatting.fontWeight}
+                          fontFamily={cell.fontFamily ?? defaultFormatting.fontFamily}
+                          fontStyle={cell.fontStyle ?? defaultFormatting.fontStyle}
+                          textDecoration={cell.textDecoration ?? defaultFormatting.textDecoration}
                           onClick={() => onCellSelect(cell.address)}
                           onDoubleClick={() => {}}
                           onChange={(value) => onCellChange(cell.address, value)}
