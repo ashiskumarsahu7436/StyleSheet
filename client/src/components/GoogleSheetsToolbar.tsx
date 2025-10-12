@@ -111,26 +111,25 @@ export default function GoogleSheetsToolbar({
     <div className="border-b border-border bg-background">
       {/* First Line - Title, Menu Bar, and Actions */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+        {/* Left side - StyleSheet Title */}
+        <div className="flex items-baseline gap-2">
+          <h1 className="text-xl font-bold tracking-tight">StyleSheet</h1>
+          <span className="text-xs text-muted-foreground font-light">An Excel-like spreadsheet builder</span>
+        </div>
+        
+        {/* Right side - Input Box + Icons */}
         <div className="flex items-center gap-3">
-          {/* StyleSheet Title */}
-          <div className="flex items-baseline gap-2">
-            <h1 className="text-xl font-bold tracking-tight">StyleSheet</h1>
-            <span className="text-xs text-muted-foreground font-light">Excel-like spreadsheet builder</span>
-          </div>
-          
           {/* Spreadsheet Name Input Box */}
           <input
             type="text"
             value={spreadsheetName}
             onChange={(e) => onSpreadsheetNameChange(e.target.value)}
-            className="text-sm font-normal bg-background border border-border px-3 py-1 rounded outline-none focus:border-primary"
+            className="text-sm font-normal bg-background border border-border px-3 py-1.5 rounded outline-none focus:border-primary w-48"
             placeholder="My Spreadsheet"
             data-testid="input-spreadsheet-name"
           />
-        </div>
-        
-        {/* Right side - Icons, Theme Toggle + History */}
-        <div className="flex items-center gap-2">
+          
+          {/* Icons */}
           <Star className="h-4 w-4 text-muted-foreground" />
           <Folder className="h-4 w-4 text-muted-foreground" />
           <Cloud className="h-4 w-4 text-muted-foreground" />
