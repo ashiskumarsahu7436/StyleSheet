@@ -129,18 +129,13 @@ export default function GoogleSheetsToolbar({
           />
         </div>
         
-        {/* Right side - Download and Theme Toggle */}
+        {/* Right side - Icons, Theme Toggle + History */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="default"
-            size="sm"
-            className="h-8 px-3 gap-1.5 text-xs"
-            onClick={onDownload}
-            title="Download spreadsheet"
-            data-testid="button-download-header"
-          >
-            <Download className="h-3.5 w-3.5" />
-            Download
+          <Star className="h-4 w-4 text-muted-foreground" />
+          <Folder className="h-4 w-4 text-muted-foreground" />
+          <Cloud className="h-4 w-4 text-muted-foreground" />
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Version history">
+            <History className="h-4 w-4" />
           </Button>
           <ThemeToggle />
         </div>
