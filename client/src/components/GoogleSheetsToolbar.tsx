@@ -172,55 +172,55 @@ export default function GoogleSheetsToolbar({
 
       {/* Toolbar - All Icons */}
       <div className="flex items-center gap-0.5 px-2 py-1 overflow-x-auto select-none bg-muted/30">
-        {/* Complex Mode Only - Search, Undo/Redo, Print, Paint, Zoom, Number Formats, Font Controls */}
+        {/* Search - Always visible */}
+        <Button variant="ghost" size="icon" className="h-7 w-7" title="Search">
+          <Search className="h-3.5 w-3.5" />
+        </Button>
+
+        {/* Undo/Redo - Always visible */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={onUndo}
+          disabled={!canUndo}
+          title="Undo (Ctrl+Z)"
+          data-testid="button-undo"
+        >
+          <Undo2 className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={onRedo}
+          disabled={!canRedo}
+          title="Redo (Ctrl+Y)"
+          data-testid="button-redo"
+        >
+          <Redo2 className="h-3.5 w-3.5" />
+        </Button>
+
+        {/* Print - Always visible */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={() => window.print()}
+          title="Print (Ctrl+P)"
+          data-testid="button-print"
+        >
+          <Printer className="h-3.5 w-3.5" />
+        </Button>
+
+        {/* Paint Format - Always visible */}
+        <Button variant="ghost" size="icon" className="h-7 w-7" title="Paint format">
+          <Paintbrush className="h-3.5 w-3.5" />
+        </Button>
+
+        {/* Complex Mode Only - Zoom and Number Formatting */}
         {isComplexMode && (
           <>
-            {/* Search */}
-            <Button variant="ghost" size="icon" className="h-7 w-7" title="Search">
-              <Search className="h-3.5 w-3.5" />
-            </Button>
-
-            {/* Undo/Redo */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={onUndo}
-              disabled={!canUndo}
-              title="Undo (Ctrl+Z)"
-              data-testid="button-undo"
-            >
-              <Undo2 className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={onRedo}
-              disabled={!canRedo}
-              title="Redo (Ctrl+Y)"
-              data-testid="button-redo"
-            >
-              <Redo2 className="h-3.5 w-3.5" />
-            </Button>
-
-            {/* Print */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={() => window.print()}
-              title="Print (Ctrl+P)"
-              data-testid="button-print"
-            >
-              <Printer className="h-3.5 w-3.5" />
-            </Button>
-
-            {/* Paint Format */}
-            <Button variant="ghost" size="icon" className="h-7 w-7" title="Paint format">
-              <Paintbrush className="h-3.5 w-3.5" />
-            </Button>
-
             {/* Zoom */}
             <Select defaultValue="100">
               <SelectTrigger className="w-16 h-7 text-xs">
@@ -255,61 +255,61 @@ export default function GoogleSheetsToolbar({
             </Button>
 
             <div className="h-5 w-px bg-border mx-1" />
-
-            {/* Font Family */}
-            <Select value={currentFontFamily} onValueChange={onFontFamilyChange}>
-              <SelectTrigger className="w-28 h-7 text-xs" data-testid="select-font-family">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FONT_FAMILIES.map((font) => (
-                  <SelectItem key={font} value={font}>
-                    {font}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Font Size with +/- buttons */}
-            <div className="flex items-center gap-0.5">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-6"
-                onClick={() => onFontSizeChange(Math.max(8, currentFontSize - 1))}
-                title="Decrease font size"
-              >
-                <Minus className="h-3 w-3" />
-              </Button>
-              <Select
-                value={currentFontSize.toString()}
-                onValueChange={(value) => onFontSizeChange(parseInt(value))}
-              >
-                <SelectTrigger className="w-12 h-7 text-xs" data-testid="select-font-size">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {FONT_SIZES.map((size) => (
-                    <SelectItem key={size} value={size.toString()}>
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-6"
-                onClick={() => onFontSizeChange(Math.min(72, currentFontSize + 1))}
-                title="Increase font size"
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
-            </div>
-
-            <div className="h-5 w-px bg-border mx-1" />
           </>
         )}
+
+        {/* Font Family - Always visible */}
+        <Select value={currentFontFamily} onValueChange={onFontFamilyChange}>
+          <SelectTrigger className="w-28 h-7 text-xs" data-testid="select-font-family">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {FONT_FAMILIES.map((font) => (
+              <SelectItem key={font} value={font}>
+                {font}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Font Size with +/- buttons - Always visible */}
+        <div className="flex items-center gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-6"
+            onClick={() => onFontSizeChange(Math.max(8, currentFontSize - 1))}
+            title="Decrease font size"
+          >
+            <Minus className="h-3 w-3" />
+          </Button>
+          <Select
+            value={currentFontSize.toString()}
+            onValueChange={(value) => onFontSizeChange(parseInt(value))}
+          >
+            <SelectTrigger className="w-12 h-7 text-xs" data-testid="select-font-size">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {FONT_SIZES.map((size) => (
+                <SelectItem key={size} value={size.toString()}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-6"
+            onClick={() => onFontSizeChange(Math.min(72, currentFontSize + 1))}
+            title="Increase font size"
+          >
+            <Plus className="h-3 w-3" />
+          </Button>
+        </div>
+
+        <div className="h-5 w-px bg-border mx-1" />
 
         {/* Text Formatting: Bold, Italic, Underline */}
         <Button
@@ -350,7 +350,7 @@ export default function GoogleSheetsToolbar({
           </Button>
         </div>
 
-        {/* Fill Color with Palette */}
+        {/* Fill Color with Palette - Always visible */}
         <div className="relative group">
           <Button variant="ghost" size="icon" className="h-7 w-7" title="Fill color">
             <Palette className="h-3.5 w-3.5" />
@@ -369,21 +369,20 @@ export default function GoogleSheetsToolbar({
           </div>
         </div>
 
-        {/* Complex Mode Only - Borders, Merge, Alignment, Wrapping, Rotation, More */}
+        {/* Borders - Always visible */}
+        <div className="h-5 w-px bg-border mx-1" />
+        <Button variant="ghost" size="icon" className="h-7 w-7" title="Borders">
+          <Grid3x3 className="h-3.5 w-3.5" />
+        </Button>
+
+        {/* Merge cells - Always visible */}
+        <Button variant="ghost" size="icon" className="h-7 w-7" title="Merge cells">
+          <span className="text-xs font-bold">⊞</span>
+        </Button>
+
+        {/* Complex Mode Only - Alignment buttons (Screenshot 1) */}
         {isComplexMode && (
           <>
-            <div className="h-5 w-px bg-border mx-1" />
-
-            {/* Borders */}
-            <Button variant="ghost" size="icon" className="h-7 w-7" title="Borders">
-              <Grid3x3 className="h-3.5 w-3.5" />
-            </Button>
-
-            {/* Merge cells - not functional, just visual */}
-            <Button variant="ghost" size="icon" className="h-7 w-7" title="Merge cells">
-              <span className="text-xs font-bold">⊞</span>
-            </Button>
-
             <div className="h-5 w-px bg-border mx-1" />
 
             {/* Horizontal Alignment */}
