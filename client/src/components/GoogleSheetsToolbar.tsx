@@ -124,7 +124,7 @@ export default function GoogleSheetsToolbar({
             type="text"
             value={spreadsheetName}
             onChange={(e) => onSpreadsheetNameChange(e.target.value)}
-            className="text-sm font-normal bg-background border border-border px-3 py-1.5 rounded outline-none focus:border-primary w-48"
+            className="text-sm font-normal bg-background border border-border px-3 py-1.5 rounded outline-none focus:border-primary w-56"
             placeholder="My Spreadsheet"
             data-testid="input-spreadsheet-name"
           />
