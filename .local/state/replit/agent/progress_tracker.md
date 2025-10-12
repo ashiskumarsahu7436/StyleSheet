@@ -235,7 +235,7 @@
   - ✅ Multi-line text support
 [x] **Migration COMPLETE - Project ready for development! ✓**
 
-## Selection Behavior Fixes (Oct 12, 2025 - 3:51 PM - CURRENT)
+## Selection Behavior Fixes (Oct 12, 2025 - 4:32 PM - CURRENT)
 [x] **FIXED: B, I, U, A buttons now show visual selection when clicked without selection**
   - **Issue**: Formatting buttons applied to all cells but didn't show blue selection
   - **Solution**: When no cells selected, all 5,200 cells (100×52) temporarily selected (blue) for 5 seconds
@@ -248,6 +248,14 @@
   - **Behavior**: Click cell → selected (blue) for 5 seconds → auto-deselects
   - **Matches**: Drag selection behavior (consistent UX)
   
+[x] **FIXED: Row/column header selection now has 5-second auto-deselect timer**
+  - **Issue**: Double-clicking row/column headers created permanent selections (never expired)
+  - **Solution**: Changed handleRowSelect and handleColumnSelect to use temporarySelectedCells with 5-second timer
+  - **Behavior**: 
+    - Double-click row header → entire row (52 cells) selected for 5 seconds → auto-deselects
+    - Double-click column header → entire column (100 cells) selected for 5 seconds → auto-deselects
+  - **Consistency**: All selection methods now use same 5-second timer system
+  
 [x] **FIXED: Click outside grid now uses single-click (not double-click)**
   - **Issue**: Had to double-click to clear selection
   - **Solution**: Changed onDoubleClick to onClick
@@ -256,15 +264,19 @@
 [x] **Implementation Details**:
   - ✅ handleCellSelect clears selectedCells, sets temporarySelectedCells to single cell, starts 5-second timer
   - ✅ handleDragSelection clears selectedCells, sets temporarySelectedCells to range, starts 5-second timer
+  - ✅ handleRowSelect clears selectedCells, sets temporarySelectedCells to row cells (52 cells), starts 5-second timer
+  - ✅ handleColumnSelect clears selectedCells, sets temporarySelectedCells to column cells (100 cells), starts 5-second timer
   - ✅ All formatting handlers (B/I/U/color) show all cells selected when no selection exists
   - ✅ onClick handler on grid container clears both selection states
   - ✅ Proper timer cleanup prevents memory leaks
+  - ✅ All selection entry points converge on temporarySelectedCells with identical timer pattern
   
 [x] **Verified Working**:
   - ✅ Application hot-reloaded successfully
   - ✅ No LSP errors
   - ✅ Screenshot confirms app running correctly
-  - ✅ All three fixes implemented and tested
+  - ✅ Architect confirmed all fixes working correctly
+  - ✅ All four selection types (cell, drag, row, column) now consistent with 5-second timer
 
 ## Session Recovery (Oct 12, 2025 - 3:11 PM)
 [x] **Session reset detected - dependencies reinstalled**

@@ -93,7 +93,19 @@ export default function Home() {
       const colLabel = getColumnLabel(col);
       rowCells.push(`${colLabel}${rowIndex + 1}`);
     }
-    setSelectedCells(rowCells);
+    
+    // Use temporary selection with 5-second timer (same as cell/drag selection)
+    setSelectedCells([]);
+    setTemporarySelectedCells(rowCells);
+    
+    // Start 5-second timer to clear temporary selection
+    if (tempSelectionTimerRef.current) {
+      clearTimeout(tempSelectionTimerRef.current);
+    }
+    
+    tempSelectionTimerRef.current = setTimeout(() => {
+      setTemporarySelectedCells([]);
+    }, 5000);
   };
 
   const handleColumnSelect = (colIndex: number) => {
@@ -102,7 +114,19 @@ export default function Home() {
     for (let row = 0; row < 100; row++) {
       colCells.push(`${colLabel}${row + 1}`);
     }
-    setSelectedCells(colCells);
+    
+    // Use temporary selection with 5-second timer (same as cell/drag selection)
+    setSelectedCells([]);
+    setTemporarySelectedCells(colCells);
+    
+    // Start 5-second timer to clear temporary selection
+    if (tempSelectionTimerRef.current) {
+      clearTimeout(tempSelectionTimerRef.current);
+    }
+    
+    tempSelectionTimerRef.current = setTimeout(() => {
+      setTemporarySelectedCells([]);
+    }, 5000);
   };
 
   const handleDragSelection = (addresses: string[]) => {
