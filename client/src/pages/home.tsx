@@ -70,12 +70,21 @@ export default function Home() {
   };
 
   const handleCellSelect = (address: string) => {
-    setSelectedCells((prev) => {
-      if (prev.includes(address)) {
-        return prev.filter((a) => a !== address);
-      }
-      return [...prev, address];
-    });
+    // Clear any permanent selections first (row/column selections)
+    setSelectedCells([]);
+    
+    // Replace temporary selection with just the clicked cell (not toggle/accumulate)
+    // This ensures each new click replaces the previous selection, matching drag behavior
+    setTemporarySelectedCells([address]);
+    
+    // Start 5-second timer to clear temporary selection
+    if (tempSelectionTimerRef.current) {
+      clearTimeout(tempSelectionTimerRef.current);
+    }
+    
+    tempSelectionTimerRef.current = setTimeout(() => {
+      setTemporarySelectedCells([]);
+    }, 5000);
   };
 
   const handleRowSelect = (rowIndex: number) => {
@@ -97,6 +106,9 @@ export default function Home() {
   };
 
   const handleDragSelection = (addresses: string[]) => {
+    // Clear any permanent selections first (row/column selections)
+    setSelectedCells([]);
+    
     setTemporarySelectedCells(addresses);
     
     if (tempSelectionTimerRef.current) {
@@ -264,6 +276,25 @@ export default function Home() {
         ...prev,
         backgroundColor: color === "transparent" ? undefined : color,
       }));
+      
+      // Show all cells as selected with 5-second timer
+      const allCellAddresses: string[] = [];
+      for (let row = 0; row < 100; row++) {
+        for (let col = 0; col < 52; col++) {
+          const colLabel = getColumnLabel(col);
+          allCellAddresses.push(`${colLabel}${row + 1}`);
+        }
+      }
+      setTemporarySelectedCells(allCellAddresses);
+      
+      // Start 5-second timer
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
+      tempSelectionTimerRef.current = setTimeout(() => {
+        setTemporarySelectedCells([]);
+      }, 5000);
+      
       return;
     }
     
@@ -330,6 +361,25 @@ export default function Home() {
         ...prev,
         fontWeight: weight,
       }));
+      
+      // Show all cells as selected with 5-second timer
+      const allCellAddresses: string[] = [];
+      for (let row = 0; row < 100; row++) {
+        for (let col = 0; col < 52; col++) {
+          const colLabel = getColumnLabel(col);
+          allCellAddresses.push(`${colLabel}${row + 1}`);
+        }
+      }
+      setTemporarySelectedCells(allCellAddresses);
+      
+      // Start 5-second timer
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
+      tempSelectionTimerRef.current = setTimeout(() => {
+        setTemporarySelectedCells([]);
+      }, 5000);
+      
       return;
     }
     
@@ -397,6 +447,25 @@ export default function Home() {
           fontStyle: currentStyle === "italic" ? "normal" : "italic"
         };
       });
+      
+      // Show all cells as selected with 5-second timer
+      const allCellAddresses: string[] = [];
+      for (let row = 0; row < 100; row++) {
+        for (let col = 0; col < 52; col++) {
+          const colLabel = getColumnLabel(col);
+          allCellAddresses.push(`${colLabel}${row + 1}`);
+        }
+      }
+      setTemporarySelectedCells(allCellAddresses);
+      
+      // Start 5-second timer
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
+      tempSelectionTimerRef.current = setTimeout(() => {
+        setTemporarySelectedCells([]);
+      }, 5000);
+      
       return;
     }
     
@@ -436,6 +505,25 @@ export default function Home() {
           textDecoration: currentDecoration === "underline" ? "none" : "underline"
         };
       });
+      
+      // Show all cells as selected with 5-second timer
+      const allCellAddresses: string[] = [];
+      for (let row = 0; row < 100; row++) {
+        for (let col = 0; col < 52; col++) {
+          const colLabel = getColumnLabel(col);
+          allCellAddresses.push(`${colLabel}${row + 1}`);
+        }
+      }
+      setTemporarySelectedCells(allCellAddresses);
+      
+      // Start 5-second timer
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
+      tempSelectionTimerRef.current = setTimeout(() => {
+        setTemporarySelectedCells([]);
+      }, 5000);
+      
       return;
     }
     
@@ -1039,7 +1127,8 @@ export default function Home() {
         />
         <div 
           className="flex-1 overflow-hidden"
-          onDoubleClick={(e) => {
+          onClick={(e) => {
+            // Clear selection when clicking outside the grid (but not on grid elements)
             if (e.target === e.currentTarget) {
               setSelectedCells([]);
               setTemporarySelectedCells([]);
