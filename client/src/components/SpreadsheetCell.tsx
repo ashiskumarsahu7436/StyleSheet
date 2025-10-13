@@ -145,7 +145,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleTextareaKeyDown}
         onFocus={() => onEnterEditMode?.()}
-        className="w-full h-full bg-transparent border-none outline-none px-0.5 text-foreground resize-none overflow-hidden flex items-center justify-center text-center"
+        className="w-full h-full bg-transparent border-none outline-none px-0.5 text-foreground resize-none overflow-hidden flex items-center"
         style={{ 
           fontSize: `${fontSize}px`,
           lineHeight: '10.5px',
