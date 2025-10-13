@@ -38,18 +38,23 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   const [tempAddress, setTempAddress] = useState(address);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-focus textarea when cell is selected
+  // Auto-focus textarea when cell is selected, blur when deselected
   useEffect(() => {
     if (isSelected && textareaRef.current) {
-      // Use setTimeout to ensure focus happens after blur completes and React updates DOM
-      setTimeout(() => {
-        if (textareaRef.current && isSelected) {
-          textareaRef.current.focus();
-          // Move cursor to end
-          const len = textareaRef.current.value.length;
-          textareaRef.current.setSelectionRange(len, len);
-        }
-      }, 10);
+      // Use requestAnimationFrame for more reliable focus timing
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (textareaRef.current && isSelected) {
+            textareaRef.current.focus();
+            // Move cursor to end
+            const len = textareaRef.current.value.length;
+            textareaRef.current.setSelectionRange(len, len);
+          }
+        });
+      });
+    } else if (!isSelected && textareaRef.current) {
+      // Blur when cell is deselected
+      textareaRef.current.blur();
     }
   }, [isSelected]);
 

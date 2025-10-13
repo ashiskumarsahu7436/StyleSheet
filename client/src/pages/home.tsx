@@ -189,12 +189,7 @@ export default function Home() {
     // Generate new cell address
     const newAddress = `${getColumnLabel(col)}${row + 1}`;
     
-    // Explicitly blur currently focused element before moving to new cell
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-    
-    // Move selection to new cell
+    // Move selection to new cell (focus will be handled by the cell's useEffect)
     handleCellSelect(newAddress);
   };
 
