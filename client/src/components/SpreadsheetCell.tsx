@@ -145,7 +145,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleTextareaKeyDown}
         onFocus={() => onEnterEditMode?.()}
-        className="w-full h-full bg-transparent border-none outline-none px-0.5 py-0 text-foreground resize-none overflow-hidden"
+        className="w-full h-full bg-transparent border-none outline-none px-0.5 text-foreground resize-none overflow-hidden flex items-center justify-center text-center"
         style={{ 
           fontSize: `${fontSize}px`,
           lineHeight: '10.5px',
@@ -156,9 +156,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           whiteSpace: 'pre-wrap',
           wordWrap: 'break-word',
           overflowWrap: 'break-word',
-          pointerEvents: isEditing ? 'auto' : 'none',
-          display: 'flex',
-          alignItems: 'center'
+          pointerEvents: isEditing ? 'auto' : 'none'
         }}
         data-testid={`input-${address}`}
       />
