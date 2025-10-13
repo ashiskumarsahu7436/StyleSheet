@@ -41,7 +41,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   // Auto-focus textarea when cell is selected
   useEffect(() => {
     if (isSelected && textareaRef.current) {
-      // Use setTimeout to ensure focus happens after React updates DOM
+      // Use setTimeout to ensure focus happens after blur completes and React updates DOM
       setTimeout(() => {
         if (textareaRef.current && isSelected) {
           textareaRef.current.focus();
@@ -49,7 +49,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           const len = textareaRef.current.value.length;
           textareaRef.current.setSelectionRange(len, len);
         }
-      }, 0);
+      }, 10);
     }
   }, [isSelected]);
 
