@@ -326,8 +326,8 @@ export default function Home() {
         });
         
         // Auto-adjust row height based on lines and fixed line height
-        const lineHeight = 11; // Fixed 11px line height
-        const requiredHeight = Math.max(totalLines * lineHeight + 2, 10.5); // add small padding, min 10.5px
+        const lineHeight = 10.5; // Fixed 10.5px line height (matches row height)
+        const requiredHeight = Math.max(totalLines * lineHeight, 10.5); // min 10.5px
         const minHeight = 10.5; // Half of Google Sheets default row height
         
         // Always update height (can increase or decrease)
