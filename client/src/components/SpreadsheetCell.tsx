@@ -41,9 +41,15 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   // Auto-focus textarea when cell is selected
   useEffect(() => {
     if (isSelected && textareaRef.current) {
-      textareaRef.current.focus();
-      // Move cursor to end
-      textareaRef.current.setSelectionRange(textareaRef.current.value.length, textareaRef.current.value.length);
+      // Use setTimeout to ensure focus happens after React updates DOM
+      setTimeout(() => {
+        if (textareaRef.current && isSelected) {
+          textareaRef.current.focus();
+          // Move cursor to end
+          const len = textareaRef.current.value.length;
+          textareaRef.current.setSelectionRange(len, len);
+        }
+      }, 0);
     }
   }, [isSelected]);
 
@@ -74,13 +80,12 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   };
 
   const handleTextareaKeyDown = (e: React.KeyboardEvent) => {
-    // For arrow keys, blur the textarea so document handler can work
+    // For arrow keys, prevent default and let document handler work
+    // Don't blur - let the new cell's focus override this one
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
       e.preventDefault();
-      if (textareaRef.current) {
-        textareaRef.current.blur();
-      }
       // Event will bubble to document handler for navigation
+      // The new cell will auto-focus via useEffect when isSelected changes
     }
   };
 
