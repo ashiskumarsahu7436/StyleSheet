@@ -328,8 +328,8 @@ export default function Home() {
         // Auto-adjust row height based on lines and actual font size
         // Use same line height multiplier as textarea (1.4) for consistency
         const lineHeight = cellFontSize * 1.4; // matches textarea lineHeight style
-        const requiredHeight = Math.max(totalLines * lineHeight + 6, 21); // add small padding, min 21px
-        const minHeight = 21; // Google Sheets default row height
+        const requiredHeight = Math.max(totalLines * lineHeight + 6, 10.5); // add small padding, min 10.5px
+        const minHeight = 10.5; // Half of Google Sheets default row height
         
         // Always update height (can increase or decrease)
         setRowHeights(prev => {

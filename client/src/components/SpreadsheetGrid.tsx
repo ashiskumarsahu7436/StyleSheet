@@ -128,8 +128,8 @@ export default function SpreadsheetGrid({
       startPosRef.current = { x: e.clientX, y: e.clientY };
     } else if (resizingRow !== null && onRowResize) {
       const deltaY = e.clientY - startPosRef.current.y;
-      const currentHeight = rowHeights.get(resizingRow) || 32;
-      const newHeight = Math.max(32, currentHeight + deltaY);
+      const currentHeight = rowHeights.get(resizingRow) || 10.5;
+      const newHeight = Math.max(10.5, currentHeight + deltaY);
       onRowResize(resizingRow, newHeight);
       startPosRef.current = { x: e.clientX, y: e.clientY };
     }
@@ -353,11 +353,11 @@ export default function SpreadsheetGrid({
                     const colspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.colspan : 1;
                     const rowspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.rowspan : 1;
                     
-                    let cellHeight = rowHeights.get(rowIndex) || 32;
+                    let cellHeight = rowHeights.get(rowIndex) || 10.5;
                     if (rowspan > 1) {
                       cellHeight = 0;
                       for (let i = 0; i < rowspan; i++) {
-                        cellHeight += rowHeights.get(rowIndex + i) || 32;
+                        cellHeight += rowHeights.get(rowIndex + i) || 10.5;
                       }
                     }
                     
