@@ -261,7 +261,7 @@ export default function Home() {
         // Add padding (px-1 = 4px on each side = 8px total, plus buffer)
         const requiredWidth = textWidth + 16;
         const maxWidth = 150; // 4 cm maximum (after this, text wraps)
-        const minWidth = 64; // Default column width (compact like Google Sheets)
+        const minWidth = 100; // Default column width (Google Sheets)
         const currentWidth = columnWidths.get(colIndex) || minWidth;
         
         // Only increase width up to maxWidth, never decrease

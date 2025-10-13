@@ -221,11 +221,11 @@ export default function SpreadsheetGrid({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        <table className="border-collapse border border-border" style={{ tableLayout: 'fixed', width: 'max-content', minWidth: '100%' }}>
+        <table className="border-collapse border border-border" style={{ tableLayout: 'fixed', width: 'max-content', minWidth: '100%', lineHeight: '1' }}>
           <colgroup>
             <col style={{ width: '48px' }} />
             {Array.from({ length: cols }).map((_, colIndex) => {
-              const width = columnWidths.get(colIndex) || 64; // Compact default like Google Sheets
+              const width = columnWidths.get(colIndex) || 100; // Google Sheets default
               return <col key={colIndex} style={{ width: `${width}px` }} />;
             })}
           </colgroup>
