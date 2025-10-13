@@ -216,7 +216,7 @@ export default function SpreadsheetGrid({
   return (
     <div className="h-full w-full overflow-auto">
       <div
-        className="p-4"
+        className="p-0"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
@@ -235,7 +235,8 @@ export default function SpreadsheetGrid({
               {Array.from({ length: cols }).map((_, colIndex) => (
                 <th
                   key={colIndex}
-                  className="relative bg-card border-r border-b border-border font-semibold text-sm sticky top-0 z-10 hover-elevate cursor-pointer h-8"
+                  className="relative bg-card border-r border-b border-border font-semibold text-sm sticky top-0 z-10 hover-elevate cursor-pointer p-0 m-0"
+                  style={{ height: '24px', lineHeight: '1' }}
                   onClick={() => onColumnSelect(colIndex)}
                   data-testid={`header-col-${getColumnLabel(colIndex)}`}
                 >
@@ -282,7 +283,8 @@ export default function SpreadsheetGrid({
               return (
                 <tr key={rowIndex} style={{ height: `${height}px` }}>
                   <th
-                    className="relative bg-card border-r border-b border-border text-sm font-medium sticky left-0 z-10 hover-elevate cursor-pointer"
+                    className="relative bg-card border-r border-b border-border text-sm font-medium sticky left-0 z-10 hover-elevate cursor-pointer p-0 m-0"
+                    style={{ height: `${height}px`, lineHeight: '1' }}
                     onClick={() => onRowSelect(rowIndex)}
                     data-testid={`header-row-${rowIndex + 1}`}
                   >
@@ -366,8 +368,8 @@ export default function SpreadsheetGrid({
                         key={address}
                         colSpan={colspan}
                         rowSpan={rowspan}
-                        className="border border-border p-0 relative"
-                        style={{ height: `${cellHeight}px` }}
+                        className="border border-border p-0 m-0 relative"
+                        style={{ height: `${cellHeight}px`, lineHeight: '1' }}
                         onMouseDown={() => handleCellMouseDown(address)}
                         onMouseEnter={() => handleCellMouseEnter(address)}
                         onMouseUp={handleCellMouseUp}
