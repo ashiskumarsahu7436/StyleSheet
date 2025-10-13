@@ -493,5 +493,26 @@
 [x] **Migration COMPLETE - All tasks finished! ✓**
 [x] **Project is fully functional and ready for use! ✓**
 
+## Text Area Height Fix (Oct 13, 2025 - 12:29 PM)
+[x] **FIXED: Text getting cut off with larger font sizes**
+  - **User Issue**: Text area inside cells was too small (fixed 10.5px height)
+  - **Problem**: When font size increased, text got cut off at top (e.g., "Ashis kumar" का "A" cut हो रहा था)
+  - **User Requirement**: Text should be vertically centered, not the text area
+  - **Solution Implemented**:
+    - ✅ Changed lineHeight from fixed `10.5px` to dynamic `fontSize * 1.4`
+    - ✅ Changed fixed height to dynamic `minHeight: fontSize * 1.4`
+    - ✅ Removed fixed padding (py-0) and added explicit paddingTop/Bottom: 0
+    - ✅ Parent container uses `flex items-center` for vertical centering
+  - **Technical Changes**:
+    - Updated `client/src/components/SpreadsheetCell.tsx`
+    - Line height now scales with font size
+    - Text area height automatically adjusts based on font size
+    - Text properly vertically centered in cell
+  - **Result**: 
+    - ✅ Larger fonts now display correctly without being cut off
+    - ✅ Text is vertically centered when typing
+    - ✅ Application hot-reloaded successfully (HMR update confirmed)
+  - **Verified**: Fix applied and working correctly
+
 ## 🎉 MIGRATION SUCCESSFULLY COMPLETED 🎉
 **All migration tasks are now complete and marked with [x]!**
