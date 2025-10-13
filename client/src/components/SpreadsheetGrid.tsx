@@ -214,7 +214,7 @@ export default function SpreadsheetGrid({
   };
 
   return (
-    <div className="h-full w-full overflow-auto">
+    <div className="h-full w-full overflow-auto custom-scrollbar">
       <div
         className="p-0"
         onMouseMove={handleMouseMove}

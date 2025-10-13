@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import SpreadsheetGrid from "@/components/SpreadsheetGrid";
 import ControlPanel from "@/components/ControlPanel";
 import GoogleSheetsToolbar from "@/components/GoogleSheetsToolbar";
+import SheetTabs from "@/components/SheetTabs";
 import { useToast } from "@/hooks/use-toast";
 
 interface CellData {
@@ -23,25 +24,40 @@ interface MergedCell {
   originalCells?: Map<string, CellData>;
 }
 
+interface Sheet {
+  id: string;
+  name: string;
+  cellData: Map<string, CellData>;
+  mergedCells: MergedCell[];
+  columnWidths: Map<number, number>;
+  rowHeights: Map<number, number>;
+  history: { cellData: Map<string, CellData>; mergedCells: MergedCell[] }[];
+  historyIndex: number;
+}
+
 export default function Home() {
   const { toast } = useToast();
+  const [sheets, setSheets] = useState<Sheet[]>([
+    {
+      id: "sheet-1",
+      name: "Sheet1",
+      cellData: new Map(),
+      mergedCells: [],
+      columnWidths: new Map(),
+      rowHeights: new Map(),
+      history: [{ cellData: new Map(), mergedCells: [] }],
+      historyIndex: 0,
+    },
+  ]);
+  const [activeSheetId, setActiveSheetId] = useState("sheet-1");
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
   const [temporarySelectedCells, setTemporarySelectedCells] = useState<string[]>([]);
-  const [cellData, setCellData] = useState<Map<string, CellData>>(new Map());
   const [inputValue, setInputValue] = useState("");
   const [outputValue, setOutputValue] = useState("");
-  const [columnWidths, setColumnWidths] = useState<Map<number, number>>(new Map());
-  const [rowHeights, setRowHeights] = useState<Map<number, number>>(new Map());
   const [customFormulas, setCustomFormulas] = useState<Array<{ name: string; logic: string }>>([]);
   const [retainSelection, setRetainSelection] = useState(false);
-  const [history, setHistory] = useState<{ cellData: Map<string, CellData>; mergedCells: MergedCell[] }[]>([
-    { cellData: new Map(), mergedCells: [] }
-  ]);
-  const [historyIndex, setHistoryIndex] = useState(0);
-  const [mergedCells, setMergedCells] = useState<MergedCell[]>([]);
   const [spreadsheetName, setSpreadsheetName] = useState("My Spreadsheet");
   const [isComplexMode, setIsComplexMode] = useState(false);
-  // Global default formatting applied to all cells when no selection
   const [defaultFormatting, setDefaultFormatting] = useState<{
     fontSize?: number;
     fontWeight?: string;
@@ -50,10 +66,58 @@ export default function Home() {
     textDecoration?: string;
     backgroundColor?: string;
   }>({
-    fontSize: 13, // Better matches default 21px cell height
+    fontSize: 13,
   });
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [editingCell, setEditingCell] = useState<string | null>(null);
+
+  // Get current active sheet
+  const activeSheet = sheets.find(s => s.id === activeSheetId) || sheets[0];
+  const cellData = activeSheet.cellData;
+  const mergedCells = activeSheet.mergedCells;
+  const columnWidths = activeSheet.columnWidths;
+  const rowHeights = activeSheet.rowHeights;
+  const history = activeSheet.history;
+  const historyIndex = activeSheet.historyIndex;
+
+  // Update active sheet data
+  const updateActiveSheet = (updates: Partial<Sheet>) => {
+    setSheets(prev => prev.map(sheet => 
+      sheet.id === activeSheetId ? { ...sheet, ...updates } : sheet
+    ));
+  };
+
+  const setCellData = (dataOrFn: Map<string, CellData> | ((prev: Map<string, CellData>) => Map<string, CellData>)) => {
+    if (typeof dataOrFn === 'function') {
+      const newData = dataOrFn(cellData);
+      updateActiveSheet({ cellData: newData });
+    } else {
+      updateActiveSheet({ cellData: dataOrFn });
+    }
+  };
+  
+  const setMergedCells = (cells: MergedCell[]) => updateActiveSheet({ mergedCells: cells });
+  
+  const setColumnWidths = (widthsOrFn: Map<number, number> | ((prev: Map<number, number>) => Map<number, number>)) => {
+    if (typeof widthsOrFn === 'function') {
+      const newWidths = widthsOrFn(columnWidths);
+      updateActiveSheet({ columnWidths: newWidths });
+    } else {
+      updateActiveSheet({ columnWidths: widthsOrFn });
+    }
+  };
+  
+  const setRowHeights = (heightsOrFn: Map<number, number> | ((prev: Map<number, number>) => Map<number, number>)) => {
+    if (typeof heightsOrFn === 'function') {
+      const newHeights = heightsOrFn(rowHeights);
+      updateActiveSheet({ rowHeights: newHeights });
+    } else {
+      updateActiveSheet({ rowHeights: heightsOrFn });
+    }
+  };
+  
+  const setHistory = (hist: { cellData: Map<string, CellData>; mergedCells: MergedCell[] }[]) => updateActiveSheet({ history: hist });
+  const setHistoryIndex = (index: number) => updateActiveSheet({ historyIndex: index });
 
   const saveToHistory = (newCellData: Map<string, CellData>, newMergedCells: MergedCell[] = mergedCells) => {
     const newHistory = history.slice(0, historyIndex + 1);
@@ -1175,10 +1239,77 @@ export default function Home() {
   const currentFontStyle = firstCell?.fontStyle || defaultFormatting.fontStyle || "normal";
   const currentTextDecoration = firstCell?.textDecoration || defaultFormatting.textDecoration || "none";
 
+  // Sheet management functions
+  const handleAddSheet = () => {
+    const newSheetNum = sheets.length + 1;
+    const newSheet: Sheet = {
+      id: `sheet-${Date.now()}`,
+      name: `Sheet${newSheetNum}`,
+      cellData: new Map(),
+      mergedCells: [],
+      columnWidths: new Map(),
+      rowHeights: new Map(),
+      history: [{ cellData: new Map(), mergedCells: [] }],
+      historyIndex: 0,
+    };
+    setSheets([...sheets, newSheet]);
+    setActiveSheetId(newSheet.id);
+    toast({
+      title: "Sheet created",
+      description: `${newSheet.name} has been created`,
+    });
+  };
+
+  const handleSheetChange = (sheetId: string) => {
+    setActiveSheetId(sheetId);
+    setSelectedCells([]);
+    setTemporarySelectedCells([]);
+    setEditingCell(null);
+    if (tempSelectionTimerRef.current) {
+      clearTimeout(tempSelectionTimerRef.current);
+    }
+  };
+
+  const handleRenameSheet = (sheetId: string, newName: string) => {
+    setSheets(prev => prev.map(sheet => 
+      sheet.id === sheetId ? { ...sheet, name: newName } : sheet
+    ));
+    toast({
+      title: "Sheet renamed",
+      description: `Sheet renamed to "${newName}"`,
+    });
+  };
+
+  const handleDeleteSheet = (sheetId: string) => {
+    if (sheets.length === 1) {
+      toast({
+        title: "Cannot delete",
+        description: "You must have at least one sheet",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const sheetIndex = sheets.findIndex(s => s.id === sheetId);
+    const newSheets = sheets.filter(s => s.id !== sheetId);
+    setSheets(newSheets);
+    
+    if (activeSheetId === sheetId) {
+      const newActiveSheet = newSheets[Math.max(0, sheetIndex - 1)];
+      setActiveSheetId(newActiveSheet.id);
+    }
+    
+    toast({
+      title: "Sheet deleted",
+      description: "Sheet has been deleted",
+    });
+  };
+
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-background">
-      <div className="flex-1 flex flex-col lg:w-2/3">
-        <GoogleSheetsToolbar
+    <div className="flex flex-col h-screen bg-background">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+        <div className="flex-1 flex flex-col lg:w-2/3">
+          <GoogleSheetsToolbar
           spreadsheetName={spreadsheetName}
           onSpreadsheetNameChange={setSpreadsheetName}
           onUndo={handleUndo}
@@ -1268,6 +1399,15 @@ export default function Home() {
           onShowOutput={handleShowOutput}
         />
       </div>
+      </div>
+      <SheetTabs
+        sheets={sheets.map(s => ({ id: s.id, name: s.name }))}
+        activeSheetId={activeSheetId}
+        onSheetChange={handleSheetChange}
+        onAddSheet={handleAddSheet}
+        onRenameSheet={handleRenameSheet}
+        onDeleteSheet={handleDeleteSheet}
+      />
     </div>
   );
 }
