@@ -926,9 +926,12 @@ export default function Home() {
       // Set row heights and cell data
       for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
         const row = worksheet.getRow(rowIndex + 1);
-        const height = rowHeights.get(rowIndex) || 10.5; // Half of Google Sheets default
+        // For Excel export, use proper readable height (21px default)
+        // Even if web app shows 10.5px, Excel needs standard height
+        const webHeight = rowHeights.get(rowIndex) || 10.5;
+        const excelHeight = webHeight < 15 ? 21 : webHeight; // Minimum 21px for Excel
         // Excel height is in points (20px = 15 points, so 1 pixel = 0.75 points)
-        row.height = height * 0.75;
+        row.height = excelHeight * 0.75;
         
         for (let colIndex = 0; colIndex < cols; colIndex++) {
           const address = `${getColumnLabel(colIndex)}${rowIndex + 1}`;
