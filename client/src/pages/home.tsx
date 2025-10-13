@@ -234,11 +234,10 @@ export default function Home() {
       setTemporarySelectedCells([]);
     }, 5000);
     
-    // Auto-adjust column width and row height when typing
+    // Auto-resize column width horizontally (up to 4cm / ~150px max)
     const match = address.match(/^([A-Z]+)(\d+)$/);
     if (match) {
       const colLabel = match[1];
-      const rowIndex = parseInt(match[2]) - 1;
       
       // Calculate column index
       let colIndex = 0;
@@ -247,99 +246,39 @@ export default function Home() {
       }
       colIndex = colIndex - 1;
       
-      // Get actual font size for the cell (cell-specific or global default)
+      // Get actual font size for the cell
       const cellFontSize = existing.fontSize ?? defaultFormatting.fontSize ?? 13;
       const cellFontFamily = existing.fontFamily ?? defaultFormatting.fontFamily ?? 'Arial';
       const cellFontWeight = existing.fontWeight ?? defaultFormatting.fontWeight ?? 'normal';
       
-      // Measure text width using actual font size for accurate sizing
+      // Measure text width
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       if (context) {
         context.font = `${cellFontWeight} ${cellFontSize}px ${cellFontFamily}`;
         const textWidth = context.measureText(value).width;
         
-        // Add padding (px-1 = 4px on each side, so 8px total, plus some buffer)
+        // Add padding (px-1 = 4px on each side = 8px total, plus buffer)
         const requiredWidth = textWidth + 16;
-        const maxWidth = 300; // Max width
-        const minWidth = 100; // Google Sheets default column width
+        const maxWidth = 150; // 4 cm maximum (after this, text wraps)
+        const minWidth = 64; // Default column width (compact like Google Sheets)
         const currentWidth = columnWidths.get(colIndex) || minWidth;
         
-        // Auto-adjust column width (Google Sheets behavior: only increase, never decrease)
-        const finalWidth = Math.max(Math.min(requiredWidth, maxWidth), currentWidth);
-        if (finalWidth > currentWidth) {
+        // Only increase width up to maxWidth, never decrease
+        if (requiredWidth > currentWidth && requiredWidth <= maxWidth) {
           setColumnWidths(prev => {
             const newMap = new Map(prev);
-            newMap.set(colIndex, finalWidth);
+            newMap.set(colIndex, requiredWidth);
+            return newMap;
+          });
+        } else if (currentWidth < maxWidth && requiredWidth > maxWidth) {
+          // Set to max width if text requires more
+          setColumnWidths(prev => {
+            const newMap = new Map(prev);
+            newMap.set(colIndex, maxWidth);
             return newMap;
           });
         }
-        
-        // Calculate wrapped lines - use actual column width for wrapping
-        const actualColumnWidth = columnWidths.get(colIndex) || 100; // Google Sheets default
-        const effectiveWidth = actualColumnWidth - 8; // subtract padding (px-1 = 4px each side)
-        
-        // Split text by newlines first (for Enter key), then wrap words
-        const lines = value.split('\n');
-        let totalLines = 0;
-        
-        lines.forEach(line => {
-          if (line.trim() === '') {
-            totalLines += 1;
-            return;
-          }
-          
-          const words = line.split(/\s+/);
-          let currentLineWidth = 0;
-          let wrappedLines = 1;
-          
-          for (const word of words) {
-            const wordWidth = context.measureText(word).width;
-            const spaceWidth = context.measureText(' ').width;
-            
-            // Check if single word is too long and needs to be broken
-            if (wordWidth > effectiveWidth) {
-              // Word needs character-level breaking
-              let charLine = '';
-              for (let char of word) {
-                const testWidth = context.measureText(charLine + char).width;
-                if (testWidth > effectiveWidth && charLine.length > 0) {
-                  wrappedLines++;
-                  charLine = char;
-                } else {
-                  charLine += char;
-                }
-              }
-              currentLineWidth = context.measureText(charLine).width + spaceWidth;
-            } else {
-              // Normal word wrapping
-              const totalWidth = currentLineWidth + wordWidth + (currentLineWidth > 0 ? spaceWidth : 0);
-              if (totalWidth > effectiveWidth && currentLineWidth > 0) {
-                wrappedLines++;
-                currentLineWidth = wordWidth + spaceWidth;
-              } else {
-                currentLineWidth = totalWidth;
-              }
-            }
-          }
-          totalLines += wrappedLines;
-        });
-        
-        // Auto-adjust row height based on lines and fixed line height
-        const lineHeight = 10.5; // Fixed 10.5px line height (matches row height)
-        const requiredHeight = Math.max(totalLines * lineHeight, 10.5); // min 10.5px
-        const minHeight = 10.5; // Half of Google Sheets default row height
-        
-        // Always update height (can increase or decrease)
-        setRowHeights(prev => {
-          const newMap = new Map(prev);
-          if (requiredHeight > minHeight) {
-            newMap.set(rowIndex, requiredHeight);
-          } else {
-            newMap.delete(rowIndex); // Reset to default if not needed
-          }
-          return newMap;
-        });
       }
     }
   };

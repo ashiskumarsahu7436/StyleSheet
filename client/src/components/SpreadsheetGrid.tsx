@@ -225,7 +225,7 @@ export default function SpreadsheetGrid({
           <colgroup>
             <col style={{ width: '48px' }} />
             {Array.from({ length: cols }).map((_, colIndex) => {
-              const width = columnWidths.get(colIndex) || 100; // Google Sheets default
+              const width = columnWidths.get(colIndex) || 64; // Compact default like Google Sheets
               return <col key={colIndex} style={{ width: `${width}px` }} />;
             })}
           </colgroup>
@@ -278,7 +278,7 @@ export default function SpreadsheetGrid({
           </thead>
           <tbody>
             {Array.from({ length: rows }).map((_, rowIndex) => {
-              const height = rowHeights.get(rowIndex) || 10.5; // Half of Google Sheets default
+              const height = rowHeights.get(rowIndex) || 21; // Google Sheets default
               return (
                 <tr key={rowIndex} style={{ height: `${height}px` }}>
                   <th
@@ -353,11 +353,11 @@ export default function SpreadsheetGrid({
                     const colspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.colspan : 1;
                     const rowspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.rowspan : 1;
                     
-                    let cellHeight = rowHeights.get(rowIndex) || 10.5;
+                    let cellHeight = rowHeights.get(rowIndex) || 21;
                     if (rowspan > 1) {
                       cellHeight = 0;
                       for (let i = 0; i < rowspan; i++) {
-                        cellHeight += rowHeights.get(rowIndex + i) || 10.5;
+                        cellHeight += rowHeights.get(rowIndex + i) || 21;
                       }
                     }
                     
