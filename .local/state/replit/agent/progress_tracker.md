@@ -518,6 +518,24 @@
 ✅ **Isolated Sheet State**: Each sheet has independent data, formatting, and history
 ✅ **All features tested and verified working correctly!**
 
+[x] **FIXED: Hide scrollbar inside cells (Oct 13, 2025 - 2:11 PM)**
+  - **User Request**: "cell ki andar jo scroll baar aa raha hai usko hide karo"
+  - **Problem**: Scrollbar was visible inside cells when editing
+  - **Solution**: Added CSS to hide scrollbar completely
+  - **Implementation**:
+    - Added `.hide-scrollbar` CSS class in index.css
+    - Works across all browsers (Chrome, Firefox, Safari, Edge)
+    - Applied class to textarea in SpreadsheetCell component
+  - **Technical Details**:
+    - WebKit: `::-webkit-scrollbar { display: none; }`
+    - Firefox: `scrollbar-width: none;`
+    - IE/Edge: `-ms-overflow-style: none;`
+  - ✅ **Architect Review: APPROVED**
+    - Cross-browser compatibility confirmed
+    - No layout issues or side effects
+    - Editing interactions remain unchanged
+  - ✅ **Verified Working**: Scrollbar now hidden inside cells
+
 [x] **FIXED: Arrow key navigation persistence after download**
   - **Issue**: Arrow key navigation stopped working after clicking Download button
   - **Root Cause**: Focus was lost when clicking buttons
