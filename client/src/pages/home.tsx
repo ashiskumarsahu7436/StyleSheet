@@ -927,7 +927,7 @@ export default function Home() {
       // Set row heights and cell data
       for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
         const row = worksheet.getRow(rowIndex + 1);
-        const height = rowHeights.get(rowIndex) || 21; // Google Sheets default: 21px
+        const height = rowHeights.get(rowIndex) || 10.5; // Half of Google Sheets default
         // Excel height is in points (20px = 15 points, so 1 pixel = 0.75 points)
         row.height = height * 0.75;
         

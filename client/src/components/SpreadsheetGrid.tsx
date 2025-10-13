@@ -278,7 +278,7 @@ export default function SpreadsheetGrid({
           </thead>
           <tbody>
             {Array.from({ length: rows }).map((_, rowIndex) => {
-              const height = rowHeights.get(rowIndex) || 21; // Google Sheets default
+              const height = rowHeights.get(rowIndex) || 10.5; // Half of Google Sheets default
               return (
                 <tr key={rowIndex} style={{ height: `${height}px` }}>
                   <th
