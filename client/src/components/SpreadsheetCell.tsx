@@ -27,7 +27,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   isSelected,
   isTemporary = false,
   backgroundColor = "transparent",
-  fontSize = 13, // Better matches default cell height
+  fontSize = 10, // Compact default font size
   fontWeight = "normal",
   fontFamily = "Arial", // Google Sheets default
   fontStyle = "normal",
@@ -148,7 +148,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
         className="w-full h-full bg-transparent border-none outline-none px-1 pt-0.5 text-foreground resize-none align-top overflow-hidden"
         style={{ 
           fontSize: `${fontSize}px`,
-          lineHeight: `${fontSize * 1.4}px`,
+          lineHeight: '11px',
           fontWeight,
           fontFamily,
           fontStyle,
