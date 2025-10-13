@@ -281,7 +281,7 @@ export default function SpreadsheetGrid({
             {Array.from({ length: rows }).map((_, rowIndex) => {
               const height = rowHeights.get(rowIndex) || 21; // Google Sheets default
               return (
-                <tr key={rowIndex} style={{ height: `${height}px` }}>
+                <tr key={rowIndex} style={{ height: `${height}px`, maxHeight: `${height}px` }}>
                   <th
                     className="relative bg-card border-r border-b border-border text-sm font-medium sticky left-0 z-10 hover-elevate cursor-pointer p-0 m-0"
                     style={{ height: `${height}px`, lineHeight: '1' }}

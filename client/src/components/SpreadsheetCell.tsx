@@ -139,23 +139,24 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           address.length > 15 ? address.substring(0, 12) + "..." : address
         )}
       </div>
-      <div className="w-full h-full overflow-hidden">
+      <div className="w-full h-full flex items-center overflow-hidden">
         <textarea
           ref={textareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleTextareaKeyDown}
           onFocus={() => onEnterEditMode?.()}
-          className="w-full h-full bg-transparent border-none outline-none px-1 pt-0.5 text-foreground resize-none"
+          className="w-full bg-transparent border-none outline-none px-1 text-foreground resize-none"
           style={{ 
             fontSize: `${fontSize}px`,
-            lineHeight: `${fontSize * 1.2}px`,
+            lineHeight: `${fontSize}px`,
             fontWeight,
             fontFamily,
             fontStyle,
             textDecoration,
             pointerEvents: isEditing ? 'auto' : 'none',
-            overflow: isEditing ? 'auto' : 'hidden'
+            overflow: isEditing ? 'auto' : 'hidden',
+            height: `${fontSize}px`
           }}
           data-testid={`input-${address}`}
         />
