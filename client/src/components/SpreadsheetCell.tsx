@@ -139,27 +139,30 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           address.length > 15 ? address.substring(0, 12) + "..." : address
         )}
       </div>
-      <textarea
-        ref={textareaRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleTextareaKeyDown}
-        onFocus={() => onEnterEditMode?.()}
-        className="w-full h-full bg-transparent border-none outline-none px-0.5 text-foreground resize-none overflow-hidden flex items-center"
-        style={{ 
-          fontSize: `${fontSize}px`,
-          lineHeight: '10.5px',
-          fontWeight,
-          fontFamily,
-          fontStyle,
-          textDecoration,
-          whiteSpace: 'pre-wrap',
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word',
-          pointerEvents: isEditing ? 'auto' : 'none'
-        }}
-        data-testid={`input-${address}`}
-      />
+      <div className="w-full h-full flex items-center">
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleTextareaKeyDown}
+          onFocus={() => onEnterEditMode?.()}
+          className="w-full bg-transparent border-none outline-none px-1 py-0 text-foreground resize-none overflow-hidden"
+          style={{ 
+            fontSize: `${fontSize}px`,
+            lineHeight: '10.5px',
+            fontWeight,
+            fontFamily,
+            fontStyle,
+            textDecoration,
+            whiteSpace: 'pre-wrap',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word',
+            pointerEvents: isEditing ? 'auto' : 'none',
+            height: '10.5px'
+          }}
+          data-testid={`input-${address}`}
+        />
+      </div>
     </div>
   );
 }, (prevProps, nextProps) => {
