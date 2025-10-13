@@ -536,6 +536,79 @@
     - Editing interactions remain unchanged
   - ✅ **Verified Working**: Scrollbar now hidden inside cells
 
+[x] **MAJOR UPDATE: Arrow Key Navigation + Cell Address Visibility (Oct 13, 2025 - 2:48 PM)**
+  - **User Request 1**: "4 different direction ki arrow key keliye hamko enter + arrow press karna padta hai. isko hame easy banana hai. mujhe ab chahiye ki ye enter click naa karna pade cell change karne keliye direct arrow keys se cell change ho."
+  - **User Request 2**: "agar koi ek bhi character koi cell me likhta hai toh uss cell ka adress gayab ho jana chhiye. aur cell ko agar fir empty kar diya jaaye toh fir se adress dikhne lag jana cahiye."
+  
+  - **Problem 1 - Arrow Key Navigation**:
+    - Previously: Had to press Enter to enter edit mode, then arrow keys would work
+    - Wanted: Direct arrow key navigation without Enter key
+    - User didn't want arrow keys to move cursor inside cell text
+  
+  - **Problem 2 - Cell Address Visibility**:
+    - Cell addresses were always visible
+    - Wanted: Hide address when cell has any content (including space)
+    - Show address again when cell becomes empty
+  
+  - **Solution Implemented**:
+    1. **Removed Edit Mode System**:
+       - Deleted `editingCell` state from home.tsx
+       - Removed `isEditing` prop from SpreadsheetCell
+       - Removed all edit mode related props from SpreadsheetGrid
+       - Simplified cell interaction model
+    
+    2. **Direct Arrow Navigation**:
+       - Arrow keys now work directly from any cell
+       - No need to press Enter first
+       - Document-level handler catches arrow keys (except from input fields)
+       - Textarea events bubble up to document for navigation
+    
+    3. **Auto-Focus System**:
+       - Added useEffect in SpreadsheetCell
+       - When cell becomes selected (isSelected=true), textarea auto-focuses
+       - Cursor moves to end of text automatically
+       - This ensures typing always happens in the selected cell
+    
+    4. **Cell Address Visibility**:
+       - Address shows only when `value === ""`
+       - Conditional rendering: `{showAddress && <div>...address...</div>}`
+       - Address disappears immediately when any character typed
+       - Reappears when cell emptied
+  
+  - **Technical Implementation**:
+    - **SpreadsheetCell.tsx**:
+      - Added `useEffect` to focus textarea when selected
+      - Removed `preventDefault` on arrow keys to allow bubbling
+      - Added conditional address rendering based on empty value
+      - Simplified keydown handler
+    - **home.tsx**:
+      - Removed `editingCell` state
+      - Document handler allows textarea events (only blocks HTMLInputElement)
+      - Navigation works from any focused state
+    - **SpreadsheetGrid.tsx**:
+      - Removed `editingCell` and `onEditingCellChange` props
+      - Simplified cell rendering
+  
+  - **User Feedback & Fixes**:
+    - Initial fix had focus issue: "box move ho jaa raha but typing wahi par ho raha hai"
+    - Problem: Selection moved but focus didn't follow
+    - Fix: Added useEffect to auto-focus textarea on selection
+    - Confirmed working: Arrow keys now move selection AND focus together
+  
+  - ✅ **Architect Review: APPROVED**
+    - Clean removal of edit mode system
+    - Focus mechanism works correctly with useEffect
+    - Arrow key navigation properly bubbles from textarea to document
+    - Cell address visibility logic correct (value === "")
+    - No TypeScript/LSP errors
+    - All functionality working as expected
+  
+  - ✅ **Verified Working**:
+    - Arrow keys directly navigate cells (no Enter needed)
+    - Typing cursor follows selection immediately  
+    - Cell addresses show only when empty
+    - No performance issues or bugs
+
 [x] **FIXED: Arrow key navigation persistence after download**
   - **Issue**: Arrow key navigation stopped working after clicking Download button
   - **Root Cause**: Focus was lost when clicking buttons

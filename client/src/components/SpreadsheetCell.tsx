@@ -74,9 +74,13 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   };
 
   const handleTextareaKeyDown = (e: React.KeyboardEvent) => {
-    // Prevent arrow keys from working inside textarea - they will be handled at grid level
+    // For arrow keys, blur the textarea so document handler can work
     if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
       e.preventDefault();
+      if (textareaRef.current) {
+        textareaRef.current.blur();
+      }
+      // Event will bubble to document handler for navigation
     }
   };
 
@@ -87,7 +91,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
     <div
       data-testid={`cell-${address}`}
       className={cn(
-        "relative w-full h-full hover-elevate cursor-pointer transition-all duration-75",
+        "relative w-full h-full hover-elevate cursor-pointer transition-all duration-75 outline-none focus:outline-none",
         isSelected && "ring-2 ring-primary",
         isTemporary && !isSelected && "ring-2 ring-blue-500"
       )}
