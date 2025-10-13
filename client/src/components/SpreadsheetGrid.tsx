@@ -48,8 +48,6 @@ interface SpreadsheetGridProps {
     textDecoration?: string;
     backgroundColor?: string;
   };
-  editingCell?: string | null;
-  onEditingCellChange?: (cell: string | null) => void;
 }
 
 export default function SpreadsheetGrid({
@@ -74,8 +72,6 @@ export default function SpreadsheetGrid({
   onDeleteColumn,
   onInsertColumn,
   defaultFormatting = {},
-  editingCell = null,
-  onEditingCellChange,
 }: SpreadsheetGridProps) {
   const [resizingCol, setResizingCol] = useState<number | null>(null);
   const [resizingRow, setResizingRow] = useState<number | null>(null);
@@ -385,13 +381,10 @@ export default function SpreadsheetGrid({
                           fontFamily={cell.fontFamily ?? defaultFormatting.fontFamily}
                           fontStyle={cell.fontStyle ?? defaultFormatting.fontStyle}
                           textDecoration={cell.textDecoration ?? defaultFormatting.textDecoration}
-                          isEditing={editingCell === cell.address}
                           onClick={() => onCellSelect(cell.address)}
-                          onDoubleClick={() => onEditingCellChange?.(cell.address)}
+                          onDoubleClick={() => onCellSelect(cell.address)}
                           onChange={(value) => onCellChange(cell.address, value)}
                           onAddressChange={(newAddr) => onAddressChange?.(cell.address, newAddr)}
-                          onEnterEditMode={() => onEditingCellChange?.(cell.address)}
-                          onExitEditMode={() => onEditingCellChange?.(null)}
                         />
                       </td>
                     );

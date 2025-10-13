@@ -69,7 +69,6 @@ export default function Home() {
     fontSize: 13,
   });
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const [editingCell, setEditingCell] = useState<string | null>(null);
 
   // Get current active sheet
   const activeSheet = sheets.find(s => s.id === activeSheetId) || sheets[0];
@@ -1185,13 +1184,8 @@ export default function Home() {
   // Keyboard navigation with arrow keys (Excel/Google Sheets style)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Don't navigate if currently editing a cell
-      if (editingCell !== null) {
-        return;
-      }
-
-      // Only handle arrow keys when not typing in an input field
-      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+      // Only handle arrow keys when not typing in an input field (except textarea which is handled by cell)
+      if (event.target instanceof HTMLInputElement) {
         return;
       }
 
@@ -1223,7 +1217,7 @@ export default function Home() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedCells, temporarySelectedCells, editingCell]); // Re-run when selection or editing state changes
+  }, [selectedCells, temporarySelectedCells]); // Re-run when selection changes
 
   const isMergedCell = selectedCells.length === 1 && mergedCells.some(m => m.startAddress === selectedCells[0]);
   
@@ -1264,7 +1258,6 @@ export default function Home() {
     setActiveSheetId(sheetId);
     setSelectedCells([]);
     setTemporarySelectedCells([]);
-    setEditingCell(null);
     if (tempSelectionTimerRef.current) {
       clearTimeout(tempSelectionTimerRef.current);
     }
@@ -1377,8 +1370,6 @@ export default function Home() {
             onDeleteColumn={handleDeleteColumn}
             onInsertColumn={handleInsertColumn}
             defaultFormatting={defaultFormatting}
-            editingCell={editingCell}
-            onEditingCellChange={setEditingCell}
           />
         </div>
       </div>
