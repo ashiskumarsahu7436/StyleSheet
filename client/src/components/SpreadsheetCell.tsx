@@ -38,13 +38,15 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   const [tempAddress, setTempAddress] = useState(address);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-focus textarea when cell is selected, blur when deselected
+  // Auto-focus textarea when cell is selected OR temporary selected (arrow keys)
   useEffect(() => {
-    if (isSelected && textareaRef.current) {
+    const shouldFocus = isSelected || isTemporary;
+    
+    if (shouldFocus && textareaRef.current) {
       // Use requestAnimationFrame for more reliable focus timing
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          if (textareaRef.current && isSelected) {
+          if (textareaRef.current && (isSelected || isTemporary)) {
             textareaRef.current.focus();
             // Move cursor to end
             const len = textareaRef.current.value.length;
@@ -52,11 +54,11 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           }
         });
       });
-    } else if (!isSelected && textareaRef.current) {
+    } else if (!shouldFocus && textareaRef.current) {
       // Blur when cell is deselected
       textareaRef.current.blur();
     }
-  }, [isSelected]);
+  }, [isSelected, isTemporary]);
 
   const handleAddressDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
