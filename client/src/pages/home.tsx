@@ -400,6 +400,132 @@ export default function Home() {
     }
   };
 
+  const handleBorderChange = (type: string, color: string) => {
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    
+    // If no cells selected, show message to select cells first
+    if (allSelected.length === 0) {
+      toast({
+        title: "No cells selected",
+        description: "Please select cells before applying borders",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const borderStyle = `1px solid ${color}`;
+    const newData = new Map(cellData);
+    
+    // Helper to get min/max row and col from selected cells
+    const getSelectionBounds = () => {
+      const rows = allSelected.map(addr => {
+        const match = addr.match(/[A-Z]+(\d+)/);
+        return match ? parseInt(match[1]) : 0;
+      });
+      const cols = allSelected.map(addr => {
+        const match = addr.match(/([A-Z]+)\d+/);
+        if (!match) return 0;
+        let col = 0;
+        for (let i = 0; i < match[1].length; i++) {
+          col = col * 26 + (match[1].charCodeAt(i) - 64);
+        }
+        return col;
+      });
+      return {
+        minRow: Math.min(...rows),
+        maxRow: Math.max(...rows),
+        minCol: Math.min(...cols),
+        maxCol: Math.max(...cols),
+      };
+    };
+
+    const bounds = getSelectionBounds();
+    
+    allSelected.forEach((address) => {
+      const existing = newData.get(address) || { address, value: "" };
+      const match = address.match(/([A-Z]+)(\d+)/);
+      if (!match) return;
+      
+      const colStr = match[1];
+      let col = 0;
+      for (let i = 0; i < colStr.length; i++) {
+        col = col * 26 + (colStr.charCodeAt(i) - 64);
+      }
+      const row = parseInt(match[2]);
+      
+      let updates: Partial<CellData> = {};
+      
+      switch (type) {
+        case 'all':
+          updates = {
+            borderTop: borderStyle,
+            borderRight: borderStyle,
+            borderBottom: borderStyle,
+            borderLeft: borderStyle,
+          };
+          break;
+        case 'outer':
+          if (row === bounds.minRow) updates.borderTop = borderStyle;
+          if (row === bounds.maxRow) updates.borderBottom = borderStyle;
+          if (col === bounds.minCol) updates.borderLeft = borderStyle;
+          if (col === bounds.maxCol) updates.borderRight = borderStyle;
+          break;
+        case 'inner':
+          if (row !== bounds.minRow) updates.borderTop = borderStyle;
+          if (row !== bounds.maxRow) updates.borderBottom = borderStyle;
+          if (col !== bounds.minCol) updates.borderLeft = borderStyle;
+          if (col !== bounds.maxCol) updates.borderRight = borderStyle;
+          break;
+        case 'horizontal':
+          updates = {
+            borderTop: borderStyle,
+            borderBottom: borderStyle,
+          };
+          break;
+        case 'vertical':
+          updates = {
+            borderLeft: borderStyle,
+            borderRight: borderStyle,
+          };
+          break;
+        case 'top':
+          updates.borderTop = borderStyle;
+          break;
+        case 'bottom':
+          updates.borderBottom = borderStyle;
+          break;
+        case 'left':
+          updates.borderLeft = borderStyle;
+          break;
+        case 'right':
+          updates.borderRight = borderStyle;
+          break;
+        case 'clear':
+          updates = {
+            borderTop: undefined,
+            borderRight: undefined,
+            borderBottom: undefined,
+            borderLeft: undefined,
+          };
+          break;
+      }
+      
+      newData.set(address, { ...existing, ...updates });
+    });
+    
+    saveToHistory(newData);
+    setCellData(newData);
+    
+    // Convert temporary selections to permanent when formatting
+    if (temporarySelectedCells.length > 0) {
+      setSelectedCells(Array.from(new Set([...selectedCells, ...temporarySelectedCells])));
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
+    }
+  };
+
   const handleFontSizeChange = (size: number) => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
     
