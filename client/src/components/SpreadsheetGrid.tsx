@@ -101,6 +101,63 @@ export default function SpreadsheetGrid({
     return index - 1;
   };
 
+  // Get row and column from address (Google Sheets style helper)
+  const getRowColFromAddress = (address: string): { row: number; col: number } | null => {
+    const rowMatch = address.match(/\d+/)?.[0];
+    const colMatch = address.match(/^[A-Z]+/)?.[0];
+    
+    if (!rowMatch || !colMatch) return null;
+    
+    const row = parseInt(rowMatch) - 1;
+    const col = getColumnIndexFromLabel(colMatch);
+    
+    return { row, col };
+  };
+
+  // Calculate selection boundaries (Google Sheets style)
+  const getSelectionBoundaries = () => {
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    if (allSelected.length === 0) return null;
+
+    let minRow = Infinity;
+    let maxRow = -Infinity;
+    let minCol = Infinity;
+    let maxCol = -Infinity;
+
+    for (const addr of allSelected) {
+      const pos = getRowColFromAddress(addr);
+      if (!pos) continue;
+      
+      minRow = Math.min(minRow, pos.row);
+      maxRow = Math.max(maxRow, pos.row);
+      minCol = Math.min(minCol, pos.col);
+      maxCol = Math.max(maxCol, pos.col);
+    }
+
+    return { minRow, maxRow, minCol, maxCol };
+  };
+
+  // Get first selected cell address
+  const firstSelectedCell = selectedCells[0] || temporarySelectedCells[0] || null;
+
+  // Check if column has any selected cells (Google Sheets style)
+  const isColumnSelected = (colIndex: number): boolean => {
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    return allSelected.some(addr => {
+      const pos = getRowColFromAddress(addr);
+      return pos?.col === colIndex;
+    });
+  };
+
+  // Check if row has any selected cells (Google Sheets style)
+  const isRowSelected = (rowIndex: number): boolean => {
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    return allSelected.some(addr => {
+      const pos = getRowColFromAddress(addr);
+      return pos?.row === rowIndex;
+    });
+  };
+
   const handleColumnBorderMouseDown = (e: React.MouseEvent, colIndex: number) => {
     e.preventDefault();
     e.stopPropagation();
@@ -134,6 +191,11 @@ export default function SpreadsheetGrid({
   const handleMouseUp = () => {
     setResizingCol(null);
     setResizingRow(null);
+    // Also end dragging when mouse is released anywhere
+    if (isDragging) {
+      setIsDragging(false);
+      setDragStart(null);
+    }
   };
 
   const handleCellMouseDown = (address: string) => {
@@ -228,11 +290,17 @@ export default function SpreadsheetGrid({
           <thead>
             <tr>
               <th className="bg-card border-r border-b border-border sticky left-0 top-0 z-20" />
-              {Array.from({ length: cols }).map((_, colIndex) => (
+              {Array.from({ length: cols }).map((_, colIndex) => {
+                const colSelected = isColumnSelected(colIndex);
+                return (
                 <th
                   key={colIndex}
                   className="relative bg-card border-r border-b border-border font-semibold text-sm sticky top-0 z-10 hover-elevate cursor-pointer p-0 m-0"
-                  style={{ height: '24px', lineHeight: '1' }}
+                  style={{ 
+                    height: '24px', 
+                    lineHeight: '1',
+                    backgroundColor: colSelected ? 'var(--sheets-header-bg)' : undefined,
+                  }}
                   onClick={() => onColumnSelect(colIndex)}
                   data-testid={`header-col-${getColumnLabel(colIndex)}`}
                 >
@@ -270,17 +338,23 @@ export default function SpreadsheetGrid({
                     onMouseDown={(e) => handleColumnBorderMouseDown(e, colIndex)}
                   />
                 </th>
-              ))}
+                )
+              })}
             </tr>
           </thead>
           <tbody>
             {Array.from({ length: rows }).map((_, rowIndex) => {
               const height = rowHeights.get(rowIndex) || 21; // Google Sheets default
+              const rowSelected = isRowSelected(rowIndex);
               return (
                 <tr key={rowIndex} style={{ height: `${height}px`, maxHeight: `${height}px` }}>
                   <th
                     className="relative bg-card border-r border-b border-border text-sm font-medium sticky left-0 z-10 hover-elevate cursor-pointer p-0 m-0"
-                    style={{ height: `${height}px`, lineHeight: '1' }}
+                    style={{ 
+                      height: `${height}px`, 
+                      lineHeight: '1',
+                      backgroundColor: rowSelected ? 'var(--sheets-header-bg)' : undefined,
+                    }}
                     onClick={() => onRowSelect(rowIndex)}
                     data-testid={`header-row-${rowIndex + 1}`}
                   >
@@ -348,6 +422,27 @@ export default function SpreadsheetGrid({
                     const isSelected = selectedCells.includes(address) || selectedCells.includes(cell.address);
                     const isTemporary = temporarySelectedCells.includes(address);
                     
+                    // Google Sheets style selection
+                    const isFirstSelected = firstSelectedCell === address || firstSelectedCell === cell.address;
+                    const boundaries = getSelectionBoundaries();
+                    const currentPos = getRowColFromAddress(address);
+                    
+                    let isInSelectionBoundary = {
+                      top: false,
+                      right: false,
+                      bottom: false,
+                      left: false,
+                    };
+                    
+                    if (boundaries && currentPos && (isSelected || isTemporary)) {
+                      isInSelectionBoundary = {
+                        top: currentPos.row === boundaries.minRow,
+                        right: currentPos.col === boundaries.maxCol,
+                        bottom: currentPos.row === boundaries.maxRow,
+                        left: currentPos.col === boundaries.minCol,
+                      };
+                    }
+                    
                     const colspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.colspan : 1;
                     const rowspan = mergeInfo && !((mergeInfo as any).isHidden) ? mergeInfo.rowspan : 1;
                     
@@ -375,6 +470,9 @@ export default function SpreadsheetGrid({
                           value={cell.value}
                           isSelected={isSelected}
                           isTemporary={isTemporary}
+                          isFirstSelected={isFirstSelected}
+                          isInSelectionBoundary={isInSelectionBoundary}
+                          isDragging={isDragging}
                           backgroundColor={cell.backgroundColor ?? defaultFormatting.backgroundColor}
                           fontSize={cell.fontSize ?? defaultFormatting.fontSize}
                           fontWeight={cell.fontWeight ?? defaultFormatting.fontWeight}

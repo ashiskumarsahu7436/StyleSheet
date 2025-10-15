@@ -6,6 +6,14 @@ interface SpreadsheetCellProps {
   value: string;
   isSelected: boolean;
   isTemporary?: boolean;
+  isFirstSelected?: boolean;
+  isInSelectionBoundary?: {
+    top: boolean;
+    right: boolean;
+    bottom: boolean;
+    left: boolean;
+  };
+  isDragging?: boolean;
   backgroundColor?: string;
   fontSize?: number;
   fontWeight?: string;
@@ -23,6 +31,9 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   value,
   isSelected,
   isTemporary = false,
+  isFirstSelected = false,
+  isInSelectionBoundary = { top: false, right: false, bottom: false, left: false },
+  isDragging = false,
   backgroundColor = "transparent",
   fontSize = 10,
   fontWeight = "normal",
@@ -99,17 +110,57 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   // Show address only when cell is empty
   const showAddress = value === "";
 
+  // Google Sheets style selection
+  const isAnySelected = isSelected || isTemporary;
+  
+  // Build box-shadow for continuous boundary (appears all at once)
+  const buildBoundaryShadow = () => {
+    // Debug any boundary
+    const hasAnyBoundary = isInSelectionBoundary.top || isInSelectionBoundary.right || 
+                           isInSelectionBoundary.bottom || isInSelectionBoundary.left;
+    
+    if (hasAnyBoundary && (isSelected || isTemporary)) {
+      console.log(`Cell ${address} - isDragging:${isDragging}, isFirstSelected:${isFirstSelected}, boundaries:`, isInSelectionBoundary);
+    }
+    
+    if (isDragging || isFirstSelected) return undefined;
+    
+    const shadows: string[] = [];
+    // Use actual Google Blue color directly (CSS variables don't work well in inline box-shadow)
+    const color = 'rgb(66, 133, 244)';
+    
+    if (isInSelectionBoundary.top) {
+      shadows.push(`inset 0 2px 0 0 ${color}`);
+    }
+    if (isInSelectionBoundary.right) {
+      shadows.push(`inset -2px 0 0 0 ${color}`);
+    }
+    if (isInSelectionBoundary.bottom) {
+      shadows.push(`inset 0 -2px 0 0 ${color}`);
+    }
+    if (isInSelectionBoundary.left) {
+      shadows.push(`inset 2px 0 0 0 ${color}`);
+    }
+    
+    return shadows.length > 0 ? shadows.join(', ') : undefined;
+  };
+  
+  // Cell styling with Google Sheets-style selection
+  const cellStyle: React.CSSProperties = {
+    backgroundColor: isAnySelected ? 'var(--sheets-selection-bg)' : backgroundColor,
+    // First selected cell always has border (even during drag)
+    ...(isFirstSelected && {
+      border: '2px solid rgb(66, 133, 244)',
+    }),
+    // Selection boundary using box-shadow (appears instantly and continuously)
+    boxShadow: buildBoundaryShadow(),
+  };
+
   return (
     <div
       data-testid={`cell-${address}`}
-      className={cn(
-        "relative w-full h-full hover-elevate cursor-pointer transition-all duration-75 outline-none focus:outline-none",
-        isSelected && "ring-2 ring-primary",
-        isTemporary && !isSelected && "ring-2 ring-blue-500"
-      )}
-      style={{
-        backgroundColor: backgroundColor,
-      }}
+      className="relative w-full h-full hover-elevate cursor-pointer outline-none focus:outline-none"
+      style={cellStyle}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       tabIndex={isSelected ? 0 : -1}
@@ -164,6 +215,12 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
     prevProps.value === nextProps.value &&
     prevProps.isSelected === nextProps.isSelected &&
     prevProps.isTemporary === nextProps.isTemporary &&
+    prevProps.isFirstSelected === nextProps.isFirstSelected &&
+    prevProps.isInSelectionBoundary?.top === nextProps.isInSelectionBoundary?.top &&
+    prevProps.isInSelectionBoundary?.right === nextProps.isInSelectionBoundary?.right &&
+    prevProps.isInSelectionBoundary?.bottom === nextProps.isInSelectionBoundary?.bottom &&
+    prevProps.isInSelectionBoundary?.left === nextProps.isInSelectionBoundary?.left &&
+    prevProps.isDragging === nextProps.isDragging &&
     prevProps.backgroundColor === nextProps.backgroundColor &&
     prevProps.fontSize === nextProps.fontSize &&
     prevProps.fontWeight === nextProps.fontWeight &&

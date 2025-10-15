@@ -254,9 +254,8 @@ export default function Home() {
   };
 
   const handleDragSelection = (addresses: string[]) => {
-    // Clear any permanent selections first (row/column selections)
-    setSelectedCells([]);
-    
+    // During drag, keep existing selected cells and add temporary ones
+    // Don't clear selectedCells - this preserves the first selected cell
     setTemporarySelectedCells(addresses);
     
     if (tempSelectionTimerRef.current) {
