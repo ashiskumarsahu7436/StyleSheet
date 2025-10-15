@@ -687,12 +687,22 @@ export default function Home() {
   };
 
   const handleMergeCells = (type: 'all' | 'vertical' | 'horizontal' = 'all') => {
-    if (selectedCells.length < 2) return;
+    // Combine both selected and temporary selected cells
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    
+    if (allSelected.length < 2) {
+      toast({
+        title: "No cells selected",
+        description: "Please select at least 2 cells to merge",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    if (selectedCells.length > 100) {
+    if (allSelected.length > 100) {
       toast({
         title: "Too Many Cells Selected",
-        description: `You selected ${selectedCells.length} cells. Please select 100 or fewer cells to merge.`,
+        description: `You selected ${allSelected.length} cells. Please select 100 or fewer cells to merge.`,
         variant: "destructive",
       });
       return;
@@ -710,7 +720,7 @@ export default function Home() {
       return { row, col: col - 1 };
     };
 
-    const cells = selectedCells.map(addr => ({ addr, ...getCellRowCol(addr) }));
+    const cells = allSelected.map(addr => ({ addr, ...getCellRowCol(addr) }));
     let minRow = Math.min(...cells.map(c => c.row));
     let maxRow = Math.max(...cells.map(c => c.row));
     let minCol = Math.min(...cells.map(c => c.col));
@@ -746,14 +756,14 @@ export default function Home() {
       }
     }
 
-    const values = selectedCells
+    const values = allSelected
       .map((addr) => cellData.get(addr)?.value || "")
       .filter((val) => val !== "")
       .join(" ");
 
     const newData = new Map(cellData);
     
-    selectedCells.forEach((addr) => {
+    allSelected.forEach((addr) => {
       if (addr !== startAddress) {
         newData.delete(addr);
       }
@@ -776,16 +786,39 @@ export default function Home() {
     saveToHistory(newData, newMergedCells);
     setCellData(newData);
     setMergedCells(newMergedCells);
+    
+    // Set the merged cell as selected (permanent selection)
     setSelectedCells([startAddress]);
+    setTemporarySelectedCells([]);
+    if (tempSelectionTimerRef.current) {
+      clearTimeout(tempSelectionTimerRef.current);
+    }
   };
 
   const handleUnmergeCells = () => {
-    if (selectedCells.length !== 1) return;
+    // Combine both selected and temporary selected cells
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
     
-    const selectedAddress = selectedCells[0];
+    if (allSelected.length !== 1) {
+      toast({
+        title: "No cell selected",
+        description: "Please select exactly one merged cell to unmerge",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const selectedAddress = allSelected[0];
     const mergedCell = mergedCells.find(m => m.startAddress === selectedAddress);
     
-    if (!mergedCell) return;
+    if (!mergedCell) {
+      toast({
+        title: "Not a merged cell",
+        description: "The selected cell is not merged",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const getCellRowCol = (addr: string) => {
       const match = addr.match(/^([A-Z]+)(\d+)$/);
@@ -827,7 +860,13 @@ export default function Home() {
     saveToHistory(newData, newMergedCells);
     setCellData(newData);
     setMergedCells(newMergedCells);
+    
+    // Set the unmerged cells as selected (permanent selection)
     setSelectedCells(allCellsInMerge);
+    setTemporarySelectedCells([]);
+    if (tempSelectionTimerRef.current) {
+      clearTimeout(tempSelectionTimerRef.current);
+    }
   };
 
   const handleDownload = async () => {
@@ -1141,7 +1180,9 @@ export default function Home() {
     };
   }, [selectedCells, temporarySelectedCells]); // Re-run when selection changes
 
-  const isMergedCell = selectedCells.length === 1 && mergedCells.some(m => m.startAddress === selectedCells[0]);
+  // Check if the selected cell (either permanent or temporary) is a merged cell
+  const allSelectedForMerge = [...selectedCells, ...temporarySelectedCells];
+  const isMergedCell = allSelectedForMerge.length === 1 && mergedCells.some(m => m.startAddress === allSelectedForMerge[0]);
   
   const getFirstSelectedCell = () => {
     const firstCell = selectedCells[0] || temporarySelectedCells[0];
