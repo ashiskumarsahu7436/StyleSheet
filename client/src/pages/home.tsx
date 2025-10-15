@@ -368,8 +368,8 @@ export default function Home() {
     // If no cells selected, show message to select cells first
     if (allSelected.length === 0) {
       toast({
-        title: "कोई cell select नहीं है",
-        description: "पहले cells select करें फिर color apply करें",
+        title: "No cells selected",
+        description: "Please select cells before applying color",
         variant: "destructive",
       });
       return;
@@ -435,8 +435,8 @@ export default function Home() {
     // If no cells selected, show message to select cells first
     if (allSelected.length === 0) {
       toast({
-        title: "कोई cell select नहीं है",
-        description: "पहले cells select करें फिर Bold apply करें",
+        title: "No cells selected",
+        description: "Please select cells before applying bold",
         variant: "destructive",
       });
       return;
@@ -500,8 +500,8 @@ export default function Home() {
     // If no cells selected, show message to select cells first
     if (allSelected.length === 0) {
       toast({
-        title: "कोई cell select नहीं है",
-        description: "पहले cells select करें फिर Italic apply करें",
+        title: "No cells selected",
+        description: "Please select cells before applying italic",
         variant: "destructive",
       });
       return;
@@ -537,8 +537,8 @@ export default function Home() {
     // If no cells selected, show message to select cells first
     if (allSelected.length === 0) {
       toast({
-        title: "कोई cell select नहीं है",
-        description: "पहले cells select करें फिर Underline apply करें",
+        title: "No cells selected",
+        description: "Please select cells before applying underline",
         variant: "destructive",
       });
       return;
