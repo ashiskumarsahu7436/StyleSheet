@@ -29,7 +29,7 @@ interface SpreadsheetCellProps {
   onDoubleClick: () => void;
   onChange: (value: string) => void;
   onAddressChange?: (address: string) => void;
-  onPaste?: (startAddress: string, data: string[][]) => void;
+  onPaste?: (startAddress: string, data: string[][], formatting?: Array<Array<{ bold?: boolean; italic?: boolean; underline?: boolean }>>) => void;
 }
 
 const SpreadsheetCell = memo(function SpreadsheetCell({
@@ -124,24 +124,66 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   const handlePaste = (e: React.ClipboardEvent) => {
     if (!onPaste) return;
     
-    // Get clipboard data
-    const clipboardData = e.clipboardData.getData('text/plain');
+    // Try to get HTML data first (to preserve formatting)
+    const htmlData = e.clipboardData.getData('text/html');
+    const textData = e.clipboardData.getData('text/plain');
     
     // Check if it contains tabs or newlines (table data)
-    if (clipboardData.includes('\t') || clipboardData.includes('\n')) {
+    if (textData.includes('\t') || textData.includes('\n')) {
       e.preventDefault(); // Prevent default paste into single cell
       
-      // Parse the data into 2D array
-      // Split by newlines for rows, tabs for columns
-      const rows = clipboardData.split('\n').map(row => row.split('\t'));
+      // Parse text data into 2D array
+      const rows = textData.split('\n').map(row => row.split('\t'));
       
       // Remove last row if it's empty (happens when copying from Excel/Sheets)
       if (rows.length > 0 && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
         rows.pop();
       }
       
-      // Call the onPaste handler with parsed data
-      onPaste(address, rows);
+      // Parse HTML for formatting if available
+      let formattingData: Array<Array<{ bold?: boolean; italic?: boolean; underline?: boolean }>> = [];
+      
+      if (htmlData) {
+        // Create a temporary DOM element to parse HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlData;
+        
+        // Try to find table structure in HTML
+        const table = tempDiv.querySelector('table');
+        if (table) {
+          const tableRows = Array.from(table.querySelectorAll('tr'));
+          formattingData = tableRows.map(tr => {
+            const cells = Array.from(tr.querySelectorAll('td, th'));
+            return cells.map(cell => {
+              const formatting: { bold?: boolean; italic?: boolean; underline?: boolean } = {};
+              
+              // Check for bold
+              if (cell.querySelector('b, strong') || 
+                  window.getComputedStyle(cell).fontWeight === 'bold' ||
+                  parseInt(window.getComputedStyle(cell).fontWeight) >= 600) {
+                formatting.bold = true;
+              }
+              
+              // Check for italic
+              if (cell.querySelector('i, em') || 
+                  window.getComputedStyle(cell).fontStyle === 'italic') {
+                formatting.italic = true;
+              }
+              
+              // Check for underline
+              if (cell.querySelector('u') || 
+                  window.getComputedStyle(cell).textDecoration.includes('underline')) {
+                formatting.underline = true;
+              }
+              
+              return formatting;
+            });
+          });
+        }
+      }
+      
+      // Call the onPaste handler with parsed data and formatting
+      onPaste(address, rows, formattingData);
     }
     // If no tabs/newlines, let default paste behavior work (single cell)
   };

@@ -366,7 +366,11 @@ export default function Home() {
     );
   };
 
-  const handlePaste = (startAddress: string, data: string[][]) => {
+  const handlePaste = (
+    startAddress: string, 
+    data: string[][], 
+    formatting?: Array<Array<{ bold?: boolean; italic?: boolean; underline?: boolean }>>
+  ) => {
     // Parse starting cell address to get row and column
     const match = startAddress.match(/^([A-Z]+)(\d+)$/);
     if (!match) return;
@@ -399,10 +403,22 @@ export default function Home() {
         // Get existing cell data or create new
         const existing = newData.get(targetAddress) || { address: targetAddress, value: "" };
         
-        // Update cell with pasted value
+        // Get formatting for this cell if available
+        const cellFormatting = formatting?.[rowOffset]?.[colOffset];
+        
+        // Build text decoration string
+        let textDecoration = existing.textDecoration || '';
+        if (cellFormatting?.underline) {
+          textDecoration = 'underline';
+        }
+        
+        // Update cell with pasted value and formatting
         newData.set(targetAddress, {
           ...existing,
           value: value,
+          ...(cellFormatting?.bold && { fontWeight: 'bold' }),
+          ...(cellFormatting?.italic && { fontStyle: 'italic' }),
+          ...(cellFormatting?.underline && { textDecoration }),
         });
       });
     });
@@ -414,9 +430,10 @@ export default function Home() {
     // Show success message
     const rowCount = data.length;
     const colCount = data[0]?.length || 0;
+    const hasFormatting = formatting && formatting.length > 0;
     toast({
       title: "Data pasted successfully",
-      description: `Pasted ${rowCount} row(s) × ${colCount} column(s) starting from ${startAddress}`,
+      description: `Pasted ${rowCount} row(s) × ${colCount} column(s) starting from ${startAddress}${hasFormatting ? ' with formatting' : ''}`,
     });
   };
 
