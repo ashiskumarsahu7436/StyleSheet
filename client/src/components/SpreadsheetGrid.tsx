@@ -10,6 +10,10 @@ interface CellData {
   fontFamily?: string;
   fontStyle?: string;
   textDecoration?: string;
+  borderTop?: string;
+  borderRight?: string;
+  borderBottom?: string;
+  borderLeft?: string;
 }
 
 interface MergedCell {
@@ -479,6 +483,10 @@ export default function SpreadsheetGrid({
                           fontFamily={cell.fontFamily ?? defaultFormatting.fontFamily}
                           fontStyle={cell.fontStyle ?? defaultFormatting.fontStyle}
                           textDecoration={cell.textDecoration ?? defaultFormatting.textDecoration}
+                          borderTop={cell.borderTop}
+                          borderRight={cell.borderRight}
+                          borderBottom={cell.borderBottom}
+                          borderLeft={cell.borderLeft}
                           onClick={() => onCellSelect(cell.address)}
                           onDoubleClick={() => onCellSelect(cell.address)}
                           onChange={(value) => onCellChange(cell.address, value)}

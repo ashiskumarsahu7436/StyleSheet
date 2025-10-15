@@ -20,6 +20,10 @@ interface SpreadsheetCellProps {
   fontFamily?: string;
   fontStyle?: string;
   textDecoration?: string;
+  borderTop?: string;
+  borderRight?: string;
+  borderBottom?: string;
+  borderLeft?: string;
   onClick: () => void;
   onDoubleClick: () => void;
   onChange: (value: string) => void;
@@ -40,6 +44,10 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   fontFamily = "Arial",
   fontStyle = "normal",
   textDecoration = "none",
+  borderTop,
+  borderRight,
+  borderBottom,
+  borderLeft,
   onClick,
   onDoubleClick,
   onChange,
@@ -154,6 +162,11 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
     }),
     // Selection boundary using box-shadow (appears instantly and continuously)
     boxShadow: buildBoundaryShadow(),
+    // Custom borders from border formatting
+    ...(borderTop && { borderTop }),
+    ...(borderRight && { borderRight }),
+    ...(borderBottom && { borderBottom }),
+    ...(borderLeft && { borderLeft }),
   };
 
   return (
