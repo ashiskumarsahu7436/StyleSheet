@@ -41,6 +41,7 @@ import {
   SlidersHorizontal
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import BordersDropdown from "@/components/BordersDropdown";
 
 interface GoogleSheetsToolbarProps {
   spreadsheetName: string;
@@ -53,6 +54,7 @@ interface GoogleSheetsToolbarProps {
   onItalicToggle: () => void;
   onUnderlineToggle: () => void;
   onColorApply: (color: string) => void;
+  onBorderChange: (type: string, color: string) => void;
   currentFontFamily?: string;
   currentFontSize?: number;
   currentFontWeight?: string;
@@ -89,6 +91,7 @@ export default function GoogleSheetsToolbar({
   onItalicToggle,
   onUnderlineToggle,
   onColorApply,
+  onBorderChange,
   currentFontFamily = "Arial",
   currentFontSize = 10,
   currentFontWeight = "normal",
@@ -385,9 +388,7 @@ export default function GoogleSheetsToolbar({
 
         {/* Borders - Always visible */}
         <div className="h-5 w-px bg-border mx-1" />
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Borders">
-          <Grid3x3 className="h-3.5 w-3.5" />
-        </Button>
+        <BordersDropdown onBorderChange={onBorderChange} />
 
         {/* Merge cells - Always visible (Google Sheets style with separate buttons) */}
         <div className="flex items-center">

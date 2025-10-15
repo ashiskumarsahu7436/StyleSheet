@@ -1405,6 +1405,7 @@ export default function Home() {
           onItalicToggle={handleItalicToggle}
           onUnderlineToggle={handleUnderlineToggle}
           onColorApply={handleColorApply}
+          onBorderChange={handleBorderChange}
           currentFontFamily={currentFontFamily}
           currentFontSize={currentFontSize}
           currentFontWeight={currentFontWeight}
