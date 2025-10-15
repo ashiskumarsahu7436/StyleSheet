@@ -29,6 +29,7 @@ interface SpreadsheetCellProps {
   onDoubleClick: () => void;
   onChange: (value: string) => void;
   onAddressChange?: (address: string) => void;
+  onPaste?: (startAddress: string, data: string[][]) => void;
 }
 
 const SpreadsheetCell = memo(function SpreadsheetCell({
@@ -54,6 +55,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   onDoubleClick,
   onChange,
   onAddressChange,
+  onPaste,
 }: SpreadsheetCellProps) {
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [tempAddress, setTempAddress] = useState(address);
@@ -117,6 +119,31 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
       // Event will bubble to document handler for navigation
       // The new cell will auto-focus via useEffect when isSelected changes
     }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    if (!onPaste) return;
+    
+    // Get clipboard data
+    const clipboardData = e.clipboardData.getData('text/plain');
+    
+    // Check if it contains tabs or newlines (table data)
+    if (clipboardData.includes('\t') || clipboardData.includes('\n')) {
+      e.preventDefault(); // Prevent default paste into single cell
+      
+      // Parse the data into 2D array
+      // Split by newlines for rows, tabs for columns
+      const rows = clipboardData.split('\n').map(row => row.split('\t'));
+      
+      // Remove last row if it's empty (happens when copying from Excel/Sheets)
+      if (rows.length > 0 && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
+        rows.pop();
+      }
+      
+      // Call the onPaste handler with parsed data
+      onPaste(address, rows);
+    }
+    // If no tabs/newlines, let default paste behavior work (single cell)
   };
 
   // Show address only when cell is empty
@@ -223,6 +250,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleTextareaKeyDown}
+          onPaste={handlePaste}
           className="w-full bg-transparent border-none outline-none px-1 resize-none hide-scrollbar relative z-10"
           style={{ 
             fontSize: `${fontSize}px`,

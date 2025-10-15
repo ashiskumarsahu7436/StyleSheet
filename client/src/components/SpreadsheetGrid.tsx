@@ -40,6 +40,7 @@ interface SpreadsheetGridProps {
   onColumnResize?: (colIndex: number, width: number) => void;
   onRowResize?: (rowIndex: number, height: number) => void;
   onDragSelection?: (addresses: string[]) => void;
+  onPaste?: (startAddress: string, data: string[][]) => void;
   mergedCells?: MergedCell[];
   onDeleteRow?: (rowIndex: number) => void;
   onInsertRow?: (rowIndex: number) => void;
@@ -71,6 +72,7 @@ export default function SpreadsheetGrid({
   onColumnResize,
   onRowResize,
   onDragSelection,
+  onPaste,
   mergedCells = [],
   onDeleteRow,
   onInsertRow,
@@ -493,6 +495,7 @@ export default function SpreadsheetGrid({
                           onDoubleClick={() => onCellSelect(cell.address)}
                           onChange={(value) => onCellChange(cell.address, value)}
                           onAddressChange={(newAddr) => onAddressChange?.(cell.address, newAddr)}
+                          onPaste={onPaste}
                         />
                       </td>
                     );

@@ -366,6 +366,60 @@ export default function Home() {
     );
   };
 
+  const handlePaste = (startAddress: string, data: string[][]) => {
+    // Parse starting cell address to get row and column
+    const match = startAddress.match(/^([A-Z]+)(\d+)$/);
+    if (!match) return;
+    
+    const startColLabel = match[1];
+    const startRow = parseInt(match[2]) - 1; // Convert to 0-indexed
+    
+    // Calculate starting column index
+    let startCol = 0;
+    for (let i = 0; i < startColLabel.length; i++) {
+      startCol = startCol * 26 + (startColLabel.charCodeAt(i) - 65 + 1);
+    }
+    startCol = startCol - 1; // Convert to 0-indexed
+    
+    // Create new cell data map
+    const newData = new Map(cellData);
+    
+    // Distribute data across cells
+    data.forEach((row, rowOffset) => {
+      row.forEach((value, colOffset) => {
+        const targetRow = startRow + rowOffset;
+        const targetCol = startCol + colOffset;
+        
+        // Check bounds (100 rows, 52 columns = AZ)
+        if (targetRow >= 100 || targetCol >= 52) return;
+        
+        // Generate target cell address
+        const targetAddress = `${getColumnLabel(targetCol)}${targetRow + 1}`;
+        
+        // Get existing cell data or create new
+        const existing = newData.get(targetAddress) || { address: targetAddress, value: "" };
+        
+        // Update cell with pasted value
+        newData.set(targetAddress, {
+          ...existing,
+          value: value,
+        });
+      });
+    });
+    
+    // Save to history and update cell data
+    saveToHistory(newData);
+    setCellData(newData);
+    
+    // Show success message
+    const rowCount = data.length;
+    const colCount = data[0]?.length || 0;
+    toast({
+      title: "Data pasted successfully",
+      description: `Pasted ${rowCount} row(s) × ${colCount} column(s) starting from ${startAddress}`,
+    });
+  };
+
   const handleTextColorApply = (color: string) => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
     
@@ -1494,6 +1548,7 @@ export default function Home() {
               setRowHeights((prev) => new Map(prev).set(row, height));
             }}
             onDragSelection={handleDragSelection}
+            onPaste={handlePaste}
             mergedCells={mergedCells}
             onDeleteRow={handleDeleteRow}
             onInsertRow={handleInsertRow}
