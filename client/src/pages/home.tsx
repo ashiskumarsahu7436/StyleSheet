@@ -365,31 +365,13 @@ export default function Home() {
   const handleColorApply = (color: string) => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
     
-    // If no cells selected, apply to ALL cells (update global default)
+    // If no cells selected, show message to select cells first
     if (allSelected.length === 0) {
-      setDefaultFormatting(prev => ({
-        ...prev,
-        backgroundColor: color === "transparent" ? undefined : color,
-      }));
-      
-      // Show all cells as selected with 5-second timer
-      const allCellAddresses: string[] = [];
-      for (let row = 0; row < 100; row++) {
-        for (let col = 0; col < 52; col++) {
-          const colLabel = getColumnLabel(col);
-          allCellAddresses.push(`${colLabel}${row + 1}`);
-        }
-      }
-      setTemporarySelectedCells(allCellAddresses);
-      
-      // Start 5-second timer
-      if (tempSelectionTimerRef.current) {
-        clearTimeout(tempSelectionTimerRef.current);
-      }
-      tempSelectionTimerRef.current = setTimeout(() => {
-        setTemporarySelectedCells([]);
-      }, 5000);
-      
+      toast({
+        title: "कोई cell select नहीं है",
+        description: "पहले cells select करें फिर color apply करें",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -450,31 +432,13 @@ export default function Home() {
   const handleFontWeightChange = (weight: string) => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
     
-    // If no cells selected, apply to ALL cells (update global default)
+    // If no cells selected, show message to select cells first
     if (allSelected.length === 0) {
-      setDefaultFormatting(prev => ({
-        ...prev,
-        fontWeight: weight,
-      }));
-      
-      // Show all cells as selected with 5-second timer
-      const allCellAddresses: string[] = [];
-      for (let row = 0; row < 100; row++) {
-        for (let col = 0; col < 52; col++) {
-          const colLabel = getColumnLabel(col);
-          allCellAddresses.push(`${colLabel}${row + 1}`);
-        }
-      }
-      setTemporarySelectedCells(allCellAddresses);
-      
-      // Start 5-second timer
-      if (tempSelectionTimerRef.current) {
-        clearTimeout(tempSelectionTimerRef.current);
-      }
-      tempSelectionTimerRef.current = setTimeout(() => {
-        setTemporarySelectedCells([]);
-      }, 5000);
-      
+      toast({
+        title: "कोई cell select नहीं है",
+        description: "पहले cells select करें फिर Bold apply करें",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -533,34 +497,13 @@ export default function Home() {
   const handleItalicToggle = () => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
     
-    // If no cells selected, apply to ALL cells (update global default)
+    // If no cells selected, show message to select cells first
     if (allSelected.length === 0) {
-      setDefaultFormatting(prev => {
-        const currentStyle = prev.fontStyle || "normal";
-        return {
-          ...prev,
-          fontStyle: currentStyle === "italic" ? "normal" : "italic"
-        };
+      toast({
+        title: "कोई cell select नहीं है",
+        description: "पहले cells select करें फिर Italic apply करें",
+        variant: "destructive",
       });
-      
-      // Show all cells as selected with 5-second timer
-      const allCellAddresses: string[] = [];
-      for (let row = 0; row < 100; row++) {
-        for (let col = 0; col < 52; col++) {
-          const colLabel = getColumnLabel(col);
-          allCellAddresses.push(`${colLabel}${row + 1}`);
-        }
-      }
-      setTemporarySelectedCells(allCellAddresses);
-      
-      // Start 5-second timer
-      if (tempSelectionTimerRef.current) {
-        clearTimeout(tempSelectionTimerRef.current);
-      }
-      tempSelectionTimerRef.current = setTimeout(() => {
-        setTemporarySelectedCells([]);
-      }, 5000);
-      
       return;
     }
     
@@ -591,34 +534,13 @@ export default function Home() {
   const handleUnderlineToggle = () => {
     const allSelected = [...selectedCells, ...temporarySelectedCells];
     
-    // If no cells selected, apply to ALL cells (update global default)
+    // If no cells selected, show message to select cells first
     if (allSelected.length === 0) {
-      setDefaultFormatting(prev => {
-        const currentDecoration = prev.textDecoration || "none";
-        return {
-          ...prev,
-          textDecoration: currentDecoration === "underline" ? "none" : "underline"
-        };
+      toast({
+        title: "कोई cell select नहीं है",
+        description: "पहले cells select करें फिर Underline apply करें",
+        variant: "destructive",
       });
-      
-      // Show all cells as selected with 5-second timer
-      const allCellAddresses: string[] = [];
-      for (let row = 0; row < 100; row++) {
-        for (let col = 0; col < 52; col++) {
-          const colLabel = getColumnLabel(col);
-          allCellAddresses.push(`${colLabel}${row + 1}`);
-        }
-      }
-      setTemporarySelectedCells(allCellAddresses);
-      
-      // Start 5-second timer
-      if (tempSelectionTimerRef.current) {
-        clearTimeout(tempSelectionTimerRef.current);
-      }
-      tempSelectionTimerRef.current = setTimeout(() => {
-        setTemporarySelectedCells([]);
-      }, 5000);
-      
       return;
     }
     
