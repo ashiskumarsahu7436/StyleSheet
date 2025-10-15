@@ -14,6 +14,10 @@ interface CellData {
   fontFamily?: string;
   fontStyle?: string;
   textDecoration?: string;
+  borderTop?: string;
+  borderRight?: string;
+  borderBottom?: string;
+  borderLeft?: string;
 }
 
 interface MergedCell {
