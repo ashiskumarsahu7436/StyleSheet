@@ -9,6 +9,7 @@ interface CellData {
   address: string;
   value: string;
   backgroundColor?: string;
+  color?: string; // Text color
   fontSize?: number;
   fontWeight?: string;
   fontFamily?: string;
@@ -363,6 +364,41 @@ export default function Home() {
     setSelectedCells((prev) =>
       prev.map((addr) => (addr === oldAddress ? newAddress : addr))
     );
+  };
+
+  const handleTextColorApply = (color: string) => {
+    const allSelected = [...selectedCells, ...temporarySelectedCells];
+    
+    // If no cells selected, show message to select cells first
+    if (allSelected.length === 0) {
+      toast({
+        title: "No cells selected",
+        description: "Please select cells before applying text color",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Apply to selected cells only
+    const newData = new Map(cellData);
+    allSelected.forEach((address) => {
+      const existing = newData.get(address) || { address, value: "" };
+      newData.set(address, {
+        ...existing,
+        color: color,
+      });
+    });
+    
+    saveToHistory(newData);
+    setCellData(newData);
+    
+    if (!retainSelection) {
+      setSelectedCells([]);
+      setTemporarySelectedCells([]);
+      if (tempSelectionTimerRef.current) {
+        clearTimeout(tempSelectionTimerRef.current);
+      }
+    }
   };
 
   const handleColorApply = (color: string) => {
@@ -1404,6 +1440,7 @@ export default function Home() {
           onBoldToggle={() => handleFontWeightChange(currentFontWeight === "bold" ? "normal" : "bold")}
           onItalicToggle={handleItalicToggle}
           onUnderlineToggle={handleUnderlineToggle}
+          onTextColorApply={handleTextColorApply}
           onColorApply={handleColorApply}
           onBorderChange={handleBorderChange}
           currentFontFamily={currentFontFamily}

@@ -394,6 +394,47 @@
   - ✅ Dual-mode system (selection + edit modes)
 [x] **Migration COMPLETE - Project ready for development! ✓**
 
+## Selection & Text Color Features (Oct 15, 2025 - 6:10 PM - LATEST)
+[x] **FIXED: Selection blue color no longer covers cell colors and text**
+  - **Problem**: Selection blue color completely covered cell background colors and text, making them invisible (like screenshot user provided)
+  - **Solution**: Restructured cell rendering with layered approach
+    - Cell background color now in base layer (always visible)
+    - Selection overlay as transparent layer (rgba blue with 0.1 opacity)
+    - Text and content on top layer with z-index: 10
+  - **Result**: Selection now works like Google Sheets
+    - ✅ Cell background colors remain visible when selected
+    - ✅ Text content stays readable when selected
+    - ✅ Blue selection appears as subtle transparent overlay
+    - ✅ Selection borders show clearly without hiding content
+  - **Technical changes:**
+    - Modified SpreadsheetCell component to use overlay div with pointer-events: none
+    - Added z-index hierarchy: background → selection overlay → text content
+    - Selection border (2px solid blue) applied to overlay, not base cell
+[x] **Selection rendering FIXED and verified! ✓**
+
+[x] **NEW FEATURE: Text Color button fully functional**
+  - **Requirement**: Make Text Color button (A with underline) functional like Fill Color
+  - **Implementation**:
+    - ✅ Created TextColorDropdown component (identical to FillColorDropdown)
+    - ✅ Added color property to CellData interface (text color)
+    - ✅ Implemented handleTextColorApply handler in home.tsx
+    - ✅ Updated SpreadsheetCell to apply color style to textarea
+    - ✅ Updated all component interfaces (SpreadsheetGrid, SpreadsheetCell)
+  - **Features**:
+    - ✅ Reset button at top (resets to black #000000)
+    - ✅ 8 rows × 10 columns color palette (exact Google Sheets colors)
+    - ✅ STANDARD section with 7 preset colors in circles
+    - ✅ CUSTOM section for custom color picker
+    - ✅ Click button to open, select color to apply, auto-close
+    - ✅ Works with cell selection (single or multiple cells)
+    - ✅ Undo/Redo support through history
+  - **User Experience:**
+    - Click Text Color (A button) → Dropdown opens
+    - Select any color → Applies to selected cell text → Dropdown closes
+    - Click Reset → Resets text to black
+    - Exactly matches Google Sheets appearance and behavior
+[x] **Text Color feature COMPLETE and fully functional! ✓**
+
 ## Fill Color Button Fix (Oct 15, 2025 - 5:41 PM)
 [x] **FIXED: Fill Color button now fully functional with Google Sheets design**
   - **Problem**: Fill Color button was hover-based and not working properly

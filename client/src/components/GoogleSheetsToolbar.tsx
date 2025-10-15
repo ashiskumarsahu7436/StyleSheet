@@ -43,6 +43,7 @@ import {
 import ThemeToggle from "@/components/ThemeToggle";
 import BordersDropdown from "@/components/BordersDropdown";
 import FillColorDropdown from "@/components/FillColorDropdown";
+import TextColorDropdown from "@/components/TextColorDropdown";
 
 interface GoogleSheetsToolbarProps {
   spreadsheetName: string;
@@ -54,6 +55,7 @@ interface GoogleSheetsToolbarProps {
   onBoldToggle: () => void;
   onItalicToggle: () => void;
   onUnderlineToggle: () => void;
+  onTextColorApply: (color: string) => void;
   onColorApply: (color: string) => void;
   onBorderChange: (type: string, color: string) => void;
   currentFontFamily?: string;
@@ -86,6 +88,7 @@ export default function GoogleSheetsToolbar({
   onBoldToggle,
   onItalicToggle,
   onUnderlineToggle,
+  onTextColorApply,
   onColorApply,
   onBorderChange,
   currentFontFamily = "Arial",
@@ -356,12 +359,8 @@ export default function GoogleSheetsToolbar({
           <Underline className="h-3.5 w-3.5" />
         </Button>
 
-        {/* Text Color */}
-        <div className="relative">
-          <Button variant="ghost" size="icon" className="h-7 w-7" title="Text color">
-            <span className="text-sm font-bold underline decoration-2" style={{ textDecorationColor: '#000' }}>A</span>
-          </Button>
-        </div>
+        {/* Text Color - Always visible */}
+        <TextColorDropdown onColorApply={onTextColorApply} />
 
         {/* Fill Color - Always visible */}
         <FillColorDropdown onColorApply={onColorApply} />

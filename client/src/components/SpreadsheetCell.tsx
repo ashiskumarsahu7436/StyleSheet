@@ -15,6 +15,7 @@ interface SpreadsheetCellProps {
   };
   isDragging?: boolean;
   backgroundColor?: string;
+  color?: string; // Text color
   fontSize?: number;
   fontWeight?: string;
   fontFamily?: string;
@@ -39,6 +40,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   isInSelectionBoundary = { top: false, right: false, bottom: false, left: false },
   isDragging = false,
   backgroundColor = "transparent",
+  color = "#000000",
   fontSize = 10,
   fontWeight = "normal",
   fontFamily = "Arial",
@@ -153,20 +155,31 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
     return shadows.length > 0 ? shadows.join(', ') : undefined;
   };
   
-  // Cell styling with Google Sheets-style selection
+  // Cell styling - always show actual background color
   const cellStyle: React.CSSProperties = {
-    backgroundColor: isAnySelected ? 'var(--sheets-selection-bg)' : backgroundColor,
-    // First selected cell always has border (even during drag)
-    ...(isFirstSelected && {
-      border: '2px solid rgb(66, 133, 244)',
-    }),
-    // Selection boundary using box-shadow (appears instantly and continuously)
-    boxShadow: buildBoundaryShadow(),
+    backgroundColor: backgroundColor,
     // Custom borders from border formatting
     ...(borderTop && { borderTop }),
     ...(borderRight && { borderRight }),
     ...(borderBottom && { borderBottom }),
     ...(borderLeft && { borderLeft }),
+  };
+
+  // Selection overlay styling (appears above cell color but below text)
+  const selectionOverlayStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'var(--sheets-selection-bg)',
+    pointerEvents: 'none',
+    // First selected cell border
+    ...(isFirstSelected && {
+      border: '2px solid rgb(66, 133, 244)',
+    }),
+    // Selection boundary using box-shadow
+    boxShadow: buildBoundaryShadow(),
   };
 
   return (
@@ -178,6 +191,8 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
       onDoubleClick={onDoubleClick}
       tabIndex={isSelected ? 0 : -1}
     >
+      {/* Selection overlay - appears below text but above cell background */}
+      {isAnySelected && <div style={selectionOverlayStyle} />}
       {showAddress && (
         <div
           className="absolute top-0.5 left-1 text-[10px] font-mono text-muted-foreground pointer-events-auto select-none z-10"
@@ -200,13 +215,13 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           )}
         </div>
       )}
-      <div className="w-full h-full flex items-center overflow-hidden">
+      <div className="w-full h-full flex items-center overflow-hidden relative z-10">
         <textarea
           ref={textareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleTextareaKeyDown}
-          className="w-full bg-transparent border-none outline-none px-1 text-foreground resize-none hide-scrollbar"
+          className="w-full bg-transparent border-none outline-none px-1 resize-none hide-scrollbar relative z-10"
           style={{ 
             fontSize: `${fontSize}px`,
             lineHeight: `${fontSize}px`,
@@ -214,6 +229,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
             fontFamily,
             fontStyle,
             textDecoration,
+            color: color,
             overflow: 'hidden',
             height: `${fontSize}px`
           }}
@@ -235,6 +251,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
     prevProps.isInSelectionBoundary?.left === nextProps.isInSelectionBoundary?.left &&
     prevProps.isDragging === nextProps.isDragging &&
     prevProps.backgroundColor === nextProps.backgroundColor &&
+    prevProps.color === nextProps.color &&
     prevProps.fontSize === nextProps.fontSize &&
     prevProps.fontWeight === nextProps.fontWeight &&
     prevProps.fontFamily === nextProps.fontFamily &&

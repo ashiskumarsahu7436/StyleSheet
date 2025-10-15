@@ -5,6 +5,7 @@ interface CellData {
   address: string;
   value: string;
   backgroundColor?: string;
+  color?: string; // Text color
   fontSize?: number;
   fontWeight?: string;
   fontFamily?: string;
@@ -478,6 +479,7 @@ export default function SpreadsheetGrid({
                           isInSelectionBoundary={isInSelectionBoundary}
                           isDragging={isDragging}
                           backgroundColor={cell.backgroundColor ?? defaultFormatting.backgroundColor}
+                          color={cell.color}
                           fontSize={cell.fontSize ?? defaultFormatting.fontSize}
                           fontWeight={cell.fontWeight ?? defaultFormatting.fontWeight}
                           fontFamily={cell.fontFamily ?? defaultFormatting.fontFamily}
