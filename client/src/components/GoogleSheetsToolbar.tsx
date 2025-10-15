@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import BordersDropdown from "@/components/BordersDropdown";
+import FillColorDropdown from "@/components/FillColorDropdown";
 
 interface GoogleSheetsToolbarProps {
   spreadsheetName: string;
@@ -74,11 +75,6 @@ const FONT_SIZES = [8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48
 const FONT_FAMILIES = ["Arial", "Calibri", "Times New Roman", "Verdana", "Georgia", "Courier New"];
 
 const MENU_ITEMS = ["File", "Edit", "View", "Insert", "Format", "Data", "Tools", "Extensions", "Help"];
-
-const COLORS = [
-  "#000000", "#434343", "#666666", "#999999", "#B7B7B7", "#CCCCCC", "#D9D9D9", "#EFEFEF", "#F3F3F3", "#FFFFFF",
-  "#980000", "#FF0000", "#FF9900", "#FFFF00", "#00FF00", "#00FFFF", "#4A86E8", "#0000FF", "#9900FF", "#FF00FF",
-];
 
 export default function GoogleSheetsToolbar({
   spreadsheetName,
@@ -367,24 +363,8 @@ export default function GoogleSheetsToolbar({
           </Button>
         </div>
 
-        {/* Fill Color with Palette - Always visible */}
-        <div className="relative group">
-          <Button variant="ghost" size="icon" className="h-7 w-7" title="Fill color">
-            <Palette className="h-3.5 w-3.5" />
-          </Button>
-          {/* Color palette */}
-          <div className="absolute hidden group-hover:grid grid-cols-10 gap-1 p-2 bg-background border border-border rounded shadow-lg top-full left-0 z-10 mt-1">
-            {COLORS.map((color, idx) => (
-              <button
-                key={idx}
-                className="h-5 w-5 rounded border border-border hover-elevate cursor-pointer"
-                style={{ backgroundColor: color }}
-                onClick={() => onColorApply(color)}
-                title={color}
-              />
-            ))}
-          </div>
-        </div>
+        {/* Fill Color - Always visible */}
+        <FillColorDropdown onColorApply={onColorApply} />
 
         {/* Borders - Always visible */}
         <div className="h-5 w-px bg-border mx-1" />
