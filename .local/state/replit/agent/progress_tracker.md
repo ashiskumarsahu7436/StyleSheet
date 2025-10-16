@@ -412,6 +412,34 @@
 [x] **Migration COMPLETE - All tasks finished! ✓**
 [x] **Project is fully functional and ready for use! ✓**
 
+## Enhanced Paste Formatting Feature (Oct 16, 2025 - LATEST)
+[x] **NEW FEATURE: Preserve ALL text formatting when pasting table data**
+  - **Requirement**: When pasting from Excel/Google Sheets, preserve all text formatting
+  - **Implementation**:
+    - ✅ Enhanced SpreadsheetCell.tsx handlePaste to extract complete formatting from HTML clipboard
+    - ✅ Updated handlePaste in home.tsx to apply all extracted formatting to pasted cells
+    - ✅ Fixed font size conversion bug (was incorrectly converting px to pt)
+  - **Formatting preserved:**
+    - ✅ Bold, Italic, Underline (text styling)
+    - ✅ Font family (Arial, Calibri, Times New Roman, etc.)
+    - ✅ Font size (accurate px values preserved)
+    - ✅ Text color (converted from RGB to hex)
+    - ✅ Background color (converted from RGB to hex)
+  - **Technical details:**
+    - Parses HTML clipboard data using getComputedStyle
+    - Extracts formatting from table cells (td, th elements)
+    - Converts RGB colors to hex format
+    - Applies all formatting properties to CellData
+    - Type-safe implementation with proper number conversion for fontSize
+  - **Architect reviewed and approved** ✅
+  - **User Experience:**
+    - Paste formatted data from Excel → Formatting preserved exactly
+    - Paste formatted data from Google Sheets → Formatting preserved exactly
+    - Toast notification confirms "Pasted X rows × Y columns with full formatting"
+    - All pasted formatting can be modified using existing toolbar controls
+    - Undo/Redo support through history system
+[x] **Enhanced paste formatting COMPLETE and verified! ✓**
+
 ## Selection & Text Color Features (Oct 15, 2025 - 6:10 PM - LATEST)
 [x] **FIXED: Selection blue color no longer covers cell colors and text**
   - **Problem**: Selection blue color completely covered cell background colors and text, making them invisible (like screenshot user provided)
