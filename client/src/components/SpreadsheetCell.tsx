@@ -152,12 +152,16 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
       }>> = [];
       
       if (htmlData) {
+        // Debug: Log the HTML data to see what Google Sheets sends
+        console.log('📋 Clipboard HTML:', htmlData);
+        
         // Create a temporary DOM element to parse HTML
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlData;
         
         // Try to find table structure in HTML
         const table = tempDiv.querySelector('table');
+        console.log('📊 Table found:', !!table);
         if (table) {
           const tableRows = Array.from(table.querySelectorAll('tr'));
           formattingData = tableRows.map(tr => {
@@ -173,64 +177,14 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
                 backgroundColor?: string;
               } = {};
               
-              const computedStyle = window.getComputedStyle(cell);
+              // Get inline style attribute (Google Sheets uses inline styles)
+              const inlineStyle = cell.getAttribute('style') || '';
+              console.log('🎨 Cell inline style:', inlineStyle);
               
-              // Check for bold
-              if (cell.querySelector('b, strong') || 
-                  computedStyle.fontWeight === 'bold' ||
-                  parseInt(computedStyle.fontWeight) >= 600) {
-                formatting.bold = true;
-              }
-              
-              // Check for italic
-              if (cell.querySelector('i, em') || 
-                  computedStyle.fontStyle === 'italic') {
-                formatting.italic = true;
-              }
-              
-              // Check for underline
-              if (cell.querySelector('u') || 
-                  computedStyle.textDecoration.includes('underline')) {
-                formatting.underline = true;
-              }
-              
-              // Extract font family
-              const fontFamily = computedStyle.fontFamily;
-              if (fontFamily && fontFamily !== 'inherit') {
-                // Clean up font family (remove quotes and fallbacks)
-                const cleanFont = fontFamily.split(',')[0].replace(/["']/g, '').trim();
-                if (cleanFont && cleanFont !== 'inherit') {
-                  formatting.fontFamily = cleanFont;
-                }
-              }
-              
-              // Extract font size (keep original px value)
-              const fontSize = computedStyle.fontSize;
-              if (fontSize && fontSize !== 'inherit') {
-                const pxSize = parseFloat(fontSize);
-                if (!isNaN(pxSize)) {
-                  formatting.fontSize = `${pxSize}px`;
-                }
-              }
-              
-              // Extract text color
-              const color = computedStyle.color;
-              if (color && color !== 'inherit' && color !== 'rgb(0, 0, 0)') {
-                // Convert rgb to hex
-                const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-                if (rgbMatch) {
-                  const r = parseInt(rgbMatch[1]);
-                  const g = parseInt(rgbMatch[2]);
-                  const b = parseInt(rgbMatch[3]);
-                  const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
-                  formatting.color = hex;
-                }
-              }
-              
-              // Extract background color
-              const bgColor = computedStyle.backgroundColor;
-              if (bgColor && bgColor !== 'inherit' && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                // Convert rgb/rgba to hex
+              // Extract background color from inline style
+              const bgColorMatch = inlineStyle.match(/background-color:\s*([^;]+)/);
+              if (bgColorMatch) {
+                const bgColor = bgColorMatch[1].trim();
                 const rgbaMatch = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
                 if (rgbaMatch) {
                   const r = parseInt(rgbaMatch[1]);
@@ -240,8 +194,77 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
                   if (!(r > 250 && g > 250 && b > 250)) {
                     const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
                     formatting.backgroundColor = hex;
+                    console.log('🎨 BG Color extracted:', hex);
                   }
                 }
+              }
+              
+              // Extract text color from inline style
+              const colorMatch = inlineStyle.match(/(?:^|;)\s*color:\s*([^;]+)/);
+              if (colorMatch) {
+                const color = colorMatch[1].trim();
+                const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                if (rgbMatch) {
+                  const r = parseInt(rgbMatch[1]);
+                  const g = parseInt(rgbMatch[2]);
+                  const b = parseInt(rgbMatch[3]);
+                  if (!(r === 0 && g === 0 && b === 0)) {
+                    const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+                    formatting.color = hex;
+                    console.log('🎨 Text color extracted:', hex);
+                  }
+                }
+              }
+              
+              // Extract font family from inline style
+              const fontFamilyMatch = inlineStyle.match(/font-family:\s*([^;]+)/);
+              if (fontFamilyMatch) {
+                const fontFamily = fontFamilyMatch[1].trim().replace(/["']/g, '').split(',')[0];
+                if (fontFamily && fontFamily !== 'inherit') {
+                  formatting.fontFamily = fontFamily;
+                }
+              }
+              
+              // Extract font size from inline style
+              const fontSizeMatch = inlineStyle.match(/font-size:\s*([^;]+)/);
+              if (fontSizeMatch) {
+                const fontSize = fontSizeMatch[1].trim();
+                const pxSize = parseFloat(fontSize);
+                if (!isNaN(pxSize)) {
+                  formatting.fontSize = `${pxSize}px`;
+                }
+              }
+              
+              // Extract font weight from inline style
+              const fontWeightMatch = inlineStyle.match(/font-weight:\s*([^;]+)/);
+              if (fontWeightMatch) {
+                const fontWeight = fontWeightMatch[1].trim();
+                if (fontWeight === 'bold' || parseInt(fontWeight) >= 600) {
+                  formatting.bold = true;
+                }
+              }
+              
+              // Extract font style from inline style
+              const fontStyleMatch = inlineStyle.match(/font-style:\s*([^;]+)/);
+              if (fontStyleMatch && fontStyleMatch[1].trim() === 'italic') {
+                formatting.italic = true;
+              }
+              
+              // Extract text decoration from inline style
+              const textDecoMatch = inlineStyle.match(/text-decoration[^:]*:\s*([^;]+)/);
+              if (textDecoMatch && textDecoMatch[1].includes('underline')) {
+                formatting.underline = true;
+              }
+              
+              // Also check for child elements (b, strong, i, em, u)
+              if (cell.querySelector('b, strong')) {
+                formatting.bold = true;
+              }
+              if (cell.querySelector('i, em')) {
+                formatting.italic = true;
+              }
+              if (cell.querySelector('u')) {
+                formatting.underline = true;
               }
               
               return formatting;
