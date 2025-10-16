@@ -183,65 +183,75 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
               } = {};
               
               // Get inline style attribute (Google Sheets uses inline styles)
-              const inlineStyle = cell.getAttribute('style') || '';
-              console.log('🎨 Cell inline style:', inlineStyle);
+              const cellStyle = cell.getAttribute('style') || '';
+              console.log('🎨 Cell style:', cellStyle);
+              console.log('🎨 Cell HTML:', cell.outerHTML.substring(0, 300));
               
-              // Extract background color from inline style
-              const bgColorMatch = inlineStyle.match(/background-color:\s*([^;]+)/);
-              if (bgColorMatch) {
-                const bgColor = bgColorMatch[1].trim();
-                const rgbaMatch = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-                if (rgbaMatch) {
-                  const r = parseInt(rgbaMatch[1]);
-                  const g = parseInt(rgbaMatch[2]);
-                  const b = parseInt(rgbaMatch[3]);
-                  // Only include if not white or very light
-                  if (!(r > 250 && g > 250 && b > 250)) {
-                    const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
-                    formatting.backgroundColor = hex;
-                    console.log('🎨 BG Color extracted:', hex);
+              // Check cell's own inline styles
+              const extractColorFromStyle = (styleStr: string) => {
+                // Background color
+                const bgMatch = styleStr.match(/background-color:\s*([^;]+)/);
+                if (bgMatch) {
+                  const bgColor = bgMatch[1].trim();
+                  const rgbaMatch = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                  if (rgbaMatch) {
+                    const r = parseInt(rgbaMatch[1]);
+                    const g = parseInt(rgbaMatch[2]);
+                    const b = parseInt(rgbaMatch[3]);
+                    if (!(r > 250 && g > 250 && b > 250)) {
+                      formatting.backgroundColor = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+                      console.log('✅ BG extracted:', formatting.backgroundColor);
+                    }
                   }
                 }
-              }
-              
-              // Extract text color from inline style
-              const colorMatch = inlineStyle.match(/(?:^|;)\s*color:\s*([^;]+)/);
-              if (colorMatch) {
-                const color = colorMatch[1].trim();
-                const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-                if (rgbMatch) {
-                  const r = parseInt(rgbMatch[1]);
-                  const g = parseInt(rgbMatch[2]);
-                  const b = parseInt(rgbMatch[3]);
-                  if (!(r === 0 && g === 0 && b === 0)) {
-                    const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
-                    formatting.color = hex;
-                    console.log('🎨 Text color extracted:', hex);
+                
+                // Text color
+                const colorMatch = styleStr.match(/(?:^|;)\s*color:\s*([^;]+)/);
+                if (colorMatch) {
+                  const color = colorMatch[1].trim();
+                  const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                  if (rgbMatch) {
+                    const r = parseInt(rgbMatch[1]);
+                    const g = parseInt(rgbMatch[2]);
+                    const b = parseInt(rgbMatch[3]);
+                    if (!(r === 0 && g === 0 && b === 0)) {
+                      formatting.color = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+                      console.log('✅ Text color extracted:', formatting.color);
+                    }
                   }
                 }
-              }
+              };
               
-              // Extract font family from inline style
-              const fontFamilyMatch = inlineStyle.match(/font-family:\s*([^;]+)/);
+              // Extract from cell's style
+              extractColorFromStyle(cellStyle);
+              
+              // Also check for span elements inside the cell (Google Sheets often uses spans for text color)
+              const spans = cell.querySelectorAll('span');
+              spans.forEach(span => {
+                const spanStyle = span.getAttribute('style') || '';
+                if (spanStyle) {
+                  console.log('🎨 Span style found:', spanStyle);
+                  extractColorFromStyle(spanStyle);
+                }
+              });
+              
+              // Font family
+              const fontFamilyMatch = cellStyle.match(/font-family:\s*([^;]+)/);
               if (fontFamilyMatch) {
-                const fontFamily = fontFamilyMatch[1].trim().replace(/["']/g, '').split(',')[0];
-                if (fontFamily && fontFamily !== 'inherit') {
-                  formatting.fontFamily = fontFamily;
-                }
+                formatting.fontFamily = fontFamilyMatch[1].trim().replace(/["']/g, '').split(',')[0];
               }
               
-              // Extract font size from inline style
-              const fontSizeMatch = inlineStyle.match(/font-size:\s*([^;]+)/);
+              // Font size
+              const fontSizeMatch = cellStyle.match(/font-size:\s*([^;]+)/);
               if (fontSizeMatch) {
-                const fontSize = fontSizeMatch[1].trim();
-                const pxSize = parseFloat(fontSize);
+                const pxSize = parseFloat(fontSizeMatch[1].trim());
                 if (!isNaN(pxSize)) {
                   formatting.fontSize = `${pxSize}px`;
                 }
               }
               
-              // Extract font weight from inline style
-              const fontWeightMatch = inlineStyle.match(/font-weight:\s*([^;]+)/);
+              // Font weight (bold)
+              const fontWeightMatch = cellStyle.match(/font-weight:\s*([^;]+)/);
               if (fontWeightMatch) {
                 const fontWeight = fontWeightMatch[1].trim();
                 if (fontWeight === 'bold' || parseInt(fontWeight) >= 600) {
@@ -249,28 +259,22 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
                 }
               }
               
-              // Extract font style from inline style
-              const fontStyleMatch = inlineStyle.match(/font-style:\s*([^;]+)/);
+              // Font style (italic)
+              const fontStyleMatch = cellStyle.match(/font-style:\s*([^;]+)/);
               if (fontStyleMatch && fontStyleMatch[1].trim() === 'italic') {
                 formatting.italic = true;
               }
               
-              // Extract text decoration from inline style
-              const textDecoMatch = inlineStyle.match(/text-decoration[^:]*:\s*([^;]+)/);
+              // Text decoration (underline)
+              const textDecoMatch = cellStyle.match(/text-decoration[^:]*:\s*([^;]+)/);
               if (textDecoMatch && textDecoMatch[1].includes('underline')) {
                 formatting.underline = true;
               }
               
-              // Also check for child elements (b, strong, i, em, u)
-              if (cell.querySelector('b, strong')) {
-                formatting.bold = true;
-              }
-              if (cell.querySelector('i, em')) {
-                formatting.italic = true;
-              }
-              if (cell.querySelector('u')) {
-                formatting.underline = true;
-              }
+              // Also check for child elements
+              if (cell.querySelector('b, strong')) formatting.bold = true;
+              if (cell.querySelector('i, em')) formatting.italic = true;
+              if (cell.querySelector('u')) formatting.underline = true;
               
               return formatting;
             });
