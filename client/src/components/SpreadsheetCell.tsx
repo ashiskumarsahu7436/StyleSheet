@@ -16,7 +16,7 @@ interface SpreadsheetCellProps {
   isDragging?: boolean;
   backgroundColor?: string;
   color?: string; // Text color
-  fontSize?: number;
+  fontSize?: number; // Font size in pt (points)
   fontWeight?: string;
   fontFamily?: string;
   fontStyle?: string;
@@ -29,7 +29,15 @@ interface SpreadsheetCellProps {
   onDoubleClick: () => void;
   onChange: (value: string) => void;
   onAddressChange?: (address: string) => void;
-  onPaste?: (startAddress: string, data: string[][], formatting?: Array<Array<{ bold?: boolean; italic?: boolean; underline?: boolean }>>) => void;
+  onPaste?: (startAddress: string, data: string[][], formatting?: Array<Array<{ 
+    bold?: boolean; 
+    italic?: boolean; 
+    underline?: boolean;
+    fontFamily?: string;
+    fontSize?: number; // pt value
+    color?: string;
+    backgroundColor?: string;
+  }>>) => void;
 }
 
 const SpreadsheetCell = memo(function SpreadsheetCell({
@@ -42,7 +50,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   isDragging = false,
   backgroundColor = "transparent",
   color = "#000000",
-  fontSize = 10,
+  fontSize = 11, // Default 11pt (Google Sheets standard)
   fontWeight = "normal",
   fontFamily = "Arial",
   fontStyle = "normal",
@@ -152,133 +160,121 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
         italic?: boolean; 
         underline?: boolean;
         fontFamily?: string;
-        fontSize?: string;
+        fontSize?: number; // Changed to number (will store pt value)
         color?: string;
         backgroundColor?: string;
       }>> = [];
       
       if (htmlData) {
-        console.log('📋 Full HTML:', htmlData);
+        console.log('📋 Full HTML:', htmlData.substring(0, 1000));
         
         // Create a temporary DOM element to parse HTML
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlData;
+        // Append to body to get computed styles
+        document.body.appendChild(tempDiv);
+        tempDiv.style.visibility = 'hidden';
+        tempDiv.style.position = 'absolute';
         
-        // Try to find table structure in HTML
-        const table = tempDiv.querySelector('table');
-        console.log('📊 Table found:', !!table, 'tempDiv html:', tempDiv.innerHTML.substring(0, 500));
-        if (table) {
-          const tableRows = Array.from(table.querySelectorAll('tr'));
-          formattingData = tableRows.map(tr => {
-            const cells = Array.from(tr.querySelectorAll('td, th'));
-            return cells.map(cell => {
-              const formatting: { 
-                bold?: boolean; 
-                italic?: boolean; 
-                underline?: boolean;
-                fontFamily?: string;
-                fontSize?: string;
-                color?: string;
-                backgroundColor?: string;
-              } = {};
-              
-              // Get inline style attribute (Google Sheets uses inline styles)
-              const cellStyle = cell.getAttribute('style') || '';
-              console.log('🎨 Cell style:', cellStyle);
-              console.log('🎨 Cell HTML:', cell.outerHTML.substring(0, 300));
-              
-              // Check cell's own inline styles
-              const extractColorFromStyle = (styleStr: string) => {
-                // Background color
-                const bgMatch = styleStr.match(/background-color:\s*([^;]+)/);
-                if (bgMatch) {
-                  const bgColor = bgMatch[1].trim();
-                  const rgbaMatch = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-                  if (rgbaMatch) {
-                    const r = parseInt(rgbaMatch[1]);
-                    const g = parseInt(rgbaMatch[2]);
-                    const b = parseInt(rgbaMatch[3]);
-                    if (!(r > 250 && g > 250 && b > 250)) {
-                      formatting.backgroundColor = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
-                      console.log('✅ BG extracted:', formatting.backgroundColor);
-                    }
+        try {
+          // Try to find table structure in HTML
+          const table = tempDiv.querySelector('table');
+          console.log('📊 Table found:', !!table);
+          
+          if (table) {
+            const tableRows = Array.from(table.querySelectorAll('tr'));
+            formattingData = tableRows.map(tr => {
+              const cells = Array.from(tr.querySelectorAll('td, th'));
+              return cells.map(cell => {
+                const formatting: { 
+                  bold?: boolean; 
+                  italic?: boolean; 
+                  underline?: boolean;
+                  fontFamily?: string;
+                  fontSize?: number;
+                  color?: string;
+                  backgroundColor?: string;
+                } = {};
+                
+                // RGB to Hex converter
+                const rgbToHex = (rgb: string): string | null => {
+                  const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                  if (!match) return null;
+                  const r = parseInt(match[1]);
+                  const g = parseInt(match[2]);
+                  const b = parseInt(match[3]);
+                  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+                };
+                
+                // Use getComputedStyle for accurate style extraction
+                const computedStyle = window.getComputedStyle(cell);
+                
+                // Background color - extract even if white (we'll filter later)
+                const bgColor = computedStyle.backgroundColor;
+                if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                  const bgHex = rgbToHex(bgColor);
+                  if (bgHex && bgHex !== '#FFFFFF') { // Ignore pure white
+                    formatting.backgroundColor = bgHex;
+                    console.log('✅ BG color extracted:', bgHex, 'from', bgColor);
                   }
                 }
                 
-                // Text color
-                const colorMatch = styleStr.match(/(?:^|;)\s*color:\s*([^;]+)/);
-                if (colorMatch) {
-                  const color = colorMatch[1].trim();
-                  const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-                  if (rgbMatch) {
-                    const r = parseInt(rgbMatch[1]);
-                    const g = parseInt(rgbMatch[2]);
-                    const b = parseInt(rgbMatch[3]);
-                    if (!(r === 0 && g === 0 && b === 0)) {
-                      formatting.color = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
-                      console.log('✅ Text color extracted:', formatting.color);
-                    }
+                // Text color - extract all colors
+                const textColor = computedStyle.color;
+                if (textColor) {
+                  const colorHex = rgbToHex(textColor);
+                  if (colorHex && colorHex !== '#000000') { // Don't store black as it's default
+                    formatting.color = colorHex;
+                    console.log('✅ Text color extracted:', colorHex, 'from', textColor);
                   }
                 }
-              };
-              
-              // Extract from cell's style
-              extractColorFromStyle(cellStyle);
-              
-              // Also check for span elements inside the cell (Google Sheets often uses spans for text color)
-              const spans = cell.querySelectorAll('span');
-              spans.forEach(span => {
-                const spanStyle = span.getAttribute('style') || '';
-                if (spanStyle) {
-                  console.log('🎨 Span style found:', spanStyle);
-                  extractColorFromStyle(spanStyle);
+                
+                // Font family
+                const fontFamily = computedStyle.fontFamily;
+                if (fontFamily && fontFamily !== 'Times New Roman') { // Ignore default
+                  formatting.fontFamily = fontFamily.split(',')[0].trim().replace(/["']/g, '');
+                  console.log('✅ Font family extracted:', formatting.fontFamily);
                 }
-              });
-              
-              // Font family
-              const fontFamilyMatch = cellStyle.match(/font-family:\s*([^;]+)/);
-              if (fontFamilyMatch) {
-                formatting.fontFamily = fontFamilyMatch[1].trim().replace(/["']/g, '').split(',')[0];
-              }
-              
-              // Font size
-              const fontSizeMatch = cellStyle.match(/font-size:\s*([^;]+)/);
-              if (fontSizeMatch) {
-                const pxSize = parseFloat(fontSizeMatch[1].trim());
-                if (!isNaN(pxSize)) {
-                  formatting.fontSize = `${pxSize}px`;
+                
+                // Font size - convert px to pt (1px = 0.75pt, so px/1.333 = pt)
+                const fontSizePx = parseFloat(computedStyle.fontSize);
+                if (!isNaN(fontSizePx) && fontSizePx > 0) {
+                  // Convert px to pt: pt = px / 1.333 (or px * 0.75)
+                  const fontSizePt = Math.round(fontSizePx * 0.75);
+                  if (fontSizePt !== 11) { // 11pt is default, don't store
+                    formatting.fontSize = fontSizePt;
+                    console.log('✅ Font size extracted:', fontSizePt + 'pt', 'from', fontSizePx + 'px');
+                  }
                 }
-              }
-              
-              // Font weight (bold)
-              const fontWeightMatch = cellStyle.match(/font-weight:\s*([^;]+)/);
-              if (fontWeightMatch) {
-                const fontWeight = fontWeightMatch[1].trim();
+                
+                // Font weight (bold)
+                const fontWeight = computedStyle.fontWeight;
                 if (fontWeight === 'bold' || parseInt(fontWeight) >= 600) {
                   formatting.bold = true;
+                  console.log('✅ Bold detected');
                 }
-              }
-              
-              // Font style (italic)
-              const fontStyleMatch = cellStyle.match(/font-style:\s*([^;]+)/);
-              if (fontStyleMatch && fontStyleMatch[1].trim() === 'italic') {
-                formatting.italic = true;
-              }
-              
-              // Text decoration (underline)
-              const textDecoMatch = cellStyle.match(/text-decoration[^:]*:\s*([^;]+)/);
-              if (textDecoMatch && textDecoMatch[1].includes('underline')) {
-                formatting.underline = true;
-              }
-              
-              // Also check for child elements
-              if (cell.querySelector('b, strong')) formatting.bold = true;
-              if (cell.querySelector('i, em')) formatting.italic = true;
-              if (cell.querySelector('u')) formatting.underline = true;
-              
-              return formatting;
+                
+                // Font style (italic)
+                if (computedStyle.fontStyle === 'italic') {
+                  formatting.italic = true;
+                  console.log('✅ Italic detected');
+                }
+                
+                // Text decoration (underline)
+                const textDeco = computedStyle.textDecoration || computedStyle.textDecorationLine;
+                if (textDeco && textDeco.includes('underline')) {
+                  formatting.underline = true;
+                  console.log('✅ Underline detected');
+                }
+                
+                console.log('📋 Final formatting for cell:', formatting);
+                return formatting;
+              });
             });
-          });
+          }
+        } finally {
+          // Clean up
+          document.body.removeChild(tempDiv);
         }
       }
       
@@ -395,15 +391,15 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           onPaste={handlePaste}
           className="w-full bg-transparent border-none outline-none px-1 resize-none hide-scrollbar relative z-10"
           style={{ 
-            fontSize: `${fontSize}px`,
-            lineHeight: `${fontSize}px`,
+            fontSize: `${fontSize}pt`,
+            lineHeight: `${fontSize}pt`,
             fontWeight,
             fontFamily,
             fontStyle,
             textDecoration,
             color: color,
             overflow: 'hidden',
-            height: `${fontSize}px`
+            height: `${fontSize}pt`
           }}
           data-testid={`input-${address}`}
         />

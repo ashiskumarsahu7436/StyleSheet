@@ -92,7 +92,7 @@ export default function GoogleSheetsToolbar({
   onColorApply,
   onBorderChange,
   currentFontFamily = "Arial",
-  currentFontSize = 10,
+  currentFontSize = 11, // Default 11pt (Google Sheets standard)
   currentFontWeight = "normal",
   currentFontStyle = "normal",
   currentTextDecoration = "none",
@@ -304,12 +304,14 @@ export default function GoogleSheetsToolbar({
             onValueChange={(value) => onFontSizeChange(parseInt(value))}
           >
             <SelectTrigger className="w-16 h-7 text-xs px-2" data-testid="select-font-size">
-              <SelectValue />
+              <SelectValue>
+                {currentFontSize}pt
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {FONT_SIZES.map((size) => (
                 <SelectItem key={size} value={size.toString()}>
-                  {size}
+                  {size}pt
                 </SelectItem>
               ))}
             </SelectContent>

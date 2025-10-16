@@ -71,7 +71,7 @@ export default function Home() {
     textDecoration?: string;
     backgroundColor?: string;
   }>({
-    fontSize: 13,
+    fontSize: 11, // Default 11pt (Google Sheets standard)
   });
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -374,7 +374,7 @@ export default function Home() {
       italic?: boolean; 
       underline?: boolean;
       fontFamily?: string;
-      fontSize?: string;
+      fontSize?: number; // Now number (pt value)
       color?: string;
       backgroundColor?: string;
     }>>
@@ -420,7 +420,7 @@ export default function Home() {
           textDecoration = 'underline';
         }
         
-        // Update cell with pasted value and ALL formatting
+        // Update cell with pasted value and ALL formatting (fontSize is now in pt)
         newData.set(targetAddress, {
           ...existing,
           value: value,
@@ -428,9 +428,9 @@ export default function Home() {
           ...(cellFormatting?.bold && { fontWeight: 'bold' }),
           ...(cellFormatting?.italic && { fontStyle: 'italic' }),
           ...(cellFormatting?.underline && { textDecoration }),
-          // Font formatting
+          // Font formatting (fontSize is now a number in pt)
           ...(cellFormatting?.fontFamily && { fontFamily: cellFormatting.fontFamily }),
-          ...(cellFormatting?.fontSize && { fontSize: parseFloat(cellFormatting.fontSize) }),
+          ...(cellFormatting?.fontSize !== undefined && { fontSize: cellFormatting.fontSize }),
           // Color formatting
           ...(cellFormatting?.color && { color: cellFormatting.color }),
           ...(cellFormatting?.backgroundColor && { backgroundColor: cellFormatting.backgroundColor }),
@@ -1155,9 +1155,9 @@ export default function Home() {
             const excelCell = row.getCell(colIndex + 1);
             excelCell.value = cellData_item.value || "";
             
-            // Apply font formatting (use same defaults as UI: 10pt Arial)
+            // Apply font formatting (use same defaults as UI: 11pt Arial)
             const fontFamily = cellData_item.fontFamily || 'Arial'; // Google Sheets default
-            const fontSize = cellData_item.fontSize || 10; // Google Sheets default
+            const fontSize = cellData_item.fontSize || 11; // Google Sheets default (11pt)
             const fontWeight = cellData_item.fontWeight || 'normal';
             const fontStyle = cellData_item.fontStyle || 'normal';
             const textDecoration = cellData_item.textDecoration || 'none';
@@ -1441,7 +1441,7 @@ export default function Home() {
   };
   
   const firstCell = getFirstSelectedCell();
-  const currentFontSize = firstCell?.fontSize || defaultFormatting.fontSize || 13;
+  const currentFontSize = firstCell?.fontSize || defaultFormatting.fontSize || 11;
   const currentFontWeight = firstCell?.fontWeight || defaultFormatting.fontWeight || "normal";
   const currentFontFamily = firstCell?.fontFamily || defaultFormatting.fontFamily || "Arial";
   const currentFontStyle = firstCell?.fontStyle || defaultFormatting.fontStyle || "normal";
