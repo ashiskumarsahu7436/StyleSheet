@@ -141,7 +141,15 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
       }
       
       // Parse HTML for formatting if available
-      let formattingData: Array<Array<{ bold?: boolean; italic?: boolean; underline?: boolean }>> = [];
+      let formattingData: Array<Array<{ 
+        bold?: boolean; 
+        italic?: boolean; 
+        underline?: boolean;
+        fontFamily?: string;
+        fontSize?: string;
+        color?: string;
+        backgroundColor?: string;
+      }>> = [];
       
       if (htmlData) {
         // Create a temporary DOM element to parse HTML
@@ -155,25 +163,85 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           formattingData = tableRows.map(tr => {
             const cells = Array.from(tr.querySelectorAll('td, th'));
             return cells.map(cell => {
-              const formatting: { bold?: boolean; italic?: boolean; underline?: boolean } = {};
+              const formatting: { 
+                bold?: boolean; 
+                italic?: boolean; 
+                underline?: boolean;
+                fontFamily?: string;
+                fontSize?: string;
+                color?: string;
+                backgroundColor?: string;
+              } = {};
+              
+              const computedStyle = window.getComputedStyle(cell);
               
               // Check for bold
               if (cell.querySelector('b, strong') || 
-                  window.getComputedStyle(cell).fontWeight === 'bold' ||
-                  parseInt(window.getComputedStyle(cell).fontWeight) >= 600) {
+                  computedStyle.fontWeight === 'bold' ||
+                  parseInt(computedStyle.fontWeight) >= 600) {
                 formatting.bold = true;
               }
               
               // Check for italic
               if (cell.querySelector('i, em') || 
-                  window.getComputedStyle(cell).fontStyle === 'italic') {
+                  computedStyle.fontStyle === 'italic') {
                 formatting.italic = true;
               }
               
               // Check for underline
               if (cell.querySelector('u') || 
-                  window.getComputedStyle(cell).textDecoration.includes('underline')) {
+                  computedStyle.textDecoration.includes('underline')) {
                 formatting.underline = true;
+              }
+              
+              // Extract font family
+              const fontFamily = computedStyle.fontFamily;
+              if (fontFamily && fontFamily !== 'inherit') {
+                // Clean up font family (remove quotes and fallbacks)
+                const cleanFont = fontFamily.split(',')[0].replace(/["']/g, '').trim();
+                if (cleanFont && cleanFont !== 'inherit') {
+                  formatting.fontFamily = cleanFont;
+                }
+              }
+              
+              // Extract font size (keep original px value)
+              const fontSize = computedStyle.fontSize;
+              if (fontSize && fontSize !== 'inherit') {
+                const pxSize = parseFloat(fontSize);
+                if (!isNaN(pxSize)) {
+                  formatting.fontSize = `${pxSize}px`;
+                }
+              }
+              
+              // Extract text color
+              const color = computedStyle.color;
+              if (color && color !== 'inherit' && color !== 'rgb(0, 0, 0)') {
+                // Convert rgb to hex
+                const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+                if (rgbMatch) {
+                  const r = parseInt(rgbMatch[1]);
+                  const g = parseInt(rgbMatch[2]);
+                  const b = parseInt(rgbMatch[3]);
+                  const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+                  formatting.color = hex;
+                }
+              }
+              
+              // Extract background color
+              const bgColor = computedStyle.backgroundColor;
+              if (bgColor && bgColor !== 'inherit' && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                // Convert rgb/rgba to hex
+                const rgbaMatch = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                if (rgbaMatch) {
+                  const r = parseInt(rgbaMatch[1]);
+                  const g = parseInt(rgbaMatch[2]);
+                  const b = parseInt(rgbaMatch[3]);
+                  // Only include if not white or very light
+                  if (!(r > 250 && g > 250 && b > 250)) {
+                    const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+                    formatting.backgroundColor = hex;
+                  }
+                }
               }
               
               return formatting;

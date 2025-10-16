@@ -369,7 +369,15 @@ export default function Home() {
   const handlePaste = (
     startAddress: string, 
     data: string[][], 
-    formatting?: Array<Array<{ bold?: boolean; italic?: boolean; underline?: boolean }>>
+    formatting?: Array<Array<{ 
+      bold?: boolean; 
+      italic?: boolean; 
+      underline?: boolean;
+      fontFamily?: string;
+      fontSize?: string;
+      color?: string;
+      backgroundColor?: string;
+    }>>
   ) => {
     // Parse starting cell address to get row and column
     const match = startAddress.match(/^([A-Z]+)(\d+)$/);
@@ -412,13 +420,20 @@ export default function Home() {
           textDecoration = 'underline';
         }
         
-        // Update cell with pasted value and formatting
+        // Update cell with pasted value and ALL formatting
         newData.set(targetAddress, {
           ...existing,
           value: value,
+          // Text style formatting
           ...(cellFormatting?.bold && { fontWeight: 'bold' }),
           ...(cellFormatting?.italic && { fontStyle: 'italic' }),
           ...(cellFormatting?.underline && { textDecoration }),
+          // Font formatting
+          ...(cellFormatting?.fontFamily && { fontFamily: cellFormatting.fontFamily }),
+          ...(cellFormatting?.fontSize && { fontSize: parseFloat(cellFormatting.fontSize) }),
+          // Color formatting
+          ...(cellFormatting?.color && { color: cellFormatting.color }),
+          ...(cellFormatting?.backgroundColor && { backgroundColor: cellFormatting.backgroundColor }),
         });
       });
     });
@@ -433,7 +448,7 @@ export default function Home() {
     const hasFormatting = formatting && formatting.length > 0;
     toast({
       title: "Data pasted successfully",
-      description: `Pasted ${rowCount} row(s) × ${colCount} column(s) starting from ${startAddress}${hasFormatting ? ' with formatting' : ''}`,
+      description: `Pasted ${rowCount} row(s) × ${colCount} column(s) starting from ${startAddress}${hasFormatting ? ' with full formatting' : ''}`,
     });
   };
 
