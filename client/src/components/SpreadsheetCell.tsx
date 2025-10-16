@@ -128,6 +128,12 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
     const htmlData = e.clipboardData.getData('text/html');
     const textData = e.clipboardData.getData('text/plain');
     
+    // Debug all available clipboard types
+    const types = e.clipboardData.types;
+    console.log('📋 Available clipboard types:', types);
+    console.log('📋 HTML length:', htmlData?.length || 0);
+    console.log('📋 Text data:', textData.substring(0, 200));
+    
     // Check if it contains tabs or newlines (table data)
     if (textData.includes('\t') || textData.includes('\n')) {
       e.preventDefault(); // Prevent default paste into single cell
@@ -152,8 +158,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
       }>> = [];
       
       if (htmlData) {
-        // Debug: Log the HTML data to see what Google Sheets sends
-        console.log('📋 Clipboard HTML:', htmlData);
+        console.log('📋 Full HTML:', htmlData);
         
         // Create a temporary DOM element to parse HTML
         const tempDiv = document.createElement('div');
@@ -161,7 +166,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
         
         // Try to find table structure in HTML
         const table = tempDiv.querySelector('table');
-        console.log('📊 Table found:', !!table);
+        console.log('📊 Table found:', !!table, 'tempDiv html:', tempDiv.innerHTML.substring(0, 500));
         if (table) {
           const tableRows = Array.from(table.querySelectorAll('tr'));
           formattingData = tableRows.map(tr => {
