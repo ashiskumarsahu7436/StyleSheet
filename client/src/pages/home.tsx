@@ -1244,13 +1244,11 @@ export default function Home() {
       }
     }
     
-    // Calculate total height: lines * lineHeight(px) + spacing
-    // Textarea has pt-1 pb-1 (4px top + 4px bottom = 8px vertical padding)
-    // Textarea height is cellHeight - 2px in SpreadsheetCell
-    // Need extra buffer for proper rendering
+    // Calculate total height: lines * lineHeight(px) + minimal spacing
+    // No padding on textarea, just minimal buffer to prevent last line cutoff
     const contentHeight = Math.ceil(totalLines * lineHeightPx);
-    // Add 12px: 8px for textarea padding (pt-1 pb-1) + 2px offset + 2px buffer
-    const requiredHeight = contentHeight + 12;
+    // Add only 4px buffer: 2px for textarea offset + 2px safety margin
+    const requiredHeight = contentHeight + 4;
     return Math.max(21, requiredHeight); // Minimum 21px
   };
 

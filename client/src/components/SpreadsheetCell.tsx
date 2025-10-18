@@ -394,7 +394,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleTextareaKeyDown}
           onPaste={handlePaste}
-          className="w-full bg-transparent border-none outline-none px-1 pt-1 pb-1 resize-none hide-scrollbar relative z-10"
+          className="w-full bg-transparent border-none outline-none px-1 resize-none hide-scrollbar relative z-10"
           style={{ 
             fontSize: `${fontSize}pt`,
             lineHeight: `${fontSize * 1.4}pt`,
