@@ -1181,8 +1181,8 @@ export default function Home() {
     
     // Convert fontSize from pt to px: 1pt = 4/3 px (or 1.333px)
     const fontSizePx = fontSize * (4/3);
-    // lineHeight in CSS is set to fontSize * 1.2 (in pt), convert to px
-    const lineHeightPx = fontSizePx * 1.2;
+    // lineHeight in CSS is set to fontSize * 1.1 (in pt), convert to px
+    const lineHeightPx = fontSizePx * 1.1;
     
     // Split by manual line breaks first
     const lines = text.split('\n');
