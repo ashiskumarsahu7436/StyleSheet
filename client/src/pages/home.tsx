@@ -1246,8 +1246,10 @@ export default function Home() {
     
     // Calculate total height: lines * lineHeight(px) + extra padding
     // Textarea height is cellHeight - 2px, so we need to add 2px back
-    // Plus 4px for top/bottom spacing = 6px total extra
-    const requiredHeight = Math.ceil(totalLines * lineHeightPx) + 6;
+    // Plus additional padding to ensure last line is never cut off
+    // Using generous padding: 10px total to handle edge cases where text
+    // wraps exactly at column boundary (prevents last line cutoff)
+    const requiredHeight = Math.ceil(totalLines * lineHeightPx) + 10;
     return Math.max(21, requiredHeight); // Minimum 21px
   };
 

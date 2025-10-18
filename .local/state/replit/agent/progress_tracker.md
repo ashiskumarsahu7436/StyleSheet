@@ -394,20 +394,27 @@
   - ✅ Dual-mode system (selection + edit modes)
 [x] **Migration COMPLETE - Project ready for development! ✓**
 
-## Auto Adjust Height Fix (Oct 18, 2025 - 6:02 PM)
+## Auto Adjust Height Fix (Oct 18, 2025 - 6:02 PM - UPDATED 6:26 PM)
 [x] **FIXED: Last line text being cut off in Auto Adjust function**
   - **Problem**: Text in wrapped cells was being cut off at the bottom (last line partially hidden)
-  - **Root cause**: Height calculation was treating font size in points (pt) as pixels (px)
+    - Example: "123456789012345678990" - the last "0" was being cut off after Auto Adjust
+  - **Root cause 1**: Height calculation was treating font size in points (pt) as pixels (px)
+  - **Root cause 2**: Edge case when text wraps exactly at column boundary (150-160px flexible limit)
+    - When column is capped at 150px and last character wraps, insufficient padding caused cutoff
   - **Solution implemented:**
     - ✅ Proper pt to px conversion: 1pt = 4/3 px (1.333px)
     - ✅ Accurate line height calculation in pixels: fontSizePx * 1.4
-    - ✅ Increased padding from 4px to 6px to prevent text cutoff
+    - ✅ **Increased padding from 4px → 6px → 10px** (final) to prevent text cutoff in edge cases
     - ✅ Account for textarea height offset (cellHeight - 2px)
   - **Technical details:**
     - Modified `calculateRequiredHeight()` function in home.tsx
     - Convert fontSize from pt to px before calculating line height
-    - Calculate: `requiredHeight = Math.ceil(totalLines * lineHeightPx) + 6`
-  - **Result**: All text lines now fully visible after Auto Adjust - no more cutting!
+    - Calculate: `requiredHeight = Math.ceil(totalLines * lineHeightPx) + 10`
+    - 10px padding handles edge cases where text wraps exactly at column width boundary
+  - **Flexible width limit (150-160px):**
+    - If text width is 150-160px: column extends to prevent word break
+    - If text width > 160px: column capped at 150px, text wraps with proper height calculation
+  - **Result**: All text lines now fully visible after Auto Adjust - no more cutting! ✅
 
 ## Latest Session Recovery (Oct 16, 2025 - 2:20 PM - CURRENT)
 [x] **Session reset detected - dependencies reinstalled successfully**
