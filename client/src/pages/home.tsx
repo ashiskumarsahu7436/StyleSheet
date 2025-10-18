@@ -1244,7 +1244,12 @@ export default function Home() {
       }
     }
     
-    // Calculate total height: lines * lineHeight(px) + minimal spacing
+    // If single line, return default height (no adjustment needed)
+    if (totalLines === 1) {
+      return 21; // Default row height for single line text
+    }
+    
+    // Calculate total height for multi-line text: lines * lineHeight(px) + minimal spacing
     // No padding on textarea, but need buffer for last line when text wraps
     const contentHeight = Math.ceil(totalLines * lineHeightPx);
     // Add 8px buffer: 2px for textarea offset + 6px for wrapped text last line
