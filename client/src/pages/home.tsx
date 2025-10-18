@@ -36,7 +36,12 @@ interface Sheet {
   mergedCells: MergedCell[];
   columnWidths: Map<number, number>;
   rowHeights: Map<number, number>;
-  history: { cellData: Map<string, CellData>; mergedCells: MergedCell[] }[];
+  history: { 
+    cellData: Map<string, CellData>; 
+    mergedCells: MergedCell[];
+    columnWidths: Map<number, number>;
+    rowHeights: Map<number, number>;
+  }[];
   historyIndex: number;
 }
 
@@ -50,7 +55,12 @@ export default function Home() {
       mergedCells: [],
       columnWidths: new Map(),
       rowHeights: new Map(),
-      history: [{ cellData: new Map(), mergedCells: [] }],
+      history: [{ 
+        cellData: new Map(), 
+        mergedCells: [],
+        columnWidths: new Map(),
+        rowHeights: new Map()
+      }],
       historyIndex: 0,
     },
   ]);
@@ -120,12 +130,27 @@ export default function Home() {
     }
   };
   
-  const setHistory = (hist: { cellData: Map<string, CellData>; mergedCells: MergedCell[] }[]) => updateActiveSheet({ history: hist });
+  const setHistory = (hist: { 
+    cellData: Map<string, CellData>; 
+    mergedCells: MergedCell[];
+    columnWidths: Map<number, number>;
+    rowHeights: Map<number, number>;
+  }[]) => updateActiveSheet({ history: hist });
   const setHistoryIndex = (index: number) => updateActiveSheet({ historyIndex: index });
 
-  const saveToHistory = (newCellData: Map<string, CellData>, newMergedCells: MergedCell[] = mergedCells) => {
+  const saveToHistory = (
+    newCellData: Map<string, CellData>, 
+    newMergedCells: MergedCell[] = mergedCells,
+    newColumnWidths: Map<number, number> = columnWidths,
+    newRowHeights: Map<number, number> = rowHeights
+  ) => {
     const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push({ cellData: new Map(newCellData), mergedCells: [...newMergedCells] });
+    newHistory.push({ 
+      cellData: new Map(newCellData), 
+      mergedCells: [...newMergedCells],
+      columnWidths: new Map(newColumnWidths),
+      rowHeights: new Map(newRowHeights)
+    });
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   };
@@ -926,6 +951,8 @@ export default function Home() {
       setHistoryIndex(historyIndex - 1);
       setCellData(new Map(history[historyIndex - 1].cellData));
       setMergedCells([...history[historyIndex - 1].mergedCells]);
+      setColumnWidths(new Map(history[historyIndex - 1].columnWidths));
+      setRowHeights(new Map(history[historyIndex - 1].rowHeights));
     }
   };
 
@@ -934,6 +961,8 @@ export default function Home() {
       setHistoryIndex(historyIndex + 1);
       setCellData(new Map(history[historyIndex + 1].cellData));
       setMergedCells([...history[historyIndex + 1].mergedCells]);
+      setColumnWidths(new Map(history[historyIndex + 1].columnWidths));
+      setRowHeights(new Map(history[historyIndex + 1].rowHeights));
     }
   };
 
@@ -1118,6 +1147,222 @@ export default function Home() {
     if (tempSelectionTimerRef.current) {
       clearTimeout(tempSelectionTimerRef.current);
     }
+  };
+
+  // Helper function to measure text width using canvas
+  const measureTextWidth = (text: string, fontFamily: string, fontSize: number, fontWeight: string, fontStyle: string): number => {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) return 0;
+    
+    context.font = `${fontStyle} ${fontWeight} ${fontSize}pt ${fontFamily}`;
+    return context.measureText(text).width;
+  };
+
+  // Helper function to calculate required height for text with word wrapping
+  const calculateRequiredHeight = (
+    text: string, 
+    columnWidth: number, 
+    fontFamily: string, 
+    fontSize: number,
+    fontWeight: string,
+    fontStyle: string
+  ): number => {
+    if (!text) return 21; // Default height for empty cells
+    
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) return 21;
+    
+    context.font = `${fontStyle} ${fontWeight} ${fontSize}pt ${fontFamily}`;
+    
+    // Account for cell padding (px-1 = 4px each side = 8px total)
+    const availableWidth = columnWidth - 8;
+    const lineHeight = fontSize * 1.4; // Same as CSS lineHeight
+    
+    // Split by manual line breaks first
+    const lines = text.split('\n');
+    let totalLines = 0;
+    
+    for (const line of lines) {
+      if (!line) {
+        totalLines += 1; // Empty line still counts
+        continue;
+      }
+      
+      // Check if line fits in available width
+      const lineWidth = context.measureText(line).width;
+      if (lineWidth <= availableWidth) {
+        totalLines += 1;
+      } else {
+        // Need to wrap - split into words
+        const words = line.split(' ');
+        let currentLine = '';
+        let wrappedLines = 0;
+        
+        for (const word of words) {
+          const testLine = currentLine ? `${currentLine} ${word}` : word;
+          const testWidth = context.measureText(testLine).width;
+          
+          if (testWidth <= availableWidth) {
+            currentLine = testLine;
+          } else {
+            // Check if single word is too long (needs character breaking)
+            const wordWidth = context.measureText(word).width;
+            if (wordWidth > availableWidth) {
+              // Word itself is too long, break by characters
+              if (currentLine) {
+                wrappedLines += 1;
+                currentLine = '';
+              }
+              
+              let charLine = '';
+              for (const char of word) {
+                const testCharLine = charLine + char;
+                const testCharWidth = context.measureText(testCharLine).width;
+                if (testCharWidth <= availableWidth) {
+                  charLine = testCharLine;
+                } else {
+                  wrappedLines += 1;
+                  charLine = char;
+                }
+              }
+              currentLine = charLine;
+            } else {
+              // Start new line with current word
+              if (currentLine) wrappedLines += 1;
+              currentLine = word;
+            }
+          }
+        }
+        if (currentLine) wrappedLines += 1;
+        totalLines += wrappedLines;
+      }
+    }
+    
+    // Calculate total height: lines * lineHeight + padding
+    const requiredHeight = Math.ceil(totalLines * lineHeight) + 4; // 4px top/bottom padding
+    return Math.max(21, requiredHeight); // Minimum 21px
+  };
+
+  // Auto Adjust function - adjusts all column widths and row heights based on content
+  const handleAutoAdjust = () => {
+    const rows = 100;
+    const cols = 52;
+    
+    // Maps to store new dimensions
+    const newColumnWidths = new Map<number, number>();
+    const newRowHeights = new Map<number, number>();
+    
+    // Track which columns and rows have content
+    const columnsWithContent = new Set<number>();
+    const rowsWithContent = new Set<number>();
+    
+    // First pass: identify cells with content and calculate requirements
+    const columnRequirements = new Map<number, number>(); // col -> max width needed
+    
+    for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+      for (let colIndex = 0; colIndex < cols; colIndex++) {
+        const address = `${getColumnLabel(colIndex)}${rowIndex + 1}`;
+        const cell = cellData.get(address);
+        
+        if (cell && cell.value) {
+          columnsWithContent.add(colIndex);
+          rowsWithContent.add(rowIndex);
+          
+          const fontFamily = cell.fontFamily || 'Arial';
+          const fontSize = cell.fontSize || 11;
+          const fontWeight = cell.fontWeight || 'normal';
+          const fontStyle = cell.fontStyle || 'normal';
+          
+          // Measure required width
+          const lines = cell.value.split('\n');
+          let maxLineWidth = 0;
+          
+          for (const line of lines) {
+            const lineWidth = measureTextWidth(line, fontFamily, fontSize, fontWeight, fontStyle);
+            maxLineWidth = Math.max(maxLineWidth, lineWidth);
+          }
+          
+          // Add padding (px-1 = 4px each side = 8px total)
+          let requiredWidth = maxLineWidth + 8;
+          
+          // Apply width limits with word break prevention
+          if (requiredWidth > 150 && requiredWidth <= 160) {
+            // Check if we can avoid word break by extending to 160px
+            // For simplicity, if it's close (150-160), allow it
+            requiredWidth = Math.min(requiredWidth, 160);
+          } else if (requiredWidth > 160) {
+            // Too wide, cap at 150px
+            requiredWidth = 150;
+          } else if (requiredWidth < 100) {
+            // Below default, use default
+            requiredWidth = 100;
+          }
+          
+          // Update column requirement (take maximum)
+          const currentMax = columnRequirements.get(colIndex) || 100;
+          columnRequirements.set(colIndex, Math.max(currentMax, requiredWidth));
+        }
+      }
+    }
+    
+    // Set column widths
+    for (let colIndex = 0; colIndex < cols; colIndex++) {
+      if (columnsWithContent.has(colIndex)) {
+        const width = columnRequirements.get(colIndex) || 100;
+        newColumnWidths.set(colIndex, width);
+      } else {
+        // No content - reset to default
+        newColumnWidths.set(colIndex, 100);
+      }
+    }
+    
+    // Second pass: calculate row heights based on new column widths
+    for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+      let maxHeightInRow = 21; // Default
+      
+      if (rowsWithContent.has(rowIndex)) {
+        for (let colIndex = 0; colIndex < cols; colIndex++) {
+          const address = `${getColumnLabel(colIndex)}${rowIndex + 1}`;
+          const cell = cellData.get(address);
+          
+          if (cell && cell.value) {
+            const fontFamily = cell.fontFamily || 'Arial';
+            const fontSize = cell.fontSize || 11;
+            const fontWeight = cell.fontWeight || 'normal';
+            const fontStyle = cell.fontStyle || 'normal';
+            const columnWidth = newColumnWidths.get(colIndex) || 100;
+            
+            const requiredHeight = calculateRequiredHeight(
+              cell.value,
+              columnWidth,
+              fontFamily,
+              fontSize,
+              fontWeight,
+              fontStyle
+            );
+            
+            maxHeightInRow = Math.max(maxHeightInRow, requiredHeight);
+          }
+        }
+      }
+      
+      newRowHeights.set(rowIndex, maxHeightInRow);
+    }
+    
+    // Save to history before applying
+    saveToHistory(cellData, mergedCells, newColumnWidths, newRowHeights);
+    
+    // Apply new dimensions
+    setColumnWidths(newColumnWidths);
+    setRowHeights(newRowHeights);
+    
+    // Show success toast
+    toast({
+      title: "Auto-adjusted successfully",
+      description: "Grid has been automatically adjusted based on content",
+    });
   };
 
   const handleDownload = async () => {
@@ -1457,7 +1702,12 @@ export default function Home() {
       mergedCells: [],
       columnWidths: new Map(),
       rowHeights: new Map(),
-      history: [{ cellData: new Map(), mergedCells: [] }],
+      history: [{ 
+        cellData: new Map(), 
+        mergedCells: [],
+        columnWidths: new Map(),
+        rowHeights: new Map()
+      }],
       historyIndex: 0,
     };
     setSheets([...sheets, newSheet]);
@@ -1537,6 +1787,7 @@ export default function Home() {
           canUndo={historyIndex > 0}
           canRedo={historyIndex < history.length - 1}
           onDownload={handleDownload}
+          onAutoAdjust={handleAutoAdjust}
           isComplexMode={isComplexMode}
           onModeToggle={handleModeToggle}
           onMergeCells={handleMergeCells}
@@ -1570,14 +1821,16 @@ export default function Home() {
             columnWidths={columnWidths}
             rowHeights={rowHeights}
             onColumnResize={(col, width) => {
-              setColumnWidths((prev) => {
-                const newMap = new Map(prev);
-                newMap.set(col, width);
-                return newMap;
-              });
+              const newColumnWidths = new Map(columnWidths);
+              newColumnWidths.set(col, width);
+              saveToHistory(cellData, mergedCells, newColumnWidths, rowHeights);
+              setColumnWidths(newColumnWidths);
             }}
             onRowResize={(row, height) => {
-              setRowHeights((prev) => new Map(prev).set(row, height));
+              const newRowHeights = new Map(rowHeights);
+              newRowHeights.set(row, height);
+              saveToHistory(cellData, mergedCells, columnWidths, newRowHeights);
+              setRowHeights(newRowHeights);
             }}
             onDragSelection={handleDragSelection}
             onPaste={handlePaste}

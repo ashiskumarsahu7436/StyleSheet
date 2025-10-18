@@ -38,7 +38,8 @@ import {
   Download,
   Table2,
   ChevronDown,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Maximize2
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import BordersDropdown from "@/components/BordersDropdown";
@@ -66,6 +67,7 @@ interface GoogleSheetsToolbarProps {
   canUndo?: boolean;
   canRedo?: boolean;
   onDownload: () => void;
+  onAutoAdjust: () => void;
   isComplexMode: boolean;
   onModeToggle: () => void;
   onMergeCells: (type?: 'all' | 'vertical' | 'horizontal') => void;
@@ -99,6 +101,7 @@ export default function GoogleSheetsToolbar({
   canUndo = false,
   canRedo = false,
   onDownload,
+  onAutoAdjust,
   isComplexMode,
   onModeToggle,
   onMergeCells,
@@ -171,6 +174,17 @@ export default function GoogleSheetsToolbar({
           >
             <Download className="h-3.5 w-3.5" />
             Download
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 px-3 gap-1.5 text-xs"
+            onClick={onAutoAdjust}
+            title="Auto Adjust"
+            data-testid="button-auto-adjust"
+          >
+            <Maximize2 className="h-3.5 w-3.5" />
+            Auto Adjust
           </Button>
           <Button
             variant={isComplexMode ? "default" : "outline"}
