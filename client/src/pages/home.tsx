@@ -1178,7 +1178,11 @@ export default function Home() {
     
     // Account for cell padding (px-1 = 4px each side = 8px total)
     const availableWidth = columnWidth - 8;
-    const lineHeight = fontSize * 1.4; // Same as CSS lineHeight
+    
+    // Convert fontSize from pt to px: 1pt = 4/3 px (or 1.333px)
+    const fontSizePx = fontSize * (4/3);
+    // lineHeight in CSS is set to fontSize * 1.4 (in pt), convert to px
+    const lineHeightPx = fontSizePx * 1.4;
     
     // Split by manual line breaks first
     const lines = text.split('\n');
@@ -1240,8 +1244,10 @@ export default function Home() {
       }
     }
     
-    // Calculate total height: lines * lineHeight + padding
-    const requiredHeight = Math.ceil(totalLines * lineHeight) + 4; // 4px top/bottom padding
+    // Calculate total height: lines * lineHeight(px) + extra padding
+    // Textarea height is cellHeight - 2px, so we need to add 2px back
+    // Plus 4px for top/bottom spacing = 6px total extra
+    const requiredHeight = Math.ceil(totalLines * lineHeightPx) + 6;
     return Math.max(21, requiredHeight); // Minimum 21px
   };
 

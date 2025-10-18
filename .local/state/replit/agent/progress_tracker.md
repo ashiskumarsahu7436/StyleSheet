@@ -377,7 +377,7 @@
 [x] **Migration COMPLETE - All tasks finished! ✓**
 [x] **Project is fully functional and ready for use! ✓**
 
-## Current Session Recovery (Oct 15, 2025 - 5:32 PM - LATEST)
+## Current Session Recovery (Oct 18, 2025 - 6:02 PM - LATEST)
 [x] **Session reset detected - dependencies reinstalled successfully**
 [x] **tsx package was missing (common after session reset)**
 [x] **Ran npm install - all 574 packages restored**
@@ -393,6 +393,21 @@
   - ✅ Borders feature functional
   - ✅ Dual-mode system (selection + edit modes)
 [x] **Migration COMPLETE - Project ready for development! ✓**
+
+## Auto Adjust Height Fix (Oct 18, 2025 - 6:02 PM)
+[x] **FIXED: Last line text being cut off in Auto Adjust function**
+  - **Problem**: Text in wrapped cells was being cut off at the bottom (last line partially hidden)
+  - **Root cause**: Height calculation was treating font size in points (pt) as pixels (px)
+  - **Solution implemented:**
+    - ✅ Proper pt to px conversion: 1pt = 4/3 px (1.333px)
+    - ✅ Accurate line height calculation in pixels: fontSizePx * 1.4
+    - ✅ Increased padding from 4px to 6px to prevent text cutoff
+    - ✅ Account for textarea height offset (cellHeight - 2px)
+  - **Technical details:**
+    - Modified `calculateRequiredHeight()` function in home.tsx
+    - Convert fontSize from pt to px before calculating line height
+    - Calculate: `requiredHeight = Math.ceil(totalLines * lineHeightPx) + 6`
+  - **Result**: All text lines now fully visible after Auto Adjust - no more cutting!
 
 ## Latest Session Recovery (Oct 16, 2025 - 2:20 PM - CURRENT)
 [x] **Session reset detected - dependencies reinstalled successfully**
