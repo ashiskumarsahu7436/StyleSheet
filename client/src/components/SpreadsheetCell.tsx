@@ -397,7 +397,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           className="w-full bg-transparent border-none outline-none px-1 resize-none hide-scrollbar relative z-10"
           style={{ 
             fontSize: `${fontSize}pt`,
-            lineHeight: `${fontSize * 1.2}pt`,
+            lineHeight: `${fontSize * 0.2}pt`,
             fontWeight,
             fontFamily,
             fontStyle,
