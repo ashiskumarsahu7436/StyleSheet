@@ -1181,8 +1181,8 @@ export default function Home() {
     
     // Convert fontSize from pt to px: 1pt = 4/3 px (or 1.333px)
     const fontSizePx = fontSize * (4/3);
-    // lineHeight in CSS is set to fontSize * 1.4 (in pt), convert to px
-    const lineHeightPx = fontSizePx * 1.4;
+    // lineHeight in CSS is set to fontSize * 1.2 (in pt), convert to px
+    const lineHeightPx = fontSizePx * 1.2;
     
     // Split by manual line breaks first
     const lines = text.split('\n');
@@ -1245,10 +1245,10 @@ export default function Home() {
     }
     
     // Calculate total height: lines * lineHeight(px) + minimal spacing
-    // No padding on textarea, just minimal buffer to prevent last line cutoff
+    // No padding on textarea, but need buffer for last line when text wraps
     const contentHeight = Math.ceil(totalLines * lineHeightPx);
-    // Add only 4px buffer: 2px for textarea offset + 2px safety margin
-    const requiredHeight = contentHeight + 4;
+    // Add 8px buffer: 2px for textarea offset + 6px for wrapped text last line
+    const requiredHeight = contentHeight + 8;
     return Math.max(21, requiredHeight); // Minimum 21px
   };
 
