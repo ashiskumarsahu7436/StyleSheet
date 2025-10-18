@@ -25,6 +25,7 @@ interface SpreadsheetCellProps {
   borderRight?: string;
   borderBottom?: string;
   borderLeft?: string;
+  cellHeight?: number; // Row height in pixels
   onClick: () => void;
   onDoubleClick: () => void;
   onChange: (value: string) => void;
@@ -59,6 +60,7 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
   borderRight,
   borderBottom,
   borderLeft,
+  cellHeight = 21, // Default row height in pixels
   onClick,
   onDoubleClick,
   onChange,
@@ -382,7 +384,10 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           )}
         </div>
       )}
-      <div className="w-full h-full flex items-center overflow-hidden relative z-10">
+      <div className={cn(
+        "w-full h-full flex overflow-hidden relative z-10",
+        cellHeight <= 21 ? "items-center" : "items-start"
+      )}>
         <textarea
           ref={textareaRef}
           value={value}
@@ -392,14 +397,15 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           className="w-full bg-transparent border-none outline-none px-1 resize-none hide-scrollbar relative z-10"
           style={{ 
             fontSize: `${fontSize}pt`,
-            lineHeight: `${fontSize}pt`,
+            lineHeight: `${fontSize * 1.4}pt`,
             fontWeight,
             fontFamily,
             fontStyle,
             textDecoration,
             color: color,
             overflow: 'hidden',
-            height: `${fontSize}pt`
+            height: cellHeight <= 21 ? `${fontSize}pt` : `${cellHeight - 2}px`,
+            whiteSpace: cellHeight <= 21 ? 'nowrap' : 'pre-wrap'
           }}
           data-testid={`input-${address}`}
         />
@@ -424,7 +430,8 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
     prevProps.fontWeight === nextProps.fontWeight &&
     prevProps.fontFamily === nextProps.fontFamily &&
     prevProps.fontStyle === nextProps.fontStyle &&
-    prevProps.textDecoration === nextProps.textDecoration
+    prevProps.textDecoration === nextProps.textDecoration &&
+    prevProps.cellHeight === nextProps.cellHeight
   );
 });
 

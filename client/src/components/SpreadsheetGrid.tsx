@@ -491,6 +491,7 @@ export default function SpreadsheetGrid({
                           borderRight={cell.borderRight}
                           borderBottom={cell.borderBottom}
                           borderLeft={cell.borderLeft}
+                          cellHeight={cellHeight}
                           onClick={() => onCellSelect(cell.address)}
                           onDoubleClick={() => onCellSelect(cell.address)}
                           onChange={(value) => onCellChange(cell.address, value)}
