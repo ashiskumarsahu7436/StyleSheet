@@ -400,3 +400,25 @@
     scrollbar-width: none;  /* Firefox */
   }
 }
+/* Print/PDF styles - hide elements that shouldn't appear in print */
+@media print {
+  /* Hide cell addresses (A1, B2, C3, etc) in cells */
+  [class*="address"] {
+    display: none !important;
+  }
+  
+  /* Hide the entire control panel on the right side */
+  .lg\\:w-1\/3 {
+    display: none !important;
+  }
+  
+  /* Make the spreadsheet full width when control panel is hidden */
+  .lg\\:w-2\/3 {
+    width: 100% !important;
+  }
+  
+  /* Hide any element with test ID containing "address" */
+  [data-testid*="address"] {
+    display: none !important;
+  }
+}

@@ -4,6 +4,17 @@ import ControlPanel from "@/components/ControlPanel";
 import GoogleSheetsToolbar from "@/components/GoogleSheetsToolbar";
 import SheetTabs from "@/components/SheetTabs";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 interface CellData {
   address: string;
@@ -73,6 +84,8 @@ export default function Home() {
   const [retainSelection, setRetainSelection] = useState(false);
   const [spreadsheetName, setSpreadsheetName] = useState("My Spreadsheet");
   const [isComplexMode, setIsComplexMode] = useState(false);
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false);
+  const [downloadFileName, setDownloadFileName] = useState("");
   const [defaultFormatting, setDefaultFormatting] = useState<{
     fontSize?: number;
     fontWeight?: string;
@@ -1377,98 +1390,129 @@ export default function Home() {
     });
   };
 
+  const handleDownloadClick = () => {
+    // Open dialog with current spreadsheet name
+    setDownloadFileName(spreadsheetName);
+    setShowDownloadDialog(true);
+  };
+
   const handleDownload = async () => {
+    // Close dialog first
+    setShowDownloadDialog(false);
+    
     try {
       const ExcelJS = await import('exceljs');
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Sheet1');
       
-      const rows = 100;
-      const cols = 52;
-      
-      // Set column widths
-      for (let colIndex = 0; colIndex < cols; colIndex++) {
-        const width = columnWidths.get(colIndex) || 100; // Google Sheets default: 100px
-        // Excel column width is in "character units" (8.43 chars = 64px in Calibri 11pt)
-        // Direct conversion: pixels / 7.6 (64px / 8.43 chars ≈ 7.6 pixels per char)
-        worksheet.getColumn(colIndex + 1).width = width / 7.6;
-      }
-      
-      // Set row heights and cell data
-      for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
-        const row = worksheet.getRow(rowIndex + 1);
-        // For Excel export, use proper readable height (21px default)
-        // Even if web app shows 10.5px, Excel needs standard height
-        const webHeight = rowHeights.get(rowIndex) || 10.5;
-        const excelHeight = webHeight < 15 ? 21 : webHeight; // Minimum 21px for Excel
-        // Excel height is in points (20px = 15 points, so 1 pixel = 0.75 points)
-        row.height = excelHeight * 0.75;
+      // Export all sheets
+      for (const sheet of sheets) {
+        const worksheet = workbook.addWorksheet(sheet.name);
         
+        // Find filled range (min/max rows and columns with data)
+        let minRow = 100, maxRow = 0, minCol = 52, maxCol = 0;
+        let hasData = false;
+        
+        sheet.cellData.forEach((cell, address) => {
+          if (cell.value && cell.value.trim()) {
+            hasData = true;
+            const match = address.match(/^([A-Z]+)(\d+)$/);
+            if (match) {
+              const colIndex = getColumnIndex(match[1]);
+              const rowIndex = parseInt(match[2]) - 1;
+              minRow = Math.min(minRow, rowIndex);
+              maxRow = Math.max(maxRow, rowIndex);
+              minCol = Math.min(minCol, colIndex);
+              maxCol = Math.max(maxCol, colIndex);
+            }
+          }
+        });
+        
+        // If no data, export at least first cell
+        if (!hasData) {
+          minRow = 0;
+          maxRow = 0;
+          minCol = 0;
+          maxCol = 0;
+        }
+        
+        const rows = maxRow + 1;
+        const cols = maxCol + 1;
+        
+        // Set column widths
         for (let colIndex = 0; colIndex < cols; colIndex++) {
-          const address = `${getColumnLabel(colIndex)}${rowIndex + 1}`;
-          const cellData_item = cellData.get(address);
+          const width = sheet.columnWidths.get(colIndex) || 100;
+          worksheet.getColumn(colIndex + 1).width = width / 7.6;
+        }
+        
+        // Set row heights and cell data
+        for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+          const row = worksheet.getRow(rowIndex + 1);
+          const webHeight = sheet.rowHeights.get(rowIndex) || 10.5;
+          const excelHeight = webHeight < 15 ? 21 : webHeight;
+          row.height = excelHeight * 0.75;
           
-          if (cellData_item) {
-            const excelCell = row.getCell(colIndex + 1);
-            excelCell.value = cellData_item.value || "";
+          for (let colIndex = 0; colIndex < cols; colIndex++) {
+            const address = `${getColumnLabel(colIndex)}${rowIndex + 1}`;
+            const cellData_item = sheet.cellData.get(address);
             
-            // Apply font formatting (use same defaults as UI: 11pt Arial)
-            const fontFamily = cellData_item.fontFamily || 'Arial'; // Google Sheets default
-            const fontSize = cellData_item.fontSize || 11; // Google Sheets default (11pt)
-            const fontWeight = cellData_item.fontWeight || 'normal';
-            const fontStyle = cellData_item.fontStyle || 'normal';
-            const textDecoration = cellData_item.textDecoration || 'none';
-            
-            excelCell.font = {
-              name: fontFamily,
-              size: fontSize,
-              bold: fontWeight === 'bold',
-              italic: fontStyle === 'italic',
-              underline: textDecoration === 'underline' ? true : false,
-            };
-            
-            // Apply cell background color
-            if (cellData_item.backgroundColor) {
-              const color = cellData_item.backgroundColor.replace('#', '');
-              excelCell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'FF' + color },
+            if (cellData_item) {
+              const excelCell = row.getCell(colIndex + 1);
+              excelCell.value = cellData_item.value || "";
+              
+              const fontFamily = cellData_item.fontFamily || 'Arial';
+              const fontSize = cellData_item.fontSize || 11;
+              const fontWeight = cellData_item.fontWeight || 'normal';
+              const fontStyle = cellData_item.fontStyle || 'normal';
+              const textDecoration = cellData_item.textDecoration || 'none';
+              
+              excelCell.font = {
+                name: fontFamily,
+                size: fontSize,
+                bold: fontWeight === 'bold',
+                italic: fontStyle === 'italic',
+                underline: textDecoration === 'underline' ? true : false,
+              };
+              
+              if (cellData_item.backgroundColor) {
+                const color = cellData_item.backgroundColor.replace('#', '');
+                excelCell.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: 'FF' + color },
+                };
+              }
+              
+              excelCell.border = {
+                top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+                left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+                bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+                right: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+              };
+              
+              excelCell.alignment = {
+                wrapText: true,
+                vertical: 'top',
+                horizontal: 'left',
               };
             }
-            
-            // Add borders to all cells (so they're visible even with background colors)
-            excelCell.border = {
-              top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-              left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-              bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-              right: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-            };
-            
-            // Enable text wrapping for multi-line content
-            excelCell.alignment = {
-              wrapText: true,
-              vertical: 'top',
-              horizontal: 'left',
-            };
           }
         }
-      }
-      
-      // Apply merged cells
-      mergedCells.forEach(merge => {
-        const startMatch = merge.startAddress.match(/^([A-Z]+)(\d+)$/);
-        const endMatch = merge.endAddress.match(/^([A-Z]+)(\d+)$/);
         
-        if (startMatch && endMatch) {
-          const startCol = startMatch[1];
-          const startRow = parseInt(startMatch[2]);
-          const endCol = endMatch[1];
-          const endRow = parseInt(endMatch[2]);
+        // Apply merged cells
+        sheet.mergedCells.forEach(merge => {
+          const startMatch = merge.startAddress.match(/^([A-Z]+)(\d+)$/);
+          const endMatch = merge.endAddress.match(/^([A-Z]+)(\d+)$/);
           
-          worksheet.mergeCells(`${startCol}${startRow}:${endCol}${endRow}`);
-        }
-      });
+          if (startMatch && endMatch) {
+            const startCol = startMatch[1];
+            const startRow = parseInt(startMatch[2]);
+            const endCol = endMatch[1];
+            const endRow = parseInt(endMatch[2]);
+            
+            worksheet.mergeCells(`${startCol}${startRow}:${endCol}${endRow}`);
+          }
+        });
+      }
       
       // Generate Excel file
       const buffer = await workbook.xlsx.writeBuffer();
@@ -1480,7 +1524,7 @@ export default function Home() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${spreadsheetName}.xlsx`;
+      link.download = `${downloadFileName || spreadsheetName}.xlsx`;
       
       // Trigger download
       document.body.appendChild(link);
@@ -1494,7 +1538,7 @@ export default function Home() {
       
       toast({
         title: "Downloaded Successfully",
-        description: `${spreadsheetName}.xlsx has been downloaded with all formatting preserved.`,
+        description: `${downloadFileName || spreadsheetName}.xlsx has been downloaded with all formatting preserved.`,
       });
     } catch (error) {
       console.error('Download error:', error);
@@ -1798,7 +1842,7 @@ export default function Home() {
           currentTextDecoration={currentTextDecoration}
           canUndo={historyIndex > 0}
           canRedo={historyIndex < history.length - 1}
-          onDownload={handleDownload}
+          onDownload={handleDownloadClick}
           onAutoAdjust={handleAutoAdjust}
           isComplexMode={isComplexMode}
           onModeToggle={handleModeToggle}
@@ -1881,6 +1925,45 @@ export default function Home() {
         onRenameSheet={handleRenameSheet}
         onDeleteSheet={handleDeleteSheet}
       />
+
+      {/* Download Dialog */}
+      <Dialog open={showDownloadDialog} onOpenChange={setShowDownloadDialog}>
+        <DialogContent data-testid="dialog-download">
+          <DialogHeader>
+            <DialogTitle>Download Spreadsheet</DialogTitle>
+            <DialogDescription>
+              Enter a name for your Excel file. The file will be downloaded to your browser's download folder.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="filename">File Name</Label>
+              <Input
+                id="filename"
+                value={downloadFileName}
+                onChange={(e) => setDownloadFileName(e.target.value)}
+                placeholder="My Spreadsheet"
+                data-testid="input-filename"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDownloadDialog(false)}
+              data-testid="button-cancel-download"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDownload}
+              data-testid="button-confirm-download"
+            >
+              Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
