@@ -40,7 +40,24 @@ interface SpreadsheetGridProps {
   onColumnResize?: (colIndex: number, width: number) => void;
   onRowResize?: (rowIndex: number, height: number) => void;
   onDragSelection?: (addresses: string[]) => void;
-  onPaste?: (startAddress: string, data: string[][], formatting?: Array<Array<{ bold?: boolean; italic?: boolean; underline?: boolean }>>) => void;
+  onPaste?: (
+    startAddress: string, 
+    data: string[][], 
+    formatting?: Array<Array<{ 
+      bold?: boolean; 
+      italic?: boolean; 
+      underline?: boolean;
+      fontFamily?: string;
+      fontSize?: number;
+      color?: string;
+      backgroundColor?: string;
+    }>>,
+    structuralInfo?: {
+      mergedCells?: Array<{ rowIndex: number; colIndex: number; rowspan: number; colspan: number }>;
+      rowHeights?: Array<{ rowIndex: number; height: number }>;
+      colWidths?: Array<{ colIndex: number; width: number }>;
+    }
+  ) => void;
   mergedCells?: MergedCell[];
   onDeleteRow?: (rowIndex: number) => void;
   onInsertRow?: (rowIndex: number) => void;
