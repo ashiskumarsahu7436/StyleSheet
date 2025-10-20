@@ -30,15 +30,24 @@ interface SpreadsheetCellProps {
   onDoubleClick: () => void;
   onChange: (value: string) => void;
   onAddressChange?: (address: string) => void;
-  onPaste?: (startAddress: string, data: string[][], formatting?: Array<Array<{ 
-    bold?: boolean; 
-    italic?: boolean; 
-    underline?: boolean;
-    fontFamily?: string;
-    fontSize?: number; // pt value
-    color?: string;
-    backgroundColor?: string;
-  }>>) => void;
+  onPaste?: (
+    startAddress: string, 
+    data: string[][], 
+    formatting?: Array<Array<{ 
+      bold?: boolean; 
+      italic?: boolean; 
+      underline?: boolean;
+      fontFamily?: string;
+      fontSize?: number; // pt value
+      color?: string;
+      backgroundColor?: string;
+    }>>,
+    structuralInfo?: {
+      mergedCells?: Array<{ rowIndex: number; colIndex: number; rowspan: number; colspan: number }>;
+      rowHeights?: Array<{ rowIndex: number; height: number }>;
+      colWidths?: Array<{ colIndex: number; width: number }>;
+    }
+  ) => void;
 }
 
 const SpreadsheetCell = memo(function SpreadsheetCell({
@@ -159,6 +168,9 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
         color?: string;
         backgroundColor?: string;
       }>> = [];
+      let mergedCellsInfo: Array<{ rowIndex: number; colIndex: number; rowspan: number; colspan: number }> = [];
+      let rowHeightsInfo: Array<{ rowIndex: number; height: number }> = [];
+      let colWidthsInfo: Array<{ colIndex: number; width: number }> = [];
       let parsedFromHTML = false;
       
       if (htmlData) {
@@ -184,8 +196,26 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
             // Parse both data and formatting in one pass
             rows = [];
             formattingData = [];
+            mergedCellsInfo = [];
+            rowHeightsInfo = [];
+            colWidthsInfo = [];
             
-            tableRows.forEach(tr => {
+            // Extract column widths from colgroup if available
+            const colgroup = table.querySelector('colgroup');
+            if (colgroup) {
+              const cols = Array.from(colgroup.querySelectorAll('col'));
+              cols.forEach((col, colIndex) => {
+                const width = (col as HTMLElement).style.width;
+                if (width) {
+                  const widthPx = parseFloat(width);
+                  if (!isNaN(widthPx) && widthPx > 0) {
+                    colWidthsInfo.push({ colIndex, width: widthPx });
+                  }
+                }
+              });
+            }
+            
+            tableRows.forEach((tr, rowIndex) => {
               const cells = Array.from(tr.querySelectorAll('td, th'));
               const rowData: string[] = [];
               const rowFormatting: Array<{
@@ -198,7 +228,32 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
                 backgroundColor?: string;
               }> = [];
               
+              // Extract row height
+              const rowHeight = (tr as HTMLElement).style.height;
+              if (rowHeight) {
+                const heightPx = parseFloat(rowHeight);
+                if (!isNaN(heightPx) && heightPx > 0) {
+                  rowHeightsInfo.push({ rowIndex, height: heightPx });
+                }
+              }
+              
+              let colIndex = 0;
               cells.forEach(cell => {
+                // Extract merged cell information
+                const rowspan = parseInt(cell.getAttribute('rowspan') || '1');
+                const colspan = parseInt(cell.getAttribute('colspan') || '1');
+                
+                if (rowspan > 1 || colspan > 1) {
+                  mergedCellsInfo.push({
+                    rowIndex,
+                    colIndex,
+                    rowspan,
+                    colspan
+                  });
+                  console.log(`📊 Merged cell found at row ${rowIndex}, col ${colIndex}: ${rowspan}×${colspan}`);
+                }
+                
+                colIndex += colspan; // Advance by colspan
                 // Extract text content
                 let text = cell.textContent || '';
                 text = text.replace(/\r/g, ''); // Remove carriage returns
@@ -376,8 +431,20 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
         rows.pop();
       }
       
+      console.log('📊 Paste data summary:', {
+        rows: rows.length,
+        cols: rows[0]?.length || 0,
+        mergedCells: mergedCellsInfo.length,
+        rowHeights: rowHeightsInfo.length,
+        colWidths: colWidthsInfo.length
+      });
+      
       // Call the onPaste handler with parsed data and formatting
-      onPaste(address, rows, formattingData);
+      onPaste(address, rows, formattingData, {
+        mergedCells: mergedCellsInfo,
+        rowHeights: rowHeightsInfo,
+        colWidths: colWidthsInfo
+      });
     }
     // If no tabs/newlines, let default paste behavior work (single cell)
   };
