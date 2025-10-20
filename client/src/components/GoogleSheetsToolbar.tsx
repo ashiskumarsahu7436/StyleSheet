@@ -67,6 +67,8 @@ interface GoogleSheetsToolbarProps {
   canUndo?: boolean;
   canRedo?: boolean;
   onDownload: () => void;
+  onCloudSave?: () => void;
+  onOpenFiles?: () => void;
   onAutoAdjust: () => void;
   isComplexMode: boolean;
   onModeToggle: () => void;
@@ -101,6 +103,8 @@ export default function GoogleSheetsToolbar({
   canUndo = false,
   canRedo = false,
   onDownload,
+  onCloudSave,
+  onOpenFiles,
   onAutoAdjust,
   isComplexMode,
   onModeToggle,
@@ -136,8 +140,26 @@ export default function GoogleSheetsToolbar({
           
           {/* Icons */}
           <Star className="h-4 w-4 text-muted-foreground" />
-          <Folder className="h-4 w-4 text-muted-foreground" />
-          <Cloud className="h-4 w-4 text-muted-foreground" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8" 
+            title="Open Files"
+            onClick={onOpenFiles}
+            data-testid="button-open-files"
+          >
+            <Folder className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8" 
+            title="Save to Cloud"
+            onClick={onCloudSave}
+            data-testid="button-cloud-save"
+          >
+            <Cloud className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8" title="Version history">
             <History className="h-4 w-4" />
           </Button>

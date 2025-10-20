@@ -4,6 +4,11 @@ import ControlPanel from "@/components/ControlPanel";
 import GoogleSheetsToolbar from "@/components/GoogleSheetsToolbar";
 import SheetTabs from "@/components/SheetTabs";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
 import {
   Dialog,
   DialogContent,
@@ -58,6 +63,7 @@ interface Sheet {
 
 export default function Home() {
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
   const [sheets, setSheets] = useState<Sheet[]>([
     {
       id: "sheet-1",
@@ -86,6 +92,11 @@ export default function Home() {
   const [isComplexMode, setIsComplexMode] = useState(false);
   const [showDownloadDialog, setShowDownloadDialog] = useState(false);
   const [downloadFileName, setDownloadFileName] = useState("");
+  const [showCloudSaveDialog, setShowCloudSaveDialog] = useState(false);
+  const [cloudFileName, setCloudFileName] = useState("");
+  const [showOverwriteDialog, setShowOverwriteDialog] = useState(false);
+  const [existingFileId, setExistingFileId] = useState<string | null>(null);
+  const [showFileBrowserDialog, setShowFileBrowserDialog] = useState(false);
   const [defaultFormatting, setDefaultFormatting] = useState<{
     fontSize?: number;
     fontWeight?: string;
@@ -1916,6 +1927,316 @@ export default function Home() {
     });
   };
 
+  // Cloud save mutation
+  const saveToCloudMutation = useMutation({
+    mutationFn: async (params: { name: string; overwrite?: boolean; fileId?: string }) => {
+      const spreadsheetData = {
+        sheets,
+        activeSheetId,
+      };
+      
+      if (params.overwrite && params.fileId) {
+        // Update existing file
+        return await apiRequest("PUT", `/api/spreadsheets/${params.fileId}`, { data: spreadsheetData });
+      } else {
+        // Create new file
+        return await apiRequest("POST", "/api/spreadsheets", {
+          name: params.name,
+          data: spreadsheetData,
+        });
+      }
+    },
+    onSuccess: (data, variables) => {
+      toast({
+        title: "Saved to Cloud",
+        description: `"${variables.name}" has been saved successfully`,
+      });
+      setShowCloudSaveDialog(false);
+      setShowOverwriteDialog(false);
+      setCloudFileName("");
+      setExistingFileId(null);
+    },
+    onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "Please sign in to save to cloud",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 1000);
+        return;
+      }
+      
+      // Check for conflict (file exists)
+      if (error.message.includes("409")) {
+        // File already exists - show overwrite dialog
+        const match = error.message.match(/existingId":"([^"]+)"/);
+        if (match && match[1]) {
+          setExistingFileId(match[1]);
+          setShowCloudSaveDialog(false);
+          setShowOverwriteDialog(true);
+        }
+        return;
+      }
+      
+      toast({
+        title: "Failed to save",
+        description: error.message || "An error occurred while saving to cloud",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCloudSaveClick = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save to cloud",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 1000);
+      return;
+    }
+    
+    setCloudFileName(spreadsheetName);
+    setShowCloudSaveDialog(true);
+  };
+
+  const handleCloudSave = () => {
+    if (!cloudFileName.trim()) {
+      toast({
+        title: "File name required",
+        description: "Please enter a file name",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    saveToCloudMutation.mutate({ name: cloudFileName });
+  };
+
+  const handleOverwrite = () => {
+    if (existingFileId) {
+      saveToCloudMutation.mutate({ 
+        name: cloudFileName, 
+        overwrite: true, 
+        fileId: existingFileId 
+      });
+    }
+  };
+
+  // File browser functionality
+  const { data: savedSpreadsheets, refetch: refetchSpreadsheets } = useQuery<any[]>({
+    queryKey: ["/api/spreadsheets"],
+    enabled: isAuthenticated && showFileBrowserDialog,
+  });
+
+  const loadSpreadsheetMutation = useMutation({
+    mutationFn: async (fileId: string) => {
+      const response = await apiRequest("GET", `/api/spreadsheets/${fileId}`, undefined);
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      // Load the spreadsheet data
+      if (data && data.data) {
+        const { sheets: loadedSheets, activeSheetId: loadedActiveSheetId } = data.data;
+        
+        // Convert plain objects back to Maps
+        const convertedSheets = loadedSheets.map((sheet: any) => ({
+          ...sheet,
+          cellData: new Map(Object.entries(sheet.cellData || {})),
+          columnWidths: new Map(Object.entries(sheet.columnWidths || {}).map(([k, v]) => [parseInt(k), v as number])),
+          rowHeights: new Map(Object.entries(sheet.rowHeights || {}).map(([k, v]) => [parseInt(k), v as number])),
+          history: sheet.history.map((h: any) => ({
+            cellData: new Map(Object.entries(h.cellData || {})),
+            mergedCells: h.mergedCells || [],
+            columnWidths: new Map(Object.entries(h.columnWidths || {}).map(([k, v]) => [parseInt(k), v as number])),
+            rowHeights: new Map(Object.entries(h.rowHeights || {}).map(([k, v]) => [parseInt(k), v as number])),
+          })),
+        }));
+
+        setSheets(convertedSheets);
+        setActiveSheetId(loadedActiveSheetId || convertedSheets[0]?.id);
+        setSpreadsheetName(data.name);
+        
+        toast({
+          title: "Loaded from Cloud",
+          description: `"${data.name}" has been loaded successfully`,
+        });
+      }
+      setShowFileBrowserDialog(false);
+    },
+    onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "Please sign in to load files",
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Failed to load",
+        description: error.message || "An error occurred while loading the file",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteSpreadsheetMutation = useMutation({
+    mutationFn: async (fileId: string) => {
+      await apiRequest("DELETE", `/api/spreadsheets/${fileId}`, undefined);
+    },
+    onSuccess: () => {
+      toast({
+        title: "File Deleted",
+        description: "Spreadsheet has been deleted from cloud",
+      });
+      refetchSpreadsheets();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to delete",
+        description: error.message || "An error occurred while deleting the file",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleOpenFileBrowser = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to access your files",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 1000);
+      return;
+    }
+    setShowFileBrowserDialog(true);
+  };
+
+  const handleLoadFile = (fileId: string) => {
+    loadSpreadsheetMutation.mutate(fileId);
+  };
+
+  const handleDeleteFile = (fileId: string, fileName: string) => {
+    if (confirm(`Are you sure you want to delete "${fileName}"?`)) {
+      deleteSpreadsheetMutation.mutate(fileId);
+    }
+  };
+
+  const handleDownloadFromCloud = async (fileId: string, fileName: string) => {
+    try {
+      // Fetch the spreadsheet data from cloud
+      const response = await apiRequest("GET", `/api/spreadsheets/${fileId}`, undefined);
+      const data = await response.json();
+      
+      if (!data || !data.data) {
+        throw new Error("Invalid file data");
+      }
+
+      const { sheets: loadedSheets } = data.data;
+      
+      // Convert plain objects back to Maps
+      const convertedSheets = loadedSheets.map((sheet: any) => ({
+        ...sheet,
+        cellData: new Map(Object.entries(sheet.cellData || {})),
+        columnWidths: new Map(Object.entries(sheet.columnWidths || {}).map(([k, v]) => [parseInt(k), v as number])),
+        rowHeights: new Map(Object.entries(sheet.rowHeights || {}).map(([k, v]) => [parseInt(k), v as number])),
+      }));
+
+      // Use ExcelJS to create Excel file
+      const ExcelJS = (await import("exceljs")).default;
+      const workbook = new ExcelJS.Workbook();
+
+      convertedSheets.forEach((sheet: Sheet) => {
+        const worksheet = workbook.addWorksheet(sheet.name);
+
+        // Set column widths
+        sheet.columnWidths.forEach((width, col) => {
+          const column = worksheet.getColumn(col + 1);
+          column.width = width / 7.5;
+        });
+
+        // Set row heights
+        sheet.rowHeights.forEach((height, row) => {
+          const excelRow = worksheet.getRow(row + 1);
+          excelRow.height = height * 0.75;
+        });
+
+        // Add cell data and formatting
+        sheet.cellData.forEach((cell, address) => {
+          const excelCell = worksheet.getCell(address);
+          excelCell.value = cell.value;
+
+          if (cell.fontSize) excelCell.font = { ...excelCell.font, size: cell.fontSize };
+          if (cell.fontFamily) excelCell.font = { ...excelCell.font, name: cell.fontFamily };
+          if (cell.fontWeight === "bold") excelCell.font = { ...excelCell.font, bold: true };
+          if (cell.fontStyle === "italic") excelCell.font = { ...excelCell.font, italic: true };
+          if (cell.textDecoration === "underline") excelCell.font = { ...excelCell.font, underline: true };
+          if (cell.color) excelCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: cell.color.replace("#", "FF") } };
+          if (cell.textColor) excelCell.font = { ...excelCell.font, color: { argb: cell.textColor.replace("#", "FF") } };
+          if (cell.textAlign) excelCell.alignment = { ...excelCell.alignment, horizontal: cell.textAlign as any };
+          if (cell.verticalAlign) excelCell.alignment = { ...excelCell.alignment, vertical: cell.verticalAlign as any };
+
+          if (cell.borders) {
+            const borderStyle: any = {};
+            if (cell.borders.top) borderStyle.top = { style: "thin", color: { argb: (cell.borderColor || "#000000").replace("#", "FF") } };
+            if (cell.borders.right) borderStyle.right = { style: "thin", color: { argb: (cell.borderColor || "#000000").replace("#", "FF") } };
+            if (cell.borders.bottom) borderStyle.bottom = { style: "thin", color: { argb: (cell.borderColor || "#000000").replace("#", "FF") } };
+            if (cell.borders.left) borderStyle.left = { style: "thin", color: { argb: (cell.borderColor || "#000000").replace("#", "FF") } };
+            excelCell.border = borderStyle;
+          }
+        });
+
+        // Handle merged cells
+        sheet.mergedCells.forEach((range) => {
+          worksheet.mergeCells(range);
+        });
+      });
+
+      // Generate Excel file and download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      // Sanitize filename
+      const sanitizedFileName = fileName.replace(/[^a-z0-9_\-\.]/gi, '_');
+      link.download = `${sanitizedFileName}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Downloaded",
+        description: `"${fileName}" has been downloaded to your device`,
+      });
+    } catch (error: any) {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "Please sign in to download files",
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Download Failed",
+        description: error.message || "An error occurred while downloading the file",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background">
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
@@ -1941,6 +2262,8 @@ export default function Home() {
           canUndo={historyIndex > 0}
           canRedo={historyIndex < history.length - 1}
           onDownload={handleDownloadClick}
+          onCloudSave={handleCloudSaveClick}
+          onOpenFiles={handleOpenFileBrowser}
           onAutoAdjust={handleAutoAdjust}
           isComplexMode={isComplexMode}
           onModeToggle={handleModeToggle}
@@ -2058,6 +2381,154 @@ export default function Home() {
               data-testid="button-confirm-download"
             >
               Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cloud Save Dialog */}
+      <Dialog open={showCloudSaveDialog} onOpenChange={setShowCloudSaveDialog}>
+        <DialogContent data-testid="dialog-cloud-save">
+          <DialogHeader>
+            <DialogTitle>Save to Cloud</DialogTitle>
+            <DialogDescription>
+              Enter a name for your spreadsheet. It will be saved to your cloud account.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="cloud-filename">File Name</Label>
+              <Input
+                id="cloud-filename"
+                value={cloudFileName}
+                onChange={(e) => setCloudFileName(e.target.value)}
+                placeholder="My Spreadsheet"
+                data-testid="input-cloud-filename"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowCloudSaveDialog(false)}
+              data-testid="button-cancel-cloud-save"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCloudSave}
+              disabled={saveToCloudMutation.isPending}
+              data-testid="button-confirm-cloud-save"
+            >
+              {saveToCloudMutation.isPending ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Overwrite Confirmation Dialog */}
+      <Dialog open={showOverwriteDialog} onOpenChange={setShowOverwriteDialog}>
+        <DialogContent data-testid="dialog-overwrite">
+          <DialogHeader>
+            <DialogTitle>File Already Exists</DialogTitle>
+            <DialogDescription>
+              A file with the name "{cloudFileName}" already exists in your cloud. Do you want to overwrite it?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowOverwriteDialog(false);
+                setShowCloudSaveDialog(true);
+              }}
+              data-testid="button-cancel-overwrite"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleOverwrite}
+              disabled={saveToCloudMutation.isPending}
+              data-testid="button-confirm-overwrite"
+              variant="destructive"
+            >
+              {saveToCloudMutation.isPending ? "Overwriting..." : "Overwrite"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* File Browser Dialog */}
+      <Dialog open={showFileBrowserDialog} onOpenChange={setShowFileBrowserDialog}>
+        <DialogContent className="max-w-2xl" data-testid="dialog-file-browser">
+          <DialogHeader>
+            <DialogTitle>Your Cloud Files</DialogTitle>
+            <DialogDescription>
+              Open or download your saved spreadsheets from the cloud.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-96 overflow-y-auto">
+            {savedSpreadsheets && savedSpreadsheets.length > 0 ? (
+              <div className="space-y-2">
+                {savedSpreadsheets.map((file: any) => (
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between p-3 border rounded-md hover-elevate"
+                    data-testid={`file-item-${file.id}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate" data-testid={`file-name-${file.id}`}>
+                        {file.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Last modified: {new Date(file.updatedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleLoadFile(file.id)}
+                        disabled={loadSpreadsheetMutation.isPending}
+                        data-testid={`button-open-${file.id}`}
+                      >
+                        Open
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownloadFromCloud(file.id, file.name)}
+                        data-testid={`button-download-${file.id}`}
+                      >
+                        Download
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteFile(file.id, file.name)}
+                        disabled={deleteSpreadsheetMutation.isPending}
+                        data-testid={`button-delete-${file.id}`}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No files saved yet</p>
+                <p className="text-sm mt-2">Click the cloud icon to save your first spreadsheet</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowFileBrowserDialog(false)}
+              data-testid="button-close-file-browser"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,6 +1,10 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LogIn, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import type { User } from "@shared/schema";
 import InputOutputSection from "./InputOutputSection";
 import FormulaSection from "./FormulaSection";
 import BulkValueSection from "./BulkValueSection";
@@ -53,10 +57,54 @@ export default function ControlPanel({
   onShowOutput,
 }: ControlPanelProps) {
   const totalSelected = selectedCells.length + temporarySelectedCells.length;
+  const { user, isLoading, isAuthenticated } = useAuth();
+
   return (
     <div className="w-full h-full border-l border-border bg-card flex flex-col">
       <div className="p-4 border-b border-border select-none">
-        <h2 className="font-semibold text-lg">Controls</h2>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h2 className="font-semibold text-lg">Controls</h2>
+          {/* User Authentication UI - Google style profile picture */}
+          {isLoading ? (
+            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+          ) : isAuthenticated && user ? (
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8" data-testid="avatar-user">
+                {user.profileImageUrl && (
+                  <AvatarImage 
+                    src={user.profileImageUrl} 
+                    alt={user.email || "User"} 
+                    className="object-cover"
+                  />
+                )}
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                  {user.firstName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => window.location.href = "/api/logout"}
+                title="Logout"
+                data-testid="button-logout"
+                className="h-8 w-8"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={() => window.location.href = "/api/login"}
+              data-testid="button-login"
+              className="h-8"
+            >
+              <LogIn className="h-4 w-4 mr-1" />
+              Sign In
+            </Button>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground mt-1">
           {totalSelected} cell{totalSelected !== 1 ? "s" : ""} selected
         </p>
