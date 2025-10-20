@@ -1,108 +1,58 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertSpreadsheetSchema } from "@shared/schema";
+import { setupAuth, isAuthenticated } from "./googleAuth";
+import { googleDriveService } from "./googleDrive";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware setup
+  // Setup Google OAuth authentication
   await setupAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Google Drive routes (all protected)
+  app.get('/api/drive/files', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      const files = await googleDriveService.listSpreadsheets(req.user);
+      res.json(files);
     } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      console.error("Error fetching files from Drive:", error);
+      res.status(500).json({ message: "Failed to fetch files from Google Drive" });
     }
   });
 
-  // Spreadsheet routes (all protected)
-  app.get('/api/spreadsheets', isAuthenticated, async (req: any, res) => {
+  app.post('/api/drive/save', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const spreadsheets = await storage.getSpreadsheets(userId);
-      res.json(spreadsheets);
-    } catch (error) {
-      console.error("Error fetching spreadsheets:", error);
-      res.status(500).json({ message: "Failed to fetch spreadsheets" });
-    }
-  });
-
-  app.get('/api/spreadsheets/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const spreadsheet = await storage.getSpreadsheet(req.params.id, userId);
+      const { name, data } = req.body;
       
-      if (!spreadsheet) {
-        return res.status(404).json({ message: "Spreadsheet not found" });
-      }
-      
-      res.json(spreadsheet);
-    } catch (error) {
-      console.error("Error fetching spreadsheet:", error);
-      res.status(500).json({ message: "Failed to fetch spreadsheet" });
-    }
-  });
-
-  app.post('/api/spreadsheets', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      
-      const validatedData = insertSpreadsheetSchema.parse({
-        ...req.body,
-        userId,
-      });
-
-      // Check if spreadsheet with same name exists
-      const existing = await storage.getSpreadsheetByName(validatedData.name, userId);
-      
-      if (existing) {
-        return res.status(409).json({ 
-          message: "Spreadsheet with this name already exists",
-          existingId: existing.id 
-        });
+      if (!name || !data) {
+        return res.status(400).json({ message: "Name and data are required" });
       }
 
-      const spreadsheet = await storage.createSpreadsheet(validatedData);
-      res.json(spreadsheet);
+      const file = await googleDriveService.saveSpreadsheet(req.user, name, data);
+      res.json(file);
     } catch (error) {
-      console.error("Error creating spreadsheet:", error);
-      res.status(500).json({ message: "Failed to create spreadsheet" });
+      console.error("Error saving file to Drive:", error);
+      res.status(500).json({ message: "Failed to save file to Google Drive" });
     }
   });
 
-  app.put('/api/spreadsheets/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/drive/load/:fileId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const spreadsheet = await storage.updateSpreadsheet(
-        req.params.id,
-        userId,
-        req.body.data
-      );
-      
-      if (!spreadsheet) {
-        return res.status(404).json({ message: "Spreadsheet not found" });
-      }
-      
-      res.json(spreadsheet);
+      const { fileId } = req.params;
+      const data = await googleDriveService.loadSpreadsheet(req.user, fileId);
+      res.json(data);
     } catch (error) {
-      console.error("Error updating spreadsheet:", error);
-      res.status(500).json({ message: "Failed to update spreadsheet" });
+      console.error("Error loading file from Drive:", error);
+      res.status(500).json({ message: "Failed to load file from Google Drive" });
     }
   });
 
-  app.delete('/api/spreadsheets/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/drive/delete/:fileId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      await storage.deleteSpreadsheet(req.params.id, userId);
-      res.json({ message: "Spreadsheet deleted successfully" });
+      const { fileId } = req.params;
+      await googleDriveService.deleteSpreadsheet(req.user, fileId);
+      res.json({ message: "File deleted successfully" });
     } catch (error) {
-      console.error("Error deleting spreadsheet:", error);
-      res.status(500).json({ message: "Failed to delete spreadsheet" });
+      console.error("Error deleting file from Drive:", error);
+      res.status(500).json({ message: "Failed to delete file from Google Drive" });
     }
   });
 

@@ -1927,7 +1927,7 @@ export default function Home() {
     });
   };
 
-  // Cloud save mutation
+  // Cloud save mutation - Google Drive
   const saveToCloudMutation = useMutation({
     mutationFn: async (params: { name: string; overwrite?: boolean; fileId?: string }) => {
       const spreadsheetData = {
@@ -1935,21 +1935,16 @@ export default function Home() {
         activeSheetId,
       };
       
-      if (params.overwrite && params.fileId) {
-        // Update existing file
-        return await apiRequest("PUT", `/api/spreadsheets/${params.fileId}`, { data: spreadsheetData });
-      } else {
-        // Create new file
-        return await apiRequest("POST", "/api/spreadsheets", {
-          name: params.name,
-          data: spreadsheetData,
-        });
-      }
+      // Google Drive automatically handles create/update
+      return await apiRequest("POST", "/api/drive/save", {
+        name: params.name,
+        data: spreadsheetData,
+      });
     },
     onSuccess: (data, variables) => {
       toast({
-        title: "Saved to Cloud",
-        description: `"${variables.name}" has been saved successfully`,
+        title: "Saved to Google Drive",
+        description: `"${variables.name}" has been saved to your Google Drive folder`,
       });
       setShowCloudSaveDialog(false);
       setShowOverwriteDialog(false);
@@ -1997,7 +1992,7 @@ export default function Home() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/api/auth/google";
       }, 1000);
       return;
     }
@@ -2029,21 +2024,21 @@ export default function Home() {
     }
   };
 
-  // File browser functionality
+  // File browser functionality - Google Drive
   const { data: savedSpreadsheets, refetch: refetchSpreadsheets } = useQuery<any[]>({
-    queryKey: ["/api/spreadsheets"],
+    queryKey: ["/api/drive/files"],
     enabled: isAuthenticated && showFileBrowserDialog,
   });
 
   const loadSpreadsheetMutation = useMutation({
     mutationFn: async (fileId: string) => {
-      const response = await apiRequest("GET", `/api/spreadsheets/${fileId}`, undefined);
-      return await response.json();
+      const response = await apiRequest("GET", `/api/drive/load/${fileId}`, undefined);
+      return response;
     },
     onSuccess: (data) => {
-      // Load the spreadsheet data
-      if (data && data.data) {
-        const { sheets: loadedSheets, activeSheetId: loadedActiveSheetId } = data.data;
+      // Load the spreadsheet data from Google Drive
+      if (data && data.sheets) {
+        const { sheets: loadedSheets, activeSheetId: loadedActiveSheetId } = data;
         
         // Convert plain objects back to Maps
         const convertedSheets = loadedSheets.map((sheet: any) => ({
@@ -2061,11 +2056,10 @@ export default function Home() {
 
         setSheets(convertedSheets);
         setActiveSheetId(loadedActiveSheetId || convertedSheets[0]?.id);
-        setSpreadsheetName(data.name);
         
         toast({
-          title: "Loaded from Cloud",
-          description: `"${data.name}" has been loaded successfully`,
+          title: "Loaded from Google Drive",
+          description: "Spreadsheet has been loaded successfully",
         });
       }
       setShowFileBrowserDialog(false);
@@ -2089,12 +2083,12 @@ export default function Home() {
 
   const deleteSpreadsheetMutation = useMutation({
     mutationFn: async (fileId: string) => {
-      await apiRequest("DELETE", `/api/spreadsheets/${fileId}`, undefined);
+      await apiRequest("DELETE", `/api/drive/delete/${fileId}`, undefined);
     },
     onSuccess: () => {
       toast({
         title: "File Deleted",
-        description: "Spreadsheet has been deleted from cloud",
+        description: "Spreadsheet has been deleted from Google Drive",
       });
       refetchSpreadsheets();
     },
@@ -2115,7 +2109,7 @@ export default function Home() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/api/auth/google";
       }, 1000);
       return;
     }
@@ -2134,15 +2128,15 @@ export default function Home() {
 
   const handleDownloadFromCloud = async (fileId: string, fileName: string) => {
     try {
-      // Fetch the spreadsheet data from cloud
-      const response = await apiRequest("GET", `/api/spreadsheets/${fileId}`, undefined);
-      const data = await response.json();
+      // Fetch the spreadsheet data from Google Drive
+      const response = await apiRequest("GET", `/api/drive/load/${fileId}`, undefined);
+      const data = response;
       
-      if (!data || !data.data) {
+      if (!data || !data.sheets) {
         throw new Error("Invalid file data");
       }
 
-      const { sheets: loadedSheets } = data.data;
+      const { sheets: loadedSheets } = data;
       
       // Convert plain objects back to Maps
       const convertedSheets = loadedSheets.map((sheet: any) => ({

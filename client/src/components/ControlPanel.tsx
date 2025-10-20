@@ -84,7 +84,7 @@ export default function ControlPanel({
               <Button 
                 variant="ghost" 
                 size="icon"
-                onClick={() => window.location.href = "/api/logout"}
+                onClick={() => window.location.href = "/api/auth/logout"}
                 title="Logout"
                 data-testid="button-logout"
                 className="h-8 w-8"
@@ -96,12 +96,12 @@ export default function ControlPanel({
             <Button 
               variant="default" 
               size="sm"
-              onClick={() => window.location.href = "/api/login"}
+              onClick={() => window.location.href = "/api/auth/google"}
               data-testid="button-login"
               className="h-8"
             >
               <LogIn className="h-4 w-4 mr-1" />
-              Sign In
+              Sign in with Google
             </Button>
           )}
         </div>
