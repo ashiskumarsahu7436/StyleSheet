@@ -279,14 +279,14 @@ export default function SpreadsheetGrid({
   };
 
   return (
-    <div className="h-full w-full overflow-auto custom-scrollbar">
-      <div
-        className="p-0"
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-      >
-        <table className="border-collapse border border-border" style={{ tableLayout: 'fixed', width: 'max-content', minWidth: '100%', lineHeight: '1' }}>
+    <div 
+      className="h-full w-full overflow-auto custom-scrollbar"
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      <div className="p-0">
+        <table className="border-collapse border border-border" style={{ tableLayout: 'fixed', width: 'max-content', minWidth: '100%', lineHeight: '1', position: 'relative' }}>
           <colgroup>
             <col style={{ width: '48px' }} />
             {Array.from({ length: cols }).map((_, colIndex) => {
@@ -296,16 +296,28 @@ export default function SpreadsheetGrid({
           </colgroup>
           <thead>
             <tr>
-              <th className="bg-card border-r border-b border-border sticky left-0 top-0 z-20" />
+              <th 
+                className="bg-card border-r border-b border-border" 
+                style={{
+                  position: 'sticky',
+                  left: 0,
+                  top: 0,
+                  zIndex: 20,
+                  backgroundColor: 'hsl(var(--card))'
+                }}
+              />
               {Array.from({ length: cols }).map((_, colIndex) => {
                 const colSelected = isColumnSelected(colIndex);
                 return (
                 <th
                   key={colIndex}
-                  className="relative bg-card border-r border-b border-border font-semibold text-sm sticky top-0 z-[15] hover-elevate cursor-pointer p-0 m-0"
+                  className="relative bg-card border-r border-b border-border font-semibold text-sm hover-elevate cursor-pointer p-0 m-0"
                   style={{ 
                     height: '24px', 
                     lineHeight: '1',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 15,
                     backgroundColor: colSelected ? 'var(--sheets-header-bg)' : 'hsl(var(--card))',
                   }}
                   onClick={() => onColumnSelect(colIndex)}
