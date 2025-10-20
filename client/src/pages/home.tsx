@@ -417,12 +417,22 @@ export default function Home() {
       backgroundColor?: string;
     }>>
   ) => {
+    console.log('🔵 PASTE DEBUG - Starting paste at:', startAddress);
+    console.log('🔵 PASTE DEBUG - Data dimensions:', data.length, 'rows x', data[0]?.length || 0, 'cols');
+    console.log('🔵 PASTE DEBUG - Data preview:', data);
+    
     // Parse starting cell address to get row and column
     const match = startAddress.match(/^([A-Z]+)(\d+)$/);
-    if (!match) return;
+    if (!match) {
+      console.log('❌ PASTE ERROR - Invalid address format:', startAddress);
+      return;
+    }
     
     const startColLabel = match[1];
     const startRow = parseInt(match[2]) - 1; // Convert to 0-indexed
+    
+    console.log('🔵 PASTE DEBUG - Parsed start column label:', startColLabel);
+    console.log('🔵 PASTE DEBUG - Parsed start row (0-indexed):', startRow);
     
     // Calculate starting column index
     let startCol = 0;
@@ -430,6 +440,9 @@ export default function Home() {
       startCol = startCol * 26 + (startColLabel.charCodeAt(i) - 65 + 1);
     }
     startCol = startCol - 1; // Convert to 0-indexed
+    
+    console.log('🔵 PASTE DEBUG - Calculated start column (0-indexed):', startCol);
+    console.log('🔵 PASTE DEBUG - Expected: A=0, B=1, C=2...');
     
     // Create new cell data map
     const newData = new Map(cellData);
@@ -441,10 +454,18 @@ export default function Home() {
         const targetCol = startCol + colOffset;
         
         // Check bounds (100 rows, 52 columns = AZ)
-        if (targetRow >= 100 || targetCol >= 52) return;
+        if (targetRow >= 100 || targetCol >= 52) {
+          console.log(`⚠️ PASTE WARNING - Cell out of bounds: row=${targetRow}, col=${targetCol}, value="${value}"`);
+          return;
+        }
         
         // Generate target cell address
         const targetAddress = `${getColumnLabel(targetCol)}${targetRow + 1}`;
+        
+        // Debug first few cells
+        if (rowOffset < 3 && colOffset < 3) {
+          console.log(`🔵 PASTE DEBUG - Cell [${rowOffset},${colOffset}]: "${value}" → ${targetAddress} (row=${targetRow}, col=${targetCol})`);
+        }
         
         // Get existing cell data or create new
         const existing = newData.get(targetAddress) || { address: targetAddress, value: "" };
