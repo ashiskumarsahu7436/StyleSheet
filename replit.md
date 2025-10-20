@@ -46,8 +46,14 @@ Preferred communication style: Simple, everyday language.
 7. **Input/Output Selection**: Temporary and permanent cell selection mechanisms
 8. **Resizable Grid**: Column and row resizing capabilities
 9. **Cell Merging**: Merge cells with rowspan/colspan support, preserving original cell data for unmerge operations
-10. **Theme Support**: Light/dark mode toggle with localStorage persistence
-11. **Performance Optimizations**: React.memo with custom comparator for efficient rendering of 5,200 cells
+10. **Enhanced Paste**: Copy/paste from Excel and Google Sheets with full formatting retention
+    - Preserves merged cells (rowspan/colspan)
+    - Maintains row heights and column widths
+    - HTML parsing with proper colspan alignment
+    - Bounds checking for merged cells to prevent overflow
+    - Full undo/redo support for structural changes
+11. **Theme Support**: Light/dark mode toggle with localStorage persistence
+12. **Performance Optimizations**: React.memo with custom comparator for efficient rendering of 5,200 cells
 
 ### Backend Architecture
 
