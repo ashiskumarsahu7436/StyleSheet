@@ -253,11 +253,16 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
                   console.log(`📊 Merged cell found at row ${rowIndex}, col ${colIndex}: ${rowspan}×${colspan}`);
                 }
                 
-                colIndex += colspan; // Advance by colspan
                 // Extract text content
                 let text = cell.textContent || '';
                 text = text.replace(/\r/g, ''); // Remove carriage returns
-                rowData.push(text);
+                
+                // Fill rowData at correct position accounting for colspan
+                rowData[colIndex] = text;
+                // Fill empty strings for additional columns if colspan > 1
+                for (let i = 1; i < colspan; i++) {
+                  rowData[colIndex + i] = '';
+                }
                 
                 // Extract formatting
                 const formatting: { 
@@ -341,7 +346,15 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
                   console.log('✅ Underline detected');
                 }
                 
-                rowFormatting.push(formatting);
+                // Fill rowFormatting at correct position accounting for colspan
+                rowFormatting[colIndex] = formatting;
+                // Fill empty formatting for additional columns if colspan > 1
+                for (let i = 1; i < colspan; i++) {
+                  rowFormatting[colIndex + i] = {};
+                }
+                
+                // Advance column index by colspan
+                colIndex += colspan;
               });
               
               rows.push(rowData);

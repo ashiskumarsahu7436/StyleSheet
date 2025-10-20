@@ -415,7 +415,12 @@ export default function Home() {
       fontSize?: number; // Now number (pt value)
       color?: string;
       backgroundColor?: string;
-    }>>
+    }>>,
+    structuralInfo?: {
+      mergedCells?: Array<{ rowIndex: number; colIndex: number; rowspan: number; colspan: number }>;
+      rowHeights?: Array<{ rowIndex: number; height: number }>;
+      colWidths?: Array<{ colIndex: number; width: number }>;
+    }
   ) => {
     console.log('🔵 PASTE DEBUG - Starting paste at:', startAddress);
     console.log('🔵 PASTE DEBUG - Data dimensions:', data.length, 'rows x', data[0]?.length || 0, 'cols');
@@ -497,17 +502,89 @@ export default function Home() {
       });
     });
     
-    // Save to history and update cell data
-    saveToHistory(newData);
+    // Apply structural information if available
+    let finalColumnWidths = columnWidths;
+    let finalRowHeights = rowHeights;
+    let finalMergedCells = mergedCells;
+    
+    if (structuralInfo) {
+      // Apply column widths
+      if (structuralInfo.colWidths && structuralInfo.colWidths.length > 0) {
+        const newColumnWidths = new Map(columnWidths);
+        structuralInfo.colWidths.forEach(({ colIndex, width }) => {
+          const targetCol = startCol + colIndex;
+          if (targetCol < 52) {
+            newColumnWidths.set(targetCol, width);
+            console.log(`📐 Applied column width: col ${targetCol} = ${width}px`);
+          }
+        });
+        finalColumnWidths = newColumnWidths;
+        setColumnWidths(newColumnWidths);
+      }
+      
+      // Apply row heights
+      if (structuralInfo.rowHeights && structuralInfo.rowHeights.length > 0) {
+        const newRowHeights = new Map(rowHeights);
+        structuralInfo.rowHeights.forEach(({ rowIndex, height }) => {
+          const targetRow = startRow + rowIndex;
+          if (targetRow < 100) {
+            newRowHeights.set(targetRow, height);
+            console.log(`📏 Applied row height: row ${targetRow} = ${height}px`);
+          }
+        });
+        finalRowHeights = newRowHeights;
+        setRowHeights(newRowHeights);
+      }
+      
+      // Apply merged cells
+      if (structuralInfo.mergedCells && structuralInfo.mergedCells.length > 0) {
+        const newMergedCells = [...mergedCells];
+        structuralInfo.mergedCells.forEach(({ rowIndex, colIndex, rowspan, colspan }) => {
+          const targetRow = startRow + rowIndex;
+          const targetCol = startCol + colIndex;
+          
+          // Check bounds for BOTH start and end of merged cell
+          const endRow = targetRow + rowspan - 1;
+          const endCol = targetCol + colspan - 1;
+          
+          if (targetRow < 100 && targetCol < 52 && endRow < 100 && endCol < 52) {
+            const startAddr = `${getColumnLabel(targetCol)}${targetRow + 1}`;
+            const endAddr = `${getColumnLabel(endCol)}${endRow + 1}`;
+            
+            newMergedCells.push({
+              startAddress: startAddr,
+              endAddress: endAddr,
+              colspan,
+              rowspan
+            });
+            console.log(`🔗 Applied merged cell: ${startAddr} to ${endAddr} (${rowspan}×${colspan})`);
+          } else {
+            console.warn(`⚠️ Skipped merged cell - out of bounds: row ${targetRow}-${endRow}, col ${targetCol}-${endCol}`);
+          }
+        });
+        finalMergedCells = newMergedCells;
+        setMergedCells(newMergedCells);
+      }
+    }
+    
+    // Save to history with all NEW computed changes
+    saveToHistory(newData, finalMergedCells, finalColumnWidths, finalRowHeights);
     setCellData(newData);
     
     // Show success message
     const rowCount = data.length;
     const colCount = data[0]?.length || 0;
     const hasFormatting = formatting && formatting.length > 0;
+    const hasStructural = structuralInfo && (
+      (structuralInfo.mergedCells?.length || 0) > 0 ||
+      (structuralInfo.rowHeights?.length || 0) > 0 ||
+      (structuralInfo.colWidths?.length || 0) > 0
+    );
+    const extraInfo = hasStructural ? 
+      ` (including ${(structuralInfo?.mergedCells?.length || 0)} merged cells, row heights, column widths)` : '';
     toast({
       title: "Data pasted successfully",
-      description: `Pasted ${rowCount} row(s) × ${colCount} column(s) starting from ${startAddress}${hasFormatting ? ' with full formatting' : ''}`,
+      description: `Pasted ${rowCount} row(s) × ${colCount} column(s) starting from ${startAddress}${hasFormatting ? ' with full formatting' : ''}${extraInfo}`,
     });
   };
 
