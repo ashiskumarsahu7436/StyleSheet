@@ -62,12 +62,17 @@
   - Redirects to login page automatically
   - Each user's files are private (isolated by user ID)
 
-### 🚧 **Next Feature to Implement**
+### ✅ **All Core Features Complete**
 [x] **File Browser UI** - To open saved spreadsheets
   - List all saved spreadsheets for current user
   - Click to open/load a saved spreadsheet
   - Delete option for unwanted files
-  - This is the remaining piece to complete the full cloud workflow
+  - This feature completes the full cloud workflow
+
+### 🚀 **Deployment Status**
+[ ] **Render Deployment** - In progress
+  - Issue: DATABASE_URL environment variable not set on Render
+  - Solution: Need to provision PostgreSQL database on Render and configure environment variable
 
 ### 📝 **How it Works**
 1. **Sign In**: Click "Sign In" button (top-right corner of Controls panel)
