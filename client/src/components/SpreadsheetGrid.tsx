@@ -302,11 +302,11 @@ export default function SpreadsheetGrid({
                 return (
                 <th
                   key={colIndex}
-                  className="relative bg-card border-r border-b border-border font-semibold text-sm sticky top-0 z-10 hover-elevate cursor-pointer p-0 m-0"
+                  className="relative bg-card border-r border-b border-border font-semibold text-sm sticky top-0 z-[15] hover-elevate cursor-pointer p-0 m-0"
                   style={{ 
                     height: '24px', 
                     lineHeight: '1',
-                    backgroundColor: colSelected ? 'var(--sheets-header-bg)' : undefined,
+                    backgroundColor: colSelected ? 'var(--sheets-header-bg)' : 'hsl(var(--card))',
                   }}
                   onClick={() => onColumnSelect(colIndex)}
                   data-testid={`header-col-${getColumnLabel(colIndex)}`}
