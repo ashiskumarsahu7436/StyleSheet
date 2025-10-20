@@ -142,33 +142,27 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
     const types = e.clipboardData.types;
     console.log('📋 Available clipboard types:', types);
     console.log('📋 HTML length:', htmlData?.length || 0);
-    console.log('📋 Text data:', textData.substring(0, 200));
+    console.log('📋 Text data (first 200 chars):', textData.substring(0, 200));
     
     // Check if it contains tabs or newlines (table data)
     if (textData.includes('\t') || textData.includes('\n')) {
       e.preventDefault(); // Prevent default paste into single cell
       
-      // Parse text data into 2D array
-      const rows = textData.split('\n').map(row => row.split('\t'));
-      
-      // Remove last row if it's empty (happens when copying from Excel/Sheets)
-      if (rows.length > 0 && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
-        rows.pop();
-      }
-      
-      // Parse HTML for formatting if available
+      // Try to parse HTML first (more reliable for Excel/Sheets data)
+      let rows: string[][] = [];
       let formattingData: Array<Array<{ 
         bold?: boolean; 
         italic?: boolean; 
         underline?: boolean;
         fontFamily?: string;
-        fontSize?: number; // Changed to number (will store pt value)
+        fontSize?: number;
         color?: string;
         backgroundColor?: string;
       }>> = [];
+      let parsedFromHTML = false;
       
       if (htmlData) {
-        console.log('📋 Full HTML:', htmlData.substring(0, 1000));
+        console.log('📋 Full HTML (first 1000 chars):', htmlData.substring(0, 1000));
         
         // Create a temporary DOM element to parse HTML
         const tempDiv = document.createElement('div');
@@ -184,10 +178,33 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
           console.log('📊 Table found:', !!table);
           
           if (table) {
+            console.log('✅ Parsing from HTML table structure (with formatting)');
             const tableRows = Array.from(table.querySelectorAll('tr'));
-            formattingData = tableRows.map(tr => {
+            
+            // Parse both data and formatting in one pass
+            rows = [];
+            formattingData = [];
+            
+            tableRows.forEach(tr => {
               const cells = Array.from(tr.querySelectorAll('td, th'));
-              return cells.map(cell => {
+              const rowData: string[] = [];
+              const rowFormatting: Array<{
+                bold?: boolean;
+                italic?: boolean;
+                underline?: boolean;
+                fontFamily?: string;
+                fontSize?: number;
+                color?: string;
+                backgroundColor?: string;
+              }> = [];
+              
+              cells.forEach(cell => {
+                // Extract text content
+                let text = cell.textContent || '';
+                text = text.replace(/\r/g, ''); // Remove carriage returns
+                rowData.push(text);
+                
+                // Extract formatting
                 const formatting: { 
                   bold?: boolean; 
                   italic?: boolean; 
@@ -269,15 +286,32 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
                   console.log('✅ Underline detected');
                 }
                 
-                console.log('📋 Final formatting for cell:', formatting);
-                return formatting;
+                rowFormatting.push(formatting);
               });
+              
+              rows.push(rowData);
+              formattingData.push(rowFormatting);
             });
+            
+            parsedFromHTML = true;
+            console.log('📊 Parsed from HTML:', rows.length, 'rows x', rows[0]?.length || 0, 'cols');
           }
         } finally {
           // Clean up
           document.body.removeChild(tempDiv);
         }
+      }
+      
+      // Fallback to text parsing if HTML parsing failed
+      if (!parsedFromHTML) {
+        console.log('⚠️ Falling back to text parsing');
+        // Parse text data into 2D array
+        rows = textData.split('\n').map(row => row.split('\t'));
+      }
+      
+      // Remove last row if it's empty (happens when copying from Excel/Sheets)
+      if (rows.length > 0 && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
+        rows.pop();
       }
       
       // Call the onPaste handler with parsed data and formatting
