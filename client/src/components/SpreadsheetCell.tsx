@@ -305,8 +305,70 @@ const SpreadsheetCell = memo(function SpreadsheetCell({
       // Fallback to text parsing if HTML parsing failed
       if (!parsedFromHTML) {
         console.log('⚠️ Falling back to text parsing');
-        // Parse text data into 2D array
-        rows = textData.split('\n').map(row => row.split('\t'));
+        
+        // Smart text parsing that handles multi-line cells
+        // Excel wraps multi-line cell text in quotes, so we need to parse carefully
+        const lines = textData.split('\n');
+        rows = [];
+        let currentRow: string[] = [];
+        let currentCell = '';
+        let inQuotedCell = false;
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          
+          // Check if we're in a quoted multi-line cell
+          if (inQuotedCell) {
+            // Continue accumulating lines until we find the closing quote
+            currentCell += '\n' + line;
+            
+            // Count quotes in current cell to see if we've closed it
+            const quoteCount = (currentCell.match(/"/g) || []).length;
+            if (quoteCount % 2 === 0) {
+              // Even number of quotes means the cell is closed
+              inQuotedCell = false;
+              // Process the rest of the line for tabs
+              const parts = currentCell.split('\t');
+              currentRow.push(parts[0].replace(/^"|"$/g, '')); // Remove surrounding quotes
+              for (let j = 1; j < parts.length; j++) {
+                currentRow.push(parts[j].replace(/^"|"$/g, ''));
+              }
+              currentCell = '';
+            }
+          } else {
+            // Normal line processing
+            const parts = line.split('\t');
+            
+            for (let j = 0; j < parts.length; j++) {
+              const part = parts[j];
+              
+              // Check if this part starts a quoted cell
+              if (part.startsWith('"') && !part.endsWith('"')) {
+                inQuotedCell = true;
+                currentCell = part;
+              } else if (part.startsWith('"') && part.endsWith('"') && part.length > 1) {
+                // Complete quoted cell on single line
+                currentRow.push(part.replace(/^"|"$/g, ''));
+              } else {
+                currentRow.push(part);
+              }
+            }
+            
+            // If not in a quoted cell, this row is complete
+            if (!inQuotedCell && currentRow.length > 0) {
+              rows.push(currentRow);
+              currentRow = [];
+            }
+          }
+        }
+        
+        // Add any remaining row
+        if (currentRow.length > 0) {
+          rows.push(currentRow);
+        }
+        
+        console.log('📊 Smart parsed:', rows.length, 'rows x', rows[0]?.length || 0, 'cols');
+        console.log('📊 First few rows:', rows.slice(0, 3));
       }
       
       // Remove last row if it's empty (happens when copying from Excel/Sheets)
