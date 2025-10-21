@@ -98,9 +98,13 @@
     - Added SSL configuration for production
   - **Issue 2:** Drizzle config had incorrect table filter
     - Had `tablesFilter: ["spreadsheet_app.*"]` which didn't match actual tables
-    - Actual tables are: sessions, users, spreadsheets
     - Removed the incorrect filter
-    - Database push will now work correctly
+  - **Issue 3:** Shared database needed proper isolation
+    - User is sharing database with another webapp
+    - Added PostgreSQL schema namespace: `stylesheet_app`
+    - Tables now isolated: `stylesheet_app.users`, `stylesheet_app.sessions`, `stylesheet_app.spreadsheets`
+    - No conflicts with other webapp's tables
+    - Schema successfully pushed to database
   - **Ready to deploy!** ✅
 
 ### 📝 **How it Works**
