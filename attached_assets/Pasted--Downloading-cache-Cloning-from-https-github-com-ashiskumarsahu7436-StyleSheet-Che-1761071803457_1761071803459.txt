@@ -1,0 +1,77 @@
+==> Downloading cache...
+==> Cloning from https://github.com/ashiskumarsahu7436/StyleSheet
+==> Checking out commit 90a0fb43235ffe18c175ef6cd37516ebc48f6b4f in branch main
+==> Transferred 249MB in 8s. Extraction took 7s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm ci --include=dev && npm run build && npm run db:push'...
+added 624 packages, and audited 625 packages in 10s
+76 packages are looking for funding
+  run `npm fund` for details
+8 vulnerabilities (3 low, 5 moderate)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.20 building for production...
+transforming...
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1742 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                        0.93 kB │ gzip:   0.50 kB
+../dist/public/assets/index-b7xNHZCT.css        73.38 kB │ gzip:  11.98 kB
+../dist/public/assets/index-CU4DqjfH.js        456.44 kB │ gzip: 139.51 kB
+../dist/public/assets/exceljs.min-SxPfu4Ez.js  938.58 kB │ gzip: 271.05 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.46s
+  dist/index.js  19.3kb
+⚡ Done in 6ms
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/render/project/src/drizzle.config.ts'
+Using 'pg' driver for database querying
+[⣷] Pulling schema from database...
+[⣯] Pulling schema from database...
+[⣟] Pulling schema from database...
+[⡿] Pulling schema from database...
+[✓] Pulling schema from database...
+error: relation "sessions" already exists
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Object.query (/opt/render/project/src/node_modules/drizzle-kit/bin.cjs:80601:26)
+    at async pgPush (/opt/render/project/src/node_modules/drizzle-kit/bin.cjs:84411:13)
+    at async Object.handler (/opt/render/project/src/node_modules/drizzle-kit/bin.cjs:93813:9)
+    at async run (/opt/render/project/src/node_modules/drizzle-kit/bin.cjs:93059:7) {
+  length: 102,
+  severity: 'ERROR',
+  code: '42P07',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'heap.c',
+  line: '1160',
+  routine: 'heap_create_with_catalog'
+}
+==> Uploading build...
+==> Uploaded in 8.4s. Compression took 3.9s
+==> Build successful 🎉
+==> Deploying...
