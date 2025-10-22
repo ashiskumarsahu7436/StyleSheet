@@ -100,10 +100,10 @@ export class GoogleDriveService {
       if (sheet.columnWidths) {
         const colWidths = sheet.columnWidths instanceof Map 
           ? sheet.columnWidths 
-          : new Map(Object.entries(sheet.columnWidths));
+          : new Map(Object.entries(sheet.columnWidths).map(([k, v]) => [parseInt(k, 10), v as number]));
         
         colWidths.forEach((width, col) => {
-          const colNumber = typeof col === 'string' ? parseInt(col) : col;
+          const colNumber = typeof col === 'string' ? parseInt(col, 10) : col;
           worksheet.getColumn(colNumber + 1).width = width / 7;
         });
       }
@@ -112,10 +112,10 @@ export class GoogleDriveService {
       if (sheet.rowHeights) {
         const rowHeights = sheet.rowHeights instanceof Map
           ? sheet.rowHeights
-          : new Map(Object.entries(sheet.rowHeights));
+          : new Map(Object.entries(sheet.rowHeights).map(([k, v]) => [parseInt(k, 10), v as number]));
         
         rowHeights.forEach((height, row) => {
-          const rowNumber = typeof row === 'string' ? parseInt(row) : row;
+          const rowNumber = typeof row === 'string' ? parseInt(row, 10) : row;
           worksheet.getRow(rowNumber + 1).height = height;
         });
       }
@@ -131,13 +131,22 @@ export class GoogleDriveService {
         if (typeof cellValue === 'object' && cellValue !== null) {
           cell.value = cellValue.value || cellValue.displayValue || '';
           
-          // Apply formatting
-          if (cellValue.bold) cell.font = { ...cell.font, bold: true };
-          if (cellValue.italic) cell.font = { ...cell.font, italic: true };
-          if (cellValue.underline) cell.font = { ...cell.font, underline: true };
+          // Apply formatting - use app's field names
+          if (cellValue.fontWeight === 'bold') cell.font = { ...cell.font, bold: true };
+          if (cellValue.fontStyle === 'italic') cell.font = { ...cell.font, italic: true };
+          // Support combined text decorations (e.g., 'underline line-through')
+          if (cellValue.textDecoration?.includes('underline double')) {
+            cell.font = { ...cell.font, underline: 'double' };
+          } else if (cellValue.textDecoration?.includes('underline')) {
+            cell.font = { ...cell.font, underline: true };
+          }
+          if (cellValue.textDecoration?.includes('line-through')) cell.font = { ...cell.font, strike: true };
           if (cellValue.fontSize) cell.font = { ...cell.font, size: cellValue.fontSize };
-          if (cellValue.fontColor) cell.font = { ...cell.font, color: { argb: cellValue.fontColor.replace('#', 'FF') } };
-          if (cellValue.backgroundColor) {
+          // Only set color if explicitly provided (don't force defaults)
+          if (cellValue.color && cellValue.color !== '#000000') {
+            cell.font = { ...cell.font, color: { argb: cellValue.color.replace('#', 'FF') } };
+          }
+          if (cellValue.backgroundColor && cellValue.backgroundColor !== 'transparent') {
             cell.fill = {
               type: 'pattern',
               pattern: 'solid',
@@ -145,6 +154,7 @@ export class GoogleDriveService {
             };
           }
           if (cellValue.textAlign) cell.alignment = { ...cell.alignment, horizontal: cellValue.textAlign };
+          if (cellValue.verticalAlign) cell.alignment = { ...cell.alignment, vertical: cellValue.verticalAlign };
         } else {
           cell.value = cellValue;
         }
@@ -233,17 +243,21 @@ export class GoogleDriveService {
       const rowHeights: Record<number, number> = {};
       const mergedCells: string[] = [];
 
-      // Get column widths
+      // Get column widths (default to 100 if undefined)
       worksheet.columns.forEach((column, index) => {
-        if (column.width) {
+        if (column.width && !isNaN(column.width)) {
           columnWidths[index] = column.width * 7;
+        } else {
+          columnWidths[index] = 100; // Default column width
         }
       });
 
-      // Get row heights
+      // Get row heights (default to 21 if undefined)
       worksheet.eachRow((row, rowNumber) => {
-        if (row.height) {
+        if (row.height && !isNaN(row.height)) {
           rowHeights[rowNumber - 1] = row.height;
+        } else {
+          rowHeights[rowNumber - 1] = 21; // Default row height
         }
       });
 
@@ -258,19 +272,40 @@ export class GoogleDriveService {
             ? (cell.result || '') 
             : value;
 
-          cellData[address] = {
+          // Build text decoration from Excel formatting
+          const decorations: string[] = [];
+          if (cell.font?.underline) {
+            if (cell.font.underline === 'double') {
+              decorations.push('underline double');
+            } else {
+              decorations.push('underline');
+            }
+          }
+          if (cell.font?.strike) {
+            decorations.push('line-through');
+          }
+          const textDecoration = decorations.length > 0 ? decorations.join(' ') : 'none';
+
+          const cellObj: any = {
             value: typeof value === 'object' && value !== null && 'result' in value ? value.result : value,
             displayValue: displayValue?.toString() || '',
-            bold: cell.font?.bold || false,
-            italic: cell.font?.italic || false,
-            underline: cell.font?.underline || false,
+            fontWeight: cell.font?.bold ? 'bold' : 'normal',
+            fontStyle: cell.font?.italic ? 'italic' : 'normal',
+            textDecoration,
             fontSize: cell.font?.size || 11,
-            fontColor: cell.font?.color?.argb ? `#${cell.font.color.argb.slice(2)}` : '#000000',
             backgroundColor: cell.fill?.type === 'pattern' && cell.fill.fgColor?.argb 
               ? `#${cell.fill.fgColor.argb.slice(2)}` 
               : 'transparent',
             textAlign: cell.alignment?.horizontal || 'left',
+            verticalAlign: cell.alignment?.vertical || 'top',
           };
+
+          // Only include color if Excel has one (don't force defaults)
+          if (cell.font?.color?.argb) {
+            cellObj.color = `#${cell.font.color.argb.slice(2)}`;
+          }
+
+          cellData[address] = cellObj;
         });
       });
 
