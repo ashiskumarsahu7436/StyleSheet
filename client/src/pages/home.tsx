@@ -2202,9 +2202,12 @@ export default function Home() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      // Sanitize filename
+      // Ensure filename has .xlsx extension (don't add if already present)
       const sanitizedFileName = fileName.replace(/[^a-z0-9_\-\.]/gi, '_');
-      link.download = `${sanitizedFileName}.xlsx`;
+      const downloadFileName = sanitizedFileName.endsWith('.xlsx') 
+        ? sanitizedFileName 
+        : `${sanitizedFileName}.xlsx`;
+      link.download = downloadFileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
