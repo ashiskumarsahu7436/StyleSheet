@@ -105,6 +105,11 @@
     - Tables now isolated: `stylesheet_app.users`, `stylesheet_app.sessions`, `stylesheet_app.spreadsheets`
     - No conflicts with other webapp's tables
     - Schema successfully pushed to database
+  - **Issue 4:** Render free version has no shell access
+    - Cannot manually run database setup commands
+    - Created safe setup script that only creates stylesheet_app schema
+    - Updated build script to auto-run schema setup on deploy
+    - Script won't touch other app's data (safe for shared database)
   - **Ready to deploy!** ✅
 
 ### 📝 **How it Works**
