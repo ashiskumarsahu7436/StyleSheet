@@ -69,7 +69,39 @@
   - Delete option for unwanted files
   - This feature completes the full cloud workflow
 
-### 🚀 **Current Session (Oct 22, 2025 - Replit Environment Migration)**
+### 🚀 **Latest Session (Oct 22, 2025 - Cloud Save/Open/Download Fixes)**
+[x] **File Format Fixed** - Changed from .stylesheet.json to .xlsx
+  - Files now save as proper Excel format (.xlsx)
+  - Added ExcelJS conversion for save and load operations
+  - Backend returns proper MIME type for Excel files
+  - File list query updated to search for .xlsx files
+
+[x] **Excel Round-Trip Conversion** - Full formatting preservation
+  - Fixed field name mappings (fontWeight, fontStyle, textDecoration, color, backgroundColor)
+  - Text decorations: underline, double underline, strikethrough all preserved
+  - Combined decorations supported ('underline line-through')
+  - Color only saved when explicitly set (no forced defaults)
+  - Column widths and row heights with safe defaults (no NaN)
+  - All parseInt calls use radix 10 for consistency
+  - Merged cells preserved in both directions
+
+[x] **Backend Field Name Fix** - modifiedTime to updatedAt
+  - Backend now returns updatedAt field for frontend compatibility
+  - File list displays correct last modified dates
+  - No more field name mismatches
+
+[x] **Download Function Fixed** - Proper .xlsx handling
+  - Download no longer duplicates .xlsx extension
+  - Files download with correct Excel format
+  - Filename sanitization improved
+
+[x] **All Issues Resolved** - Cloud workflow fully functional
+  - Save: Files save as .xlsx with full formatting
+  - Open: Files load correctly with all formatting preserved
+  - Download: Files download as proper Excel files
+  - Ready for production use
+
+### 🚀 **Previous Session (Oct 22, 2025 - Replit Environment Migration)**
 [x] **Package Installation** - Complete
   - Installed all npm dependencies (624 packages)
   - tsx runtime now available
