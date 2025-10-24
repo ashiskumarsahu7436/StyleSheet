@@ -2155,18 +2155,16 @@ export default function Home() {
 
   // Auto-save effect: automatically save changes after 2 seconds of inactivity
   useEffect(() => {
-    // Only auto-save if:
-    // 1. User is authenticated
-    // 2. File has been previously saved (currentFileId exists)
-    // 3. Save status is not already 'saving'
+    // Skip if:
+    // 1. User is not authenticated
+    // 2. No file has been previously saved (no currentFileId)
+    // 3. Currently saving (avoid concurrent saves)
     if (!isAuthenticated || !currentFileId || saveStatus === 'saving') {
       return;
     }
 
-    // Mark as unsaved when sheets change
-    if (saveStatus !== 'unsaved') {
-      setSaveStatus('unsaved');
-    }
+    // Mark as unsaved immediately when sheets change
+    setSaveStatus('unsaved');
 
     // Clear existing timer
     if (autoSaveTimerRef.current) {
@@ -2188,7 +2186,7 @@ export default function Home() {
         clearTimeout(autoSaveTimerRef.current);
       }
     };
-  }, [sheets, isAuthenticated, currentFileId]);
+  }, [sheets, spreadsheetName, isAuthenticated, currentFileId]);
 
   const handleDownloadFromCloud = async (fileId: string, fileName: string) => {
     try {
