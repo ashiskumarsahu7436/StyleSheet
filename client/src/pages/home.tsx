@@ -99,6 +99,7 @@ export default function Home() {
   const [showFileBrowserDialog, setShowFileBrowserDialog] = useState(false);
   const [currentFileId, setCurrentFileId] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
+  const [manuallySaved, setManuallySaved] = useState(false); // Track manual save for checkmark
   const [defaultFormatting, setDefaultFormatting] = useState<{
     fontSize?: number;
     fontWeight?: string;
