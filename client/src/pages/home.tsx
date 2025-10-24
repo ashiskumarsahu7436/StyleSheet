@@ -97,6 +97,8 @@ export default function Home() {
   const [showOverwriteDialog, setShowOverwriteDialog] = useState(false);
   const [existingFileId, setExistingFileId] = useState<string | null>(null);
   const [showFileBrowserDialog, setShowFileBrowserDialog] = useState(false);
+  const [currentFileId, setCurrentFileId] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [defaultFormatting, setDefaultFormatting] = useState<{
     fontSize?: number;
     fontWeight?: string;
@@ -108,6 +110,7 @@ export default function Home() {
     fontSize: 11, // Default 11pt (Google Sheets standard)
   });
   const tempSelectionTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get current active sheet
   const activeSheet = sheets.find(s => s.id === activeSheetId) || sheets[0];
@@ -1929,7 +1932,8 @@ export default function Home() {
 
   // Cloud save mutation - Google Drive
   const saveToCloudMutation = useMutation({
-    mutationFn: async (params: { name: string; overwrite?: boolean; fileId?: string }) => {
+    mutationFn: async (params: { name: string; overwrite?: boolean; fileId?: string; isAutoSave?: boolean }) => {
+      setSaveStatus('saving');
       const spreadsheetData = {
         sheets,
         activeSheetId,
@@ -1941,17 +1945,30 @@ export default function Home() {
         data: spreadsheetData,
       });
     },
-    onSuccess: (data, variables) => {
-      toast({
-        title: "Saved to Google Drive",
-        description: `"${variables.name}" has been saved to your Google Drive folder`,
-      });
+    onSuccess: (data: any, variables) => {
+      setSaveStatus('saved');
+      
+      // Store file ID for auto-save
+      if (data && data.id) {
+        setCurrentFileId(data.id);
+      }
+      
+      // Only show toast for manual saves, not auto-saves
+      if (!variables.isAutoSave) {
+        toast({
+          title: "Saved to Google Drive",
+          description: `"${variables.name}" has been saved to your Google Drive folder`,
+        });
+      }
+      
       setShowCloudSaveDialog(false);
       setShowOverwriteDialog(false);
       setCloudFileName("");
       setExistingFileId(null);
     },
-    onError: (error: any) => {
+    onError: (error: any, variables) => {
+      setSaveStatus('unsaved');
+      
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -1966,21 +1983,26 @@ export default function Home() {
       
       // Check for conflict (file exists)
       if (error.message.includes("409")) {
-        // File already exists - show overwrite dialog
-        const match = error.message.match(/existingId":"([^"]+)"/);
-        if (match && match[1]) {
-          setExistingFileId(match[1]);
-          setShowCloudSaveDialog(false);
-          setShowOverwriteDialog(true);
+        // File already exists - show overwrite dialog (only for manual saves)
+        if (!variables.isAutoSave) {
+          const match = error.message.match(/existingId":"([^"]+)"/);
+          if (match && match[1]) {
+            setExistingFileId(match[1]);
+            setShowCloudSaveDialog(false);
+            setShowOverwriteDialog(true);
+          }
         }
         return;
       }
       
-      toast({
-        title: "Failed to save",
-        description: error.message || "An error occurred while saving to cloud",
-        variant: "destructive",
-      });
+      // Only show error toast for manual saves
+      if (!variables.isAutoSave) {
+        toast({
+          title: "Failed to save",
+          description: error.message || "An error occurred while saving to cloud",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -2033,12 +2055,12 @@ export default function Home() {
   const loadSpreadsheetMutation = useMutation({
     mutationFn: async (fileId: string) => {
       const response = await apiRequest("GET", `/api/drive/load/${fileId}`, undefined);
-      return response;
+      return { data: response, fileId };
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data, fileId }) => {
       // Load the spreadsheet data from Google Drive
       if (data && data.sheets) {
-        const { sheets: loadedSheets, activeSheetId: loadedActiveSheetId } = data;
+        const { sheets: loadedSheets, activeSheetId: loadedActiveSheetId, name } = data;
         
         // Convert plain objects back to Maps
         const convertedSheets = loadedSheets.map((sheet: any) => ({
@@ -2056,6 +2078,11 @@ export default function Home() {
 
         setSheets(convertedSheets);
         setActiveSheetId(loadedActiveSheetId || convertedSheets[0]?.id);
+        
+        // Set current file ID and name for auto-save
+        setCurrentFileId(fileId);
+        setSpreadsheetName(name || "My Spreadsheet");
+        setSaveStatus('saved');
         
         toast({
           title: "Loaded from Google Drive",
@@ -2125,6 +2152,43 @@ export default function Home() {
       deleteSpreadsheetMutation.mutate(fileId);
     }
   };
+
+  // Auto-save effect: automatically save changes after 2 seconds of inactivity
+  useEffect(() => {
+    // Only auto-save if:
+    // 1. User is authenticated
+    // 2. File has been previously saved (currentFileId exists)
+    // 3. Save status is not already 'saving'
+    if (!isAuthenticated || !currentFileId || saveStatus === 'saving') {
+      return;
+    }
+
+    // Mark as unsaved when sheets change
+    if (saveStatus !== 'unsaved') {
+      setSaveStatus('unsaved');
+    }
+
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    // Set new timer for auto-save (2 second debounce)
+    autoSaveTimerRef.current = setTimeout(() => {
+      // Auto-save with the current spreadsheet name
+      saveToCloudMutation.mutate({ 
+        name: spreadsheetName,
+        isAutoSave: true 
+      });
+    }, 2000);
+
+    // Cleanup on unmount
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [sheets, isAuthenticated, currentFileId]);
 
   const handleDownloadFromCloud = async (fileId: string, fileName: string) => {
     try {
@@ -2267,6 +2331,7 @@ export default function Home() {
           onMergeCells={handleMergeCells}
           onUnmergeCells={handleUnmergeCells}
           isMergedCell={isMergedCell}
+          saveStatus={saveStatus}
         />
         <div 
           className="flex-1 overflow-hidden"

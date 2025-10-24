@@ -33,6 +33,9 @@ import {
   Star,
   Folder,
   Cloud,
+  CloudOff,
+  Check,
+  Loader2,
   Minus,
   Plus,
   Download,
@@ -75,6 +78,7 @@ interface GoogleSheetsToolbarProps {
   onMergeCells: (type?: 'all' | 'vertical' | 'horizontal') => void;
   onUnmergeCells: () => void;
   isMergedCell?: boolean;
+  saveStatus?: 'saved' | 'saving' | 'unsaved';
 }
 
 const FONT_SIZES = [8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
@@ -111,6 +115,7 @@ export default function GoogleSheetsToolbar({
   onMergeCells,
   onUnmergeCells,
   isMergedCell = false,
+  saveStatus = 'saved',
 }: GoogleSheetsToolbarProps) {
   const isBold = currentFontWeight === "bold" || currentFontWeight === "700";
   const isItalic = currentFontStyle === "italic";
@@ -153,12 +158,24 @@ export default function GoogleSheetsToolbar({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-8 w-8" 
-            title="Save to Cloud"
+            className="h-8 w-8 relative" 
+            title={saveStatus === 'saved' ? "All changes saved" : saveStatus === 'saving' ? "Saving..." : "Save to Cloud"}
             onClick={onCloudSave}
             data-testid="button-cloud-save"
           >
-            <Cloud className="h-4 w-4" />
+            {saveStatus === 'saving' ? (
+              <div className="relative">
+                <Cloud className="h-4 w-4" />
+                <Loader2 className="h-2.5 w-2.5 absolute top-0.5 left-0.5 animate-spin" />
+              </div>
+            ) : saveStatus === 'saved' ? (
+              <div className="relative">
+                <Cloud className="h-4 w-4" />
+                <Check className="h-2.5 w-2.5 absolute top-0.5 left-0.5 stroke-[3]" />
+              </div>
+            ) : (
+              <Cloud className="h-4 w-4" />
+            )}
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8" title="Version history">
             <History className="h-4 w-4" />
